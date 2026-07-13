@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SME Webmail & Aegis Phishing Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Gmail Header -->
+    <header class="gmail-header">
+        <div class="header-left">
+            <button class="menu-btn"><i class="fas fa-bars"></i></button>
+            <div class="logo">
+                <i class="fas fa-envelope"></i>
+                <span>Gmail</span>
+            </div>
+        </div>
+        <div class="header-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search in mail">
+        </div>
+        <div class="header-right">
+            <i class="fas fa-question-circle header-icon"></i>
+            <i class="fas fa-cog header-icon"></i>
+            <i class="fas fa-th header-icon"></i>
+            <div class="profile-pic">A</div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Webmail Sidebar -->
+        <aside class="mail-sidebar">
+            <button class="compose-btn"><i class="fas fa-pen"></i> Compose</button>
+            <ul class="nav-links">
+                <li class="active"><i class="fas fa-inbox"></i> Inbox <span class="badge">3</span></li>
+                <li><i class="fas fa-star"></i> Starred</li>
+                <li><i class="fas fa-clock"></i> Snoozed</li>
+                <li><i class="fas fa-paper-plane"></i> Sent</li>
+                <li><i class="fas fa-file-alt"></i> Drafts</li>
+            </ul>
+        </aside>
+
+        <!-- Webmail Inbox List -->
+        <section class="mail-list">
+            <div class="list-header">
+                <i class="far fa-square"></i>
+                <i class="fas fa-caret-down" style="margin-right: 15px;"></i>
+                <i class="fas fa-redo"></i>
+                <i class="fas fa-ellipsis-v"></i>
+            </div>
+            <div class="email-items" id="email-list">
+                <!-- Emails populated by JS -->
+            </div>
+        </section>
+
+        <!-- Webmail Reader -->
+        <section class="mail-reader" id="mail-reader">
+            <div class="empty-state" id="empty-state">
+                <i class="fas fa-envelope-open"></i>
+                <p>Select an item to read</p>
+            </div>
+            
+            <div class="email-content-wrapper" id="email-content-wrapper" style="display: none;">
+                <!-- New Risk Banner -->
+                <div class="risk-banner" id="top-risk-banner" style="display: none;">
+                    <div class="risk-banner-score">
+                        <i class="fas fa-shield-alt" id="top-risk-icon"></i>
+                        <span id="top-risk-text">Aegis Analyzer Status</span>
+                    </div>
+                    <span id="top-risk-percentage"></span>
+                </div>
+
+                <div class="reader-header">
+                    <h2 id="email-subject">Subject</h2>
+                </div>
+                <div class="meta">
+                    <div class="sender-info">
+                        <div class="avatar" id="sender-avatar">A</div>
+                        <div>
+                            <h4 id="email-sender-name">Sender Name</h4>
+                            <p id="email-sender-address">to me <i class="fas fa-caret-down" style="font-size: 0.8rem; margin-left: 5px;"></i></p>
+                        </div>
+                    </div>
+                    <div class="time" id="email-time">10:00 AM</div>
+                </div>
+                <div class="reader-body" id="email-body">
+                    <!-- Body content -->
+                </div>
+                <div class="attachments" id="email-attachments" style="display: none;">
+                    <h4><i class="fas fa-paperclip"></i> Attachments</h4>
+                    <div class="attachment-item" id="attachment-content">
+                        <i class="fas fa-file-pdf" style="color: #ea4335;"></i>
+                        <span id="attachment-name">document.pdf</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aegis Context Analyzer Overlay -->
+        <div class="analyzer-overlay" id="analyzer-overlay">
+            <div class="analyzer-header">
+                <h3><i class="fas fa-shield-alt text-glow"></i> Aegis Phishing Analyzer</h3>
+                <button id="close-analyzer"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="analyzer-status" id="analyzer-status">
+                <div class="spinner"></div>
+                <p>Running Multi-Layered Analysis...</p>
+            </div>
+
+            <div class="analyzer-results" id="analyzer-results" style="display: none;">
+
+                <div class="risk-score-card" id="risk-score-card">
+                    <div class="score-circle" id="score-circle">
+                        <span id="score-value">0</span>%
+                    </div>
+                    <div class="score-text">
+                        <h4 id="risk-level">Safe</h4>
+                        <p id="risk-desc">No significant threats detected.</p>
+                    </div>
+                </div>
+
+                <div class="layer-analysis">
+                    <h4>Multi-Layered Defense Status</h4>
+                    <ul class="layers-list">
+                        <li id="layer-sanitization"><i class="fas fa-check-circle text-green"></i> Pre-processing: HTML
+                            Sanitized</li>
+                        <li id="layer-auth"><i class="fas fa-check-circle text-green"></i> Layer 1: Auth
+                            (SPF/DKIM/DMARC)</li>
+                        <li id="layer-attach"><i class="fas fa-minus-circle text-gray"></i> Layer 2: Attachment Check
+                        </li>
+                        <li id="layer-behavior"><i class="fas fa-check-circle text-green"></i> Layer 3: Behavioral
+                            Analysis</li>
+                        <li id="layer-nlp"><i class="fas fa-check-circle text-green"></i> Layer 4: Deep NLP Context</li>
+                    </ul>
+                </div>
+
+                <div class="xai-box" id="xai-box">
+                    <h4><i class="fas fa-brain"></i> Explainable AI (XAI) Insight</h4>
+                    <p id="xai-text">This email follows standard communication patterns.</p>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" id="whitelist-btn" style="display: none;"><i
+                            class="fas fa-user-check"></i> Whitelist Sender</button>
+                    <button class="btn" id="block-btn" style="display: none;"><i class="fas fa-ban"></i> Block</button>
+                    <button class="btn" id="report-btn" style="display: none;"><i class="fas fa-flag"></i> Report False
+                        Positive</button>
+                    <button class="btn" id="full-analysis-btn"><i class="fas fa-search-plus"></i> View Full
+                        Analysis</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab-analyze" id="fab-analyze" title="Analyze with AI" style="display: none;">
+            <i class="fas fa-shield-alt"></i> Scan
+        </button>
+
+        <!-- JS Threat Overlay -->
+        <div class="js-threat-overlay" id="js-threat-overlay" style="display: none;">
+            <div class="js-threat-box">
+                <i class="fas fa-skull-crossbones"></i>
+                <h2>Malicious Script Blocked</h2>
+                <p id="js-threat-text">Aegis has prevented a known Web Skimmer from loading on this page.</p>
+                <button id="close-threat-btn">Return to Safety</button>
+            </div>
+        </div>
+
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>
