@@ -812,3 +812,553 @@ body {
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
 }
+
+/* ====================================================
+   FULL ANALYSIS MODAL  —  brutalist / Aegis style
+   ==================================================== */
+
+.full-analysis-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+}
+
+.full-analysis-modal.open {
+    display: flex;
+    animation: famFadeIn 0.2s ease forwards;
+}
+
+@keyframes famFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.fam-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Panel Container ───────────────────────────────── */
+.fam-panel {
+    position: relative;
+    z-index: 1;
+    width: 92vw;
+    max-width: 1040px;
+    max-height: 90vh;
+    background: var(--bg-color);
+    border: 3px solid #000;
+    box-shadow: 12px 12px 0px #000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Header ────────────────────────────────────────── */
+.fam-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 3px solid #000;
+    background-color: var(--text-primary);
+    color: var(--bg-color);
+    flex-shrink: 0;
+}
+
+.fam-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.fam-logo {
+    font-size: 1.5rem;
+    color: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fam-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bg-color);
+}
+
+.fam-subtitle {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+    font-weight: 500;
+}
+
+.fam-header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Risk level badge */
+.fam-risk-badge {
+    padding: 6px 16px;
+    border: 2px solid var(--bg-color);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg-color);
+    background: transparent;
+    box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.3);
+}
+
+.fam-risk-badge.badge-safe {
+    border-color: var(--risk-green);
+    color: var(--risk-green);
+    background: var(--risk-green-bg);
+}
+
+.fam-risk-badge.badge-warning {
+    border-color: var(--risk-yellow);
+    color: var(--risk-yellow);
+    background: var(--risk-yellow-bg);
+}
+
+.fam-risk-badge.badge-critical {
+    border-color: var(--risk-red);
+    color: var(--risk-red);
+    background: var(--risk-red-bg);
+}
+
+.fam-close-btn {
+    background: none;
+    border: 2px solid transparent;
+    color: var(--bg-color);
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    transition: all 0.1s;
+}
+
+.fam-close-btn:hover {
+    color: var(--risk-red);
+    border-color: var(--risk-red);
+}
+
+/* ── Scrollable Body Grid ───────────────────────────── */
+.fam-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 24px;
+    overflow-y: auto;
+    flex-grow: 1;
+    background-color: var(--bg-color);
+}
+
+.fam-body::-webkit-scrollbar { width: 8px; }
+.fam-body::-webkit-scrollbar-track { background: #f1f3f4; border-left: 2px solid #000; }
+.fam-body::-webkit-scrollbar-thumb { background: #000; }
+
+.fam-col-left,
+.fam-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ── Cards / Section Containers ─────────────────────── */
+.fam-card {
+    border: 2px solid #000;
+    padding: 20px;
+    background-color: var(--bg-color);
+    box-shadow: 4px 4px 0px #000;
+}
+
+.fam-card-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 8px;
+}
+
+.fam-card-label i {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+/* ── Risk Score Gauge Card ─────────────────────────── */
+.fam-gauge-card {
+    background-color: var(--surface-color);
+}
+
+.fam-gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.fam-gauge-svg {
+    width: 100%;
+    max-width: 230px;
+}
+
+.fam-gauge-score-wrap {
+    text-align: center;
+    margin-top: -10px;
+}
+
+.fam-gauge-score {
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #000;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.fam-gauge-score span {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.fam-gauge-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: inline-block;
+    padding: 3px 12px;
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0px #000;
+}
+
+.fam-gauge-label.lbl-safe {
+    color: var(--risk-green);
+    border-color: var(--risk-green);
+    background: var(--risk-green-bg);
+}
+
+.fam-gauge-label.lbl-warning {
+    color: var(--risk-yellow);
+    border-color: var(--risk-yellow);
+    background: var(--risk-yellow-bg);
+}
+
+.fam-gauge-label.lbl-critical {
+    color: var(--risk-red);
+    border-color: var(--risk-red);
+    background: var(--risk-red-bg);
+}
+
+/* ── Metadata Grid ─────────────────────────────────── */
+.fam-meta-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fam-meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+}
+
+.fam-meta-key {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    min-width: 80px;
+}
+
+.fam-meta-val {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fam-domain {
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    background: #ffffff;
+    padding: 2px 8px;
+    border: 1px solid #000;
+    font-weight: 700;
+}
+
+/* ── XAI Box ───────────────────────────────────────── */
+.fam-xai-card {
+    background-color: var(--surface-color);
+}
+
+.fam-xai-text {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: var(--text-primary);
+    font-weight: 600;
+    background: #ffffff;
+    border: 2px solid #000;
+    padding: 14px;
+    box-shadow: 3px 3px 0px #000;
+}
+
+.fam-xai-footer {
+    margin-top: 12px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+}
+
+/* ── Defense Layers ────────────────────────────────── */
+.fam-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fam-layer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 2px solid #000;
+    background-color: #ffffff;
+    box-shadow: 3px 3px 0px #000;
+}
+
+.fam-layer-icon {
+    font-size: 1.1rem;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.fam-layer-icon.icon-pass { color: var(--risk-green); }
+.fam-layer-icon.icon-fail { color: var(--risk-red); }
+.fam-layer-icon.icon-warn { color: var(--risk-yellow); }
+.fam-layer-icon.icon-skip { color: var(--text-secondary); }
+
+.fam-layer-body {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.fam-layer-name {
+    font-weight: 800;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.fam-layer-detail {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+.fam-layer-status {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 2px solid #000;
+    flex-shrink: 0;
+    box-shadow: 2px 2px 0px #000;
+}
+
+.fam-layer-status.status-pass {
+    color: var(--risk-green);
+    border-color: var(--risk-green);
+    background: var(--risk-green-bg);
+}
+
+.fam-layer-status.status-fail {
+    color: var(--risk-red);
+    border-color: var(--risk-red);
+    background: var(--risk-red-bg);
+}
+
+.fam-layer-status.status-warn {
+    color: var(--risk-yellow);
+    border-color: var(--risk-yellow);
+    background: var(--risk-yellow-bg);
+}
+
+.fam-layer-status.status-skip {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background: var(--surface-color);
+}
+
+/* ── Threat Indicators ─────────────────────────────── */
+.fam-indicators {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fam-indicator-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border: 2px solid #000;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 2px 2px 0px #000;
+}
+
+.fam-indicator-pill.pill-red {
+    color: var(--risk-red);
+    border-color: var(--risk-red);
+    background: var(--risk-red-bg);
+}
+
+.fam-indicator-pill.pill-yellow {
+    color: var(--risk-yellow);
+    border-color: var(--risk-yellow);
+    background: var(--risk-yellow-bg);
+}
+
+.fam-indicator-pill.pill-green {
+    color: var(--risk-green);
+    border-color: var(--risk-green);
+    background: var(--risk-green-bg);
+}
+
+.fam-no-threats {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--risk-green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 2px solid var(--risk-green);
+    background: var(--risk-green-bg);
+    width: 100%;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 0px #000;
+}
+
+/* ── Recommendation Card ───────────────────────────── */
+.fam-recommendation-card {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.fam-recommendation {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 14px;
+    border: 2px solid #000;
+    background: #ffffff;
+    margin-bottom: 16px;
+    border-left: 6px solid #000;
+    box-shadow: 3px 3px 0px #000;
+}
+
+.fam-recommendation.rec-safe     { border-left-color: var(--risk-green); }
+.fam-recommendation.rec-warning  { border-left-color: var(--risk-yellow); }
+.fam-recommendation.rec-critical { border-left-color: var(--risk-red); }
+
+/* ── Action Buttons — Brutalist .btn ────────────────── */
+.fam-action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.fam-action-btn {
+    flex: 1;
+    padding: 14px 16px;
+    border: 2px solid #000;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.1s;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0px #000;
+    font-size: 0.82rem;
+    min-width: 120px;
+}
+
+.fam-action-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px #000;
+}
+
+.fam-action-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000;
+}
+
+.fam-btn-whitelist {
+    background: var(--text-primary);
+    color: var(--bg-color);
+}
+
+.fam-btn-block {
+    background: var(--risk-red);
+    color: #ffffff;
+    border-color: #000;
+}
+
+.fam-btn-report {
+    background: var(--bg-color);
+    color: var(--text-primary);
+}
+
+/* ── Responsive Layout ────────────────────────────── */
+@media (max-width: 768px) {
+    .fam-body {
+        grid-template-columns: 1fr;
+    }
+    .fam-panel {
+        width: 96vw;
+        max-height: 94vh;
+    }
+}

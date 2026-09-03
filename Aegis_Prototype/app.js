@@ -119,6 +119,11 @@ const fullAnalysisBtn = document.getElementById('full-analysis-btn');
 const jsThreatOverlay = document.getElementById('js-threat-overlay');
 const closeThreatBtn = document.getElementById('close-threat-btn');
 
+// Full Analysis Modal elements
+const fullAnalysisModal = document.getElementById('full-analysis-modal');
+const famCloseBtn = document.getElementById('fam-close-btn');
+const famBackdrop = document.getElementById('fam-backdrop');
+
 // Top Risk Banner Elements
 const topRiskBanner = document.getElementById('top-risk-banner');
 const topRiskIcon = document.getElementById('top-risk-icon');
@@ -309,14 +314,196 @@ reportBtn.addEventListener('click', function() {
     }, 2000);
 });
 
-// View Full Analysis Simulation
+// View Full Analysis — opens the premium Full Analysis Modal
 fullAnalysisBtn.addEventListener('click', function() {
-    const originalText = this.innerHTML;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-    setTimeout(() => {
-        this.innerHTML = originalText;
-        alert("Full Analysis View would open here.");
-    }, 1000);
+    const email = mockEmails.find(e => e.id === currentEmailId);
+    if (!email) return;
+    openFullAnalysisModal(email);
+});
+
+function openFullAnalysisModal(email) {
+    const a = email.analysis;
+
+    // ── Header ──────────────────────────────────────────────────
+    const badge = document.getElementById('fam-risk-badge');
+    badge.textContent = a.riskLevel;
+    badge.className = 'fam-risk-badge';
+    if (a.riskLevel === 'Safe')     badge.classList.add('badge-safe');
+    else if (a.riskLevel === 'Warning') badge.classList.add('badge-warning');
+    else                             badge.classList.add('badge-critical');
+
+    document.getElementById('fam-subtitle').textContent =
+        `Analyzed: ${email.subject} — ${email.time}`;
+
+    // ── Gauge ────────────────────────────────────────────────────
+    const scoreEl   = document.getElementById('fam-gauge-score');
+    const labelEl   = document.getElementById('fam-gauge-label');
+    const fillEl    = document.getElementById('fam-gauge-fill');
+    const needleEl  = document.getElementById('fam-gauge-needle');
+
+    scoreEl.innerHTML = `${a.score}<span>%</span>`;
+    labelEl.textContent = a.riskLevel;
+    labelEl.className = 'fam-gauge-label';
+    if (a.riskLevel === 'Safe')     labelEl.classList.add('lbl-safe');
+    else if (a.riskLevel === 'Warning') labelEl.classList.add('lbl-warning');
+    else                             labelEl.classList.add('lbl-critical');
+
+    // Arc total length ≈ 251.2 (half-circle circumference for r=80 arc)
+    const arcLen = 251.2;
+    const offset = arcLen - (a.score / 100) * arcLen;
+    // Needle: -90° = leftmost (0%), +90° = rightmost (100%), so map score to -90..+90
+    const needleDeg = -90 + (a.score / 100) * 180;
+
+    // Reset first (re-trigger animation)
+    fillEl.style.transition  = 'none';
+    needleEl.style.transition = 'none';
+    fillEl.style.strokeDashoffset  = arcLen;
+    needleEl.style.transform = 'rotate(-90deg)';
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            fillEl.style.transition  = 'stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)';
+            needleEl.style.transition = 'transform 1.2s cubic-bezier(0.34,1.56,0.64,1)';
+            fillEl.style.strokeDashoffset  = offset;
+            needleEl.style.transform = `rotate(${needleDeg}deg)`;
+        });
+    });
+
+    // ── Email Metadata ───────────────────────────────────────────
+    document.getElementById('fam-meta-from').textContent    = `${email.senderName} <${email.senderAddress}>`;
+    const domain = email.senderAddress.split('@')[1] || email.senderAddress;
+    document.getElementById('fam-meta-domain').textContent  = domain;
+    document.getElementById('fam-meta-subject').textContent = email.subject;
+    document.getElementById('fam-meta-time').textContent    = email.time;
+    document.getElementById('fam-meta-attach').textContent  = email.hasAttachment ? email.attachmentName : 'None';
+
+    // ── XAI ─────────────────────────────────────────────────────
+    document.getElementById('fam-xai-text').textContent = a.xai;
+
+    // ── Layers ───────────────────────────────────────────────────
+    const layersEl = document.getElementById('fam-layers');
+    layersEl.innerHTML = '';
+
+    const layerMap = [
+        { key: 'sanitization', label: 'Pre-processing: HTML Sanitization' },
+        { key: 'auth',         label: 'Layer 1: Email Auth (SPF/DKIM/DMARC)' },
+        { key: 'attach',       label: 'Layer 2: Attachment Intelligence' },
+        { key: 'behavior',     label: 'Layer 3: Behavioral Analysis' },
+        { key: 'nlp',          label: 'Layer 4: Deep NLP Context' },
+    ];
+
+    layerMap.forEach(({ key, label }, idx) => {
+        const data = a.layers[key];
+        let iconClass, iconType, statusClass, statusText;
+
+        if (data.icon === 'fa-check-circle') {
+            iconClass = 'fas fa-check'; iconType = 'icon-pass';
+            statusClass = 'status-pass'; statusText = 'Pass';
+        } else if (data.icon === 'fa-times-circle') {
+            iconClass = 'fas fa-times'; iconType = 'icon-fail';
+            statusClass = 'status-fail'; statusText = 'Fail';
+        } else if (data.icon === 'fa-exclamation-triangle') {
+            iconClass = 'fas fa-exclamation'; iconType = 'icon-warn';
+            statusClass = 'status-warn'; statusText = 'Warn';
+        } else {
+            iconClass = 'fas fa-minus'; iconType = 'icon-skip';
+            statusClass = 'status-skip'; statusText = 'Skip';
+        }
+
+        const item = document.createElement('div');
+        item.className = 'fam-layer-item';
+        item.style.animationDelay = `${idx * 80}ms`;
+        item.innerHTML = `
+            <div class="fam-layer-icon ${iconType}"><i class="${iconClass}"></i></div>
+            <div class="fam-layer-body">
+                <div class="fam-layer-name">${label}</div>
+                <div class="fam-layer-detail">${data.detail}</div>
+            </div>
+            <div class="fam-layer-status ${statusClass}">${statusText}</div>
+        `;
+        layersEl.appendChild(item);
+    });
+
+    // ── Threat Indicators ────────────────────────────────────────
+    const indicatorsEl = document.getElementById('fam-indicators');
+    indicatorsEl.innerHTML = '';
+
+    const threatMap = {
+        'fa-times-circle': { pill: 'pill-red',    icon: 'fas fa-times-circle' },
+        'fa-exclamation-triangle': { pill: 'pill-yellow', icon: 'fas fa-exclamation-triangle' },
+    };
+
+    const threats = [];
+    Object.values(a.layers).forEach(layer => {
+        if (layer.icon === 'fa-times-circle' || layer.icon === 'fa-exclamation-triangle') {
+            threats.push({ text: layer.detail, type: threatMap[layer.icon] });
+        }
+    });
+
+    if (threats.length === 0) {
+        indicatorsEl.innerHTML = `<div class="fam-no-threats"><i class="fas fa-check-circle"></i> No active threat indicators detected.</div>`;
+    } else {
+        threats.forEach((t, idx) => {
+            const pill = document.createElement('div');
+            pill.className = `fam-indicator-pill ${t.type.pill}`;
+            pill.style.animationDelay = `${idx * 60}ms`;
+            pill.innerHTML = `<i class="${t.type.icon}"></i> ${t.text}`;
+            indicatorsEl.appendChild(pill);
+        });
+    }
+
+    // ── Recommendation ───────────────────────────────────────────
+    const recEl = document.getElementById('fam-recommendation');
+    recEl.className = 'fam-recommendation';
+    let recText = '';
+    if (a.riskLevel === 'Safe') {
+        recText = 'This email has passed all Aegis security layers and is considered safe. No action is required. You may optionally whitelist the sender to speed up future checks.';
+        recEl.classList.add('rec-safe');
+    } else if (a.riskLevel === 'Warning') {
+        recText = 'This email contains suspicious patterns consistent with a Business Email Compromise (BEC) attempt. Exercise extreme caution — do not click links, transfer funds, or share credentials until the sender is verified through a separate channel.';
+        recEl.classList.add('rec-warning');
+    } else {
+        recText = 'CRITICAL THREAT DETECTED. Aegis strongly recommends blocking this sender immediately and reporting this email to your IT security team. Do not open attachments, click links, or reply to this message under any circumstances.';
+        recEl.classList.add('rec-critical');
+    }
+    recEl.textContent = recText;
+
+    // Action buttons
+    const wlBtn = document.getElementById('fam-whitelist-btn');
+    const blBtn = document.getElementById('fam-block-btn');
+    const rpBtn = document.getElementById('fam-report-btn');
+    wlBtn.style.display = a.riskLevel === 'Safe' ? 'flex' : 'none';
+    blBtn.style.display = a.riskLevel !== 'Safe' ? 'flex' : 'none';
+    rpBtn.style.display = a.riskLevel !== 'Safe' ? 'flex' : 'none';
+
+    // ── Open ─────────────────────────────────────────────────────
+    fullAnalysisModal.classList.add('open');
+}
+
+function closeFullAnalysisModal() {
+    fullAnalysisModal.classList.remove('open');
+}
+
+famCloseBtn.addEventListener('click', closeFullAnalysisModal);
+famBackdrop.addEventListener('click', closeFullAnalysisModal);
+
+// FAM action button feedback
+document.getElementById('fam-whitelist-btn').addEventListener('click', function() {
+    const orig = this.innerHTML;
+    this.innerHTML = '<i class="fas fa-check"></i> Whitelisted!';
+    setTimeout(() => { this.innerHTML = orig; closeFullAnalysisModal(); }, 1800);
+});
+
+document.getElementById('fam-block-btn').addEventListener('click', function() {
+    const orig = this.innerHTML;
+    this.innerHTML = '<i class="fas fa-shield-alt"></i> Blocked!';
+    setTimeout(() => { this.innerHTML = orig; closeFullAnalysisModal(); }, 1800);
+});
+
+document.getElementById('fam-report-btn').addEventListener('click', function() {
+    const orig = this.innerHTML;
+    this.innerHTML = '<i class="fas fa-check"></i> Reported!';
+    setTimeout(() => { this.innerHTML = orig; closeFullAnalysisModal(); }, 1800);
 });
 
 // JS Threat Close
