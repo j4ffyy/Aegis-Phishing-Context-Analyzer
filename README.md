@@ -50,4 +50,4 @@ The prototype includes four example emails demonstrating:
 
 ## License
 
-This repository is currently a self-contained prototype. Feel free to adapt it for your capstone demo or resea
+This repository is currently a self-contained prototype. Feel free to adapt it for your capstone demo or research showcase.
