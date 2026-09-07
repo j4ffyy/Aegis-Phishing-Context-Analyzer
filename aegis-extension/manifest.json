@@ -1,0 +1,69 @@
+﻿{
+  "manifest_version": 3,
+  "name": "Aegis: AI-Powered Phishing Context Analyzer",
+  "version": "0.1.0",
+  "description": "Privacy-preserving phishing detection for SME Gmail users. Analyzes email context with a 4-layer AI pipeline and provides plain-language XAI threat rationales.",
+  "author": "Jafphet P. Grengia & Michael Angelo L. Bernardo — MMDC Capstone 1",
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Aegis Phishing Analyzer"
+  },
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": [
+        "pii_scrubber.js",
+        "local_heuristics.js",
+        "content_script.js"
+      ],
+      "css": ["overlay/overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "permissions": [
+    "storage"
+  ],
+
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "http://localhost:8000/*",
+    "https://aegis-backend.onrender.com/*"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "overlay/overlay.html",
+        "overlay/overlay.css",
+        "whitelist/whitelist_dashboard.html",
+        "icons/icon16.png",
+        "icons/icon48.png",
+        "icons/icon128.png"
+      ],
+      "matches": ["https://mail.google.com/*"]
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none';"
+  }
+}
