@@ -1,4 +1,4 @@
-﻿{
+{
   "manifest_version": 3,
   "name": "Aegis: AI-Powered Phishing Context Analyzer",
   "version": "0.1.0",
@@ -32,7 +32,8 @@
       "js": [
         "pii_scrubber.js",
         "local_heuristics.js",
-        "content_script.js"
+        "content_script.js",
+        "overlay/overlay.js"
       ],
       "css": ["overlay/overlay.css"],
       "run_at": "document_idle"

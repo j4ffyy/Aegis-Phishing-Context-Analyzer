@@ -1,0 +1,959 @@
+/**
+ * Aegis: AI-Powered Phishing Context Analyzer
+ * Component: Overlay Stylesheet
+ */
+
+.aegis-overlay-root {
+  --aegis-bg: #ffffff;
+  --aegis-surface: #f2f6fc;
+  --aegis-border: #dadce0;
+  --aegis-text-primary: #202124;
+  --aegis-text-secondary: #5f6368;
+  --aegis-primary: #1a73e8;
+  --aegis-font: 'Roboto', 'Inter', sans-serif;
+
+  /* Risk level colors */
+  --aegis-risk-green:      #188038;
+  --aegis-risk-green-bg:   #e6f4ea;
+  --aegis-risk-yellow:     #b06000;
+  --aegis-risk-yellow-bg:  #fef7e0;
+  --aegis-risk-red:        #d93025;
+  --aegis-risk-red-bg:     #fce8e6;
+
+  /* Brutalist panel token (Aegis brand) */
+  --aegis-analyzer-border: #000000;
+  --aegis-analyzer-bg:     #ffffff;
+  --aegis-analyzer-text:   #000000;
+  --aegis-analyzer-text-sec: #666666;
+
+  font-family: var(--aegis-font);
+  box-sizing: border-box;
+}
+
+/* Universal box-sizing reset inside Aegis root only */
+.aegis-overlay-root *,
+.aegis-overlay-root *::before,
+.aegis-overlay-root *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
+   Floating Action Button (FAB) — Scan Trigger
+   Fixed positioning so it floats over Gmail regardless of layout.
+   ============================================================ */
+.aegis-overlay-root .aegis-fab {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--aegis-analyzer-bg);
+  color: var(--aegis-analyzer-text);
+  border: 3px solid var(--aegis-analyzer-border);
+  padding: 15px 25px;
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: var(--aegis-font);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.1s;
+  z-index: 2147483640; /* Near-max z-index to float above Gmail */
+}
+
+.aegis-overlay-root .aegis-fab:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px rgba(0, 0, 0, 1);
+}
+
+.aegis-overlay-root .aegis-fab:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+/* ============================================================
+   Analyzer Side Panel Overlay
+   ============================================================ */
+.aegis-overlay-root .aegis-analyzer-overlay {
+  position: fixed;
+  top: 20px;
+  right: -420px; /* Hidden off-screen by default */
+  width: 380px;
+  height: calc(100vh - 40px);
+  background: var(--aegis-analyzer-bg);
+  border: 3px solid var(--aegis-analyzer-border);
+  box-shadow: -8px 8px 0px rgba(0, 0, 0, 1);
+  z-index: 2147483641;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.aegis-overlay-root .aegis-analyzer-overlay.active {
+  right: 20px;
+}
+
+/* Panel Header */
+.aegis-overlay-root .aegis-analyzer-header {
+  padding: 20px;
+  border-bottom: 3px solid var(--aegis-analyzer-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--aegis-analyzer-text);
+  color: var(--aegis-analyzer-bg);
+  flex-shrink: 0;
+}
+
+.aegis-overlay-root .aegis-analyzer-header h3 {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--aegis-analyzer-bg);
+}
+
+.aegis-overlay-root .aegis-analyzer-header i {
+  color: var(--aegis-analyzer-bg);
+}
+
+.aegis-overlay-root .aegis-close-btn {
+  background: none;
+  border: none;
+  color: var(--aegis-analyzer-bg);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  transition: all 0.1s;
+}
+
+.aegis-overlay-root .aegis-close-btn:hover {
+  color: var(--aegis-risk-red);
+}
+
+/* Loading State */
+.aegis-overlay-root .aegis-analyzer-status {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: var(--aegis-text-primary);
+}
+
+.aegis-overlay-root .aegis-analyzer-status p {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--aegis-text-secondary);
+}
+
+/* Loading Spinner */
+.aegis-overlay-root .aegis-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: var(--aegis-analyzer-text);
+  border-radius: 50%;
+  animation: aegis-spin 1s linear infinite;
+}
+
+@keyframes aegis-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Results Pane */
+.aegis-overlay-root .aegis-analyzer-results {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  height: 100%;
+}
+
+/* ============================================================
+   Risk Score Card (Side Panel)
+   ============================================================ */
+.aegis-overlay-root .aegis-risk-score-card {
+  border: 2px solid var(--aegis-border);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background-color: var(--aegis-analyzer-bg);
+}
+
+.aegis-overlay-root .aegis-score-circle {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  border: 4px solid var(--aegis-border);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.aegis-overlay-root .aegis-score-text h4 {
+  font-size: 1.3rem;
+  margin-bottom: 5px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.aegis-overlay-root .aegis-score-text p {
+  font-size: 0.85rem;
+  color: var(--aegis-text-secondary);
+  font-weight: 600;
+}
+
+/* Threat-level color modifiers for the risk card */
+.aegis-overlay-root .threat-safe .aegis-score-circle {
+  border-color: var(--aegis-risk-green);
+  color: var(--aegis-risk-green);
+}
+.aegis-overlay-root .threat-safe .aegis-risk-score-card {
+  border-color: var(--aegis-risk-green);
+  background-color: var(--aegis-risk-green-bg);
+}
+.aegis-overlay-root .threat-safe .aegis-score-text h4 { color: var(--aegis-risk-green); }
+
+.aegis-overlay-root .threat-warning .aegis-score-circle {
+  border-color: var(--aegis-risk-yellow);
+  color: var(--aegis-risk-yellow);
+}
+.aegis-overlay-root .threat-warning .aegis-risk-score-card {
+  border-color: var(--aegis-risk-yellow);
+  background-color: var(--aegis-risk-yellow-bg);
+}
+.aegis-overlay-root .threat-warning .aegis-score-text h4 { color: var(--aegis-risk-yellow); }
+
+.aegis-overlay-root .threat-critical .aegis-score-circle {
+  border-color: var(--aegis-risk-red);
+  color: var(--aegis-risk-red);
+}
+.aegis-overlay-root .threat-critical .aegis-risk-score-card {
+  border-color: var(--aegis-risk-red);
+  background-color: var(--aegis-risk-red-bg);
+}
+.aegis-overlay-root .threat-critical .aegis-score-text h4 { color: var(--aegis-risk-red); }
+
+/* ============================================================
+   Layer Analysis List (Side Panel)
+   ============================================================ */
+.aegis-overlay-root .aegis-layer-analysis h4 {
+  font-size: 1rem;
+  margin-bottom: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--aegis-analyzer-border);
+  padding-bottom: 5px;
+  color: var(--aegis-text-primary);
+}
+
+.aegis-overlay-root .aegis-layers-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aegis-overlay-root .aegis-layers-list li {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: var(--aegis-text-primary);
+}
+
+.aegis-overlay-root .aegis-layers-list i { font-size: 1.1rem; }
+.aegis-overlay-root .aegis-icon-pass { color: var(--aegis-risk-green); }
+.aegis-overlay-root .aegis-icon-fail { color: var(--aegis-risk-red); }
+.aegis-overlay-root .aegis-icon-warn { color: var(--aegis-risk-yellow); }
+.aegis-overlay-root .aegis-icon-skip { color: var(--aegis-text-secondary); }
+
+/* ============================================================
+   XAI Explanation Box (Side Panel)
+   ============================================================ */
+.aegis-overlay-root .aegis-xai-box {
+  border: 2px solid var(--aegis-analyzer-border);
+  padding: 15px;
+  background-color: var(--aegis-surface);
+}
+
+.aegis-overlay-root .aegis-xai-box h4 {
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--aegis-text-primary);
+}
+
+.aegis-overlay-root .aegis-xai-box p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  font-weight: 500;
+  color: var(--aegis-text-primary);
+}
+
+/* ============================================================
+   Action Buttons (Side Panel)
+   ============================================================ */
+.aegis-overlay-root .aegis-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding-bottom: 10px;
+}
+
+.aegis-overlay-root .aegis-btn {
+  padding: 14px;
+  border: 2px solid var(--aegis-analyzer-border);
+  font-weight: 700;
+  font-family: var(--aegis-font);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.1s;
+  background-color: var(--aegis-analyzer-bg);
+  color: var(--aegis-analyzer-text);
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 1);
+  font-size: 0.9rem;
+}
+
+.aegis-overlay-root .aegis-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+}
+
+.aegis-overlay-root .aegis-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 1);
+}
+
+.aegis-overlay-root .aegis-btn-primary {
+  background-color: var(--aegis-analyzer-text);
+  color: var(--aegis-analyzer-bg);
+}
+
+/* ============================================================
+   JS Threat Blocker Overlay (full-screen warning)
+   ============================================================ */
+.aegis-overlay-root .aegis-js-threat-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.92);
+  z-index: 2147483645;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aegis-overlay-root .aegis-js-threat-box {
+  border: 8px solid black;
+  padding: 40px;
+  max-width: 500px;
+  text-align: center;
+  background-color: white;
+  box-shadow: 15px 15px 0px black;
+  font-family: var(--aegis-font);
+}
+
+.aegis-overlay-root .aegis-js-threat-box i {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  color: var(--aegis-risk-red);
+}
+
+.aegis-overlay-root .aegis-js-threat-box h2 {
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+  color: var(--aegis-analyzer-text);
+}
+
+.aegis-overlay-root .aegis-js-threat-box p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: 30px;
+  font-weight: 500;
+  color: var(--aegis-text-primary);
+}
+
+.aegis-overlay-root .aegis-js-threat-box button {
+  background-color: black;
+  color: white;
+  border: 2px solid black;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--aegis-font);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  transition: all 0.1s;
+}
+
+.aegis-overlay-root .aegis-js-threat-box button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.5);
+}
+
+.aegis-overlay-root .aegis-js-threat-box button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================
+   Full Analysis Modal (FAM)
+   ============================================================ */
+.aegis-overlay-root .aegis-fam {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483643;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--aegis-font);
+}
+
+.aegis-overlay-root .aegis-fam.open {
+  display: flex;
+  animation: aegis-fam-fadein 0.2s ease forwards;
+}
+
+@keyframes aegis-fam-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Backdrop */
+.aegis-overlay-root .aegis-fam-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* Panel Container */
+.aegis-overlay-root .aegis-fam-panel {
+  position: relative;
+  z-index: 1;
+  width: 92vw;
+  max-width: 1040px;
+  max-height: 90vh;
+  background: var(--aegis-analyzer-bg);
+  border: 3px solid #000;
+  box-shadow: 12px 12px 0px #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* FAM Header */
+.aegis-overlay-root .aegis-fam-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 3px solid #000;
+  background-color: var(--aegis-analyzer-text);
+  color: var(--aegis-analyzer-bg);
+  flex-shrink: 0;
+}
+
+.aegis-overlay-root .aegis-fam-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.aegis-overlay-root .aegis-fam-logo {
+  font-size: 1.5rem;
+  color: var(--aegis-analyzer-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aegis-overlay-root .aegis-fam-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--aegis-analyzer-bg);
+}
+
+.aegis-overlay-root .aegis-fam-subtitle {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.aegis-overlay-root .aegis-fam-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Risk Badge in FAM Header */
+.aegis-overlay-root .aegis-fam-risk-badge {
+  padding: 6px 16px;
+  border: 2px solid var(--aegis-analyzer-bg);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--aegis-analyzer-bg);
+  background: transparent;
+  box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.3);
+}
+
+.aegis-overlay-root .aegis-fam-risk-badge.badge-safe {
+  border-color: var(--aegis-risk-green);
+  color: var(--aegis-risk-green);
+  background: var(--aegis-risk-green-bg);
+}
+
+.aegis-overlay-root .aegis-fam-risk-badge.badge-warning {
+  border-color: var(--aegis-risk-yellow);
+  color: var(--aegis-risk-yellow);
+  background: var(--aegis-risk-yellow-bg);
+}
+
+.aegis-overlay-root .aegis-fam-risk-badge.badge-critical {
+  border-color: var(--aegis-risk-red);
+  color: var(--aegis-risk-red);
+  background: var(--aegis-risk-red-bg);
+}
+
+.aegis-overlay-root .aegis-fam-close-btn {
+  background: none;
+  border: 2px solid transparent;
+  color: var(--aegis-analyzer-bg);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  transition: all 0.1s;
+}
+
+.aegis-overlay-root .aegis-fam-close-btn:hover {
+  color: var(--aegis-risk-red);
+  border-color: var(--aegis-risk-red);
+}
+
+/* FAM Scrollable Body Grid */
+.aegis-overlay-root .aegis-fam-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 24px;
+  overflow-y: auto;
+  flex-grow: 1;
+  background-color: var(--aegis-analyzer-bg);
+}
+
+.aegis-overlay-root .aegis-fam-body::-webkit-scrollbar { width: 8px; }
+.aegis-overlay-root .aegis-fam-body::-webkit-scrollbar-track { background: #f1f3f4; border-left: 2px solid #000; }
+.aegis-overlay-root .aegis-fam-body::-webkit-scrollbar-thumb { background: #000; }
+
+.aegis-overlay-root .aegis-fam-col-left,
+.aegis-overlay-root .aegis-fam-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* FAM Cards */
+.aegis-overlay-root .aegis-fam-card {
+  border: 2px solid #000;
+  padding: 20px;
+  background-color: var(--aegis-analyzer-bg);
+  box-shadow: 4px 4px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-card-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--aegis-text-primary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+}
+
+.aegis-overlay-root .aegis-fam-card-label i {
+  font-size: 0.9rem;
+  color: var(--aegis-text-primary);
+}
+
+/* Gauge Card */
+.aegis-overlay-root .aegis-fam-gauge-card {
+  background-color: var(--aegis-surface);
+}
+
+.aegis-overlay-root .aegis-fam-gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.aegis-overlay-root .aegis-fam-gauge-svg {
+  width: 100%;
+  max-width: 230px;
+}
+
+.aegis-overlay-root .aegis-fam-gauge-score-wrap {
+  text-align: center;
+  margin-top: -10px;
+}
+
+.aegis-overlay-root .aegis-fam-gauge-score {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #000;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.aegis-overlay-root .aegis-fam-gauge-score span {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--aegis-text-secondary);
+}
+
+.aegis-overlay-root .aegis-fam-gauge-label {
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-top: 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 3px 12px;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-gauge-label.lbl-safe {
+  color: var(--aegis-risk-green);
+  border-color: var(--aegis-risk-green);
+  background: var(--aegis-risk-green-bg);
+}
+.aegis-overlay-root .aegis-fam-gauge-label.lbl-warning {
+  color: var(--aegis-risk-yellow);
+  border-color: var(--aegis-risk-yellow);
+  background: var(--aegis-risk-yellow-bg);
+}
+.aegis-overlay-root .aegis-fam-gauge-label.lbl-critical {
+  color: var(--aegis-risk-red);
+  border-color: var(--aegis-risk-red);
+  background: var(--aegis-risk-red-bg);
+}
+
+/* Metadata Grid */
+.aegis-overlay-root .aegis-fam-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aegis-overlay-root .aegis-fam-meta-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--aegis-surface);
+  border: 1px solid var(--aegis-border);
+}
+
+.aegis-overlay-root .aegis-fam-meta-key {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--aegis-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.aegis-overlay-root .aegis-fam-meta-val {
+  font-size: 0.85rem;
+  color: var(--aegis-text-primary);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aegis-overlay-root .aegis-fam-meta-domain {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  color: var(--aegis-text-primary);
+  background: #ffffff;
+  padding: 2px 8px;
+  border: 1px solid #000;
+  font-weight: 700;
+}
+
+/* XAI Card */
+.aegis-overlay-root .aegis-fam-xai-card {
+  background-color: var(--aegis-surface);
+}
+
+.aegis-overlay-root .aegis-fam-xai-text {
+  font-size: 0.88rem;
+  line-height: 1.75;
+  color: var(--aegis-text-primary);
+  font-weight: 600;
+  background: #ffffff;
+  border: 2px solid #000;
+  padding: 14px;
+  box-shadow: 3px 3px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-xai-footer {
+  margin-top: 12px;
+  font-size: 0.72rem;
+  color: var(--aegis-text-secondary);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+/* Defense Layer Items */
+.aegis-overlay-root .aegis-fam-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.aegis-overlay-root .aegis-fam-layer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 2px solid #000;
+  background-color: #ffffff;
+  box-shadow: 3px 3px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-layer-icon {
+  font-size: 1.1rem;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.aegis-overlay-root .aegis-fam-layer-icon.icon-pass { color: var(--aegis-risk-green); }
+.aegis-overlay-root .aegis-fam-layer-icon.icon-fail { color: var(--aegis-risk-red); }
+.aegis-overlay-root .aegis-fam-layer-icon.icon-warn { color: var(--aegis-risk-yellow); }
+.aegis-overlay-root .aegis-fam-layer-icon.icon-skip { color: var(--aegis-text-secondary); }
+
+.aegis-overlay-root .aegis-fam-layer-body {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.aegis-overlay-root .aegis-fam-layer-name {
+  font-weight: 800;
+  color: var(--aegis-text-primary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.aegis-overlay-root .aegis-fam-layer-detail {
+  font-size: 0.78rem;
+  color: var(--aegis-text-secondary);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.aegis-overlay-root .aegis-fam-layer-status {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 2px solid #000;
+  flex-shrink: 0;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-layer-status.status-pass {
+  color: var(--aegis-risk-green); border-color: var(--aegis-risk-green); background: var(--aegis-risk-green-bg);
+}
+.aegis-overlay-root .aegis-fam-layer-status.status-fail {
+  color: var(--aegis-risk-red); border-color: var(--aegis-risk-red); background: var(--aegis-risk-red-bg);
+}
+.aegis-overlay-root .aegis-fam-layer-status.status-warn {
+  color: var(--aegis-risk-yellow); border-color: var(--aegis-risk-yellow); background: var(--aegis-risk-yellow-bg);
+}
+.aegis-overlay-root .aegis-fam-layer-status.status-skip {
+  color: var(--aegis-text-secondary); border-color: var(--aegis-border); background: var(--aegis-surface);
+}
+
+/* Threat Indicator Pills */
+.aegis-overlay-root .aegis-fam-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aegis-overlay-root .aegis-fam-indicator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  border: 2px solid #000;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-indicator-pill.pill-red {
+  color: var(--aegis-risk-red); border-color: var(--aegis-risk-red); background: var(--aegis-risk-red-bg);
+}
+.aegis-overlay-root .aegis-fam-indicator-pill.pill-yellow {
+  color: var(--aegis-risk-yellow); border-color: var(--aegis-risk-yellow); background: var(--aegis-risk-yellow-bg);
+}
+.aegis-overlay-root .aegis-fam-indicator-pill.pill-green {
+  color: var(--aegis-risk-green); border-color: var(--aegis-risk-green); background: var(--aegis-risk-green-bg);
+}
+
+.aegis-overlay-root .aegis-fam-no-threats {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--aegis-risk-green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 2px solid var(--aegis-risk-green);
+  background: var(--aegis-risk-green-bg);
+  width: 100%;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0px #000;
+}
+
+/* Recommendation Card */
+.aegis-overlay-root .aegis-fam-recommendation-card {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.aegis-overlay-root .aegis-fam-recommendation {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--aegis-text-primary);
+  font-weight: 600;
+  padding: 14px;
+  border: 2px solid #000;
+  background: #ffffff;
+  margin-bottom: 16px;
+  border-left: 6px solid #000;
+  box-shadow: 3px 3px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-recommendation.rec-safe     { border-left-color: var(--aegis-risk-green); }
+.aegis-overlay-root .aegis-fam-recommendation.rec-warning  { border-left-color: var(--aegis-risk-yellow); }
+.aegis-overlay-root .aegis-fam-recommendation.rec-critical { border-left-color: var(--aegis-risk-red); }
+
+/* FAM Action Buttons */
+.aegis-overlay-root .aegis-fam-action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.aegis-overlay-root .aegis-fam-action-btn {
+  flex: 1;
+  padding: 14px 16px;
+  border: 2px solid #000;
+  font-weight: 800;
+  font-family: var(--aegis-font);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.1s;
+  background-color: var(--aegis-analyzer-bg);
+  color: var(--aegis-analyzer-text);
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0px #000;
+  font-size: 0.82rem;
+  min-width: 120px;
+}
+
+.aegis-overlay-root .aegis-fam-action-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-action-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000;
+}
+
+.aegis-overlay-root .aegis-fam-btn-whitelist {
+  background: var(--aegis-analyzer-text);
+  color: var(--aegis-analyzer-bg);
+}
+
+.aegis-overlay-root .aegis-fam-btn-block {
+  background: var(--aegis-risk-red);
+  color: #ffffff;
+  border-color: #000;
+}
+
+.aegis-overlay-root .aegis-fam-btn-report {
+  background: var(--aegis-analyzer-bg);
+  color: var(--aegis-analyzer-text);
+}
+
+/* ============================================================
+   Responsive Layout (FAM)
+   ============================================================ */
+@media (max-width: 768px) {
+  .aegis-overlay-root .aegis-fam-body {
+    grid-template-columns: 1fr;
+  }
+  .aegis-overlay-root .aegis-fam-panel {
+    width: 96vw;
+    max-height: 94vh;
+  }
+}
