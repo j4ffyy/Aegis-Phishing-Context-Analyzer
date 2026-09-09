@@ -1,0 +1,32 @@
+# Aegis Backend — Python Dependencies
+#
+# IMPORTANT: Do NOT add torch, torchvision, or torchaudio.
+# PyTorch consumes 800MB–1.5GB RAM at runtime, which exceeds the
+# Render.com free-tier 512MB memory ceiling and causes OOM crashes.
+# ONNX Runtime (~140MB RSS) is the approved inference backend.
+
+# Web framework & server
+fastapi>=0.110.0
+uvicorn>=0.28.0
+
+# Async HTTP client (VirusTotal API calls in link_scanner.py)
+httpx>=0.27.0
+
+# ONNX inference engine — CPU-only, no PyTorch dependency
+# Intentionally unpinned to allow pip to resolve the latest wheel
+# compatible with the host Python version (dev: 3.14, Docker: 3.11-slim).
+onnxruntime
+
+# Transformer tokenizer (tokenization only — model weights loaded via ONNX)
+transformers>=4.38.0
+tokenizers>=0.15.0
+huggingface-hub>=0.21.0
+
+# Numerical operations (softmax, score normalization)
+numpy>=1.24.0
+
+# Schema validation & serialization
+pydantic>=2.6.0
+
+# Environment variable loading
+python-dotenv>=1.0.0
