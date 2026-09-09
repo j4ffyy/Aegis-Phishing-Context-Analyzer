@@ -1,0 +1,31 @@
+# Aegis Backend — Git Ignore Rules
+
+# Environment secrets — NEVER commit
+.env
+!.env.example
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# ONNX model weights and tokenizer assets
+# These are baked into the Docker image at build time via download_model.py.
+# They are large binary files and must not be committed to the repository.
+models/phishing_distilbert/
+
+# IDE and OS artifacts
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Pytest and coverage
+.pytest_cache/
+htmlcov/
+.coverage
