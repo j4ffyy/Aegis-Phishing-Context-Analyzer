@@ -493,6 +493,22 @@
     initObserver();
   }
 
+  // Listen for re-scan / reload signals from popup or background
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === 'AEGIS_RESCAN' || request.action === 'AEGIS_RELOAD') {
+        console.log(`${LOG_PREFIX} Received re-scan trigger from extension popup.`);
+        initObserver();
+        const fab = document.getElementById('aegis-fab');
+        if (fab && fab.style.display !== 'none') {
+          fab.click();
+        }
+        sendResponse({ status: 'ok', message: 'Aegis re-scan initiated' });
+      }
+      return true;
+    });
+  }
+
   // Expose API for testing and extension communication
   window.AegisContentScript = {
     extractEmailContext,

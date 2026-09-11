@@ -80,8 +80,8 @@
 .aegis-overlay-root .aegis-analyzer-overlay {
   position: fixed;
   top: 20px;
-  right: -420px; /* Hidden off-screen by default */
-  width: 380px;
+  right: -450px; /* Hidden off-screen by default */
+  width: 410px;
   height: calc(100vh - 40px);
   background: var(--aegis-analyzer-bg);
   border: 3px solid var(--aegis-analyzer-border);
@@ -99,43 +99,151 @@
 
 /* Panel Header */
 .aegis-overlay-root .aegis-analyzer-header {
-  padding: 20px;
-  border-bottom: 3px solid var(--aegis-analyzer-border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--aegis-analyzer-text);
-  color: var(--aegis-analyzer-bg);
-  flex-shrink: 0;
+  padding: 12px 16px !important;
+  border-bottom: 3px solid var(--aegis-analyzer-border) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background-color: var(--aegis-analyzer-text) !important;
+  color: var(--aegis-analyzer-bg) !important;
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 8px !important;
 }
 
 .aegis-overlay-root .aegis-analyzer-header h3 {
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--aegis-analyzer-bg);
+  font-size: 0.9rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  color: var(--aegis-analyzer-bg) !important;
+  letter-spacing: 0.04em !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
 }
 
-.aegis-overlay-root .aegis-analyzer-header i {
-  color: var(--aegis-analyzer-bg);
+.aegis-overlay-root .aegis-analyzer-header h3 span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
-.aegis-overlay-root .aegis-close-btn {
-  background: none;
-  border: none;
-  color: var(--aegis-analyzer-bg);
-  font-size: 1.4rem;
-  cursor: pointer;
-  line-height: 1;
-  padding: 4px 8px;
-  transition: all 0.1s;
+.aegis-overlay-root .aegis-header-logo-icon {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  object-fit: contain !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.4)) !important;
 }
 
-.aegis-overlay-root .aegis-close-btn:hover {
-  color: var(--aegis-risk-red);
+.aegis-overlay-root .aegis-fab-logo-icon {
+  width: 20px !important;
+  height: 20px !important;
+  object-fit: contain !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+.aegis-overlay-root .aegis-analyzer-header-controls,
+.aegis-overlay-root .aegis-fam-header-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+}
+
+.aegis-overlay-root .aegis-header-btn,
+.aegis-overlay-root .aegis-fam-header-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: transform 0.15s ease, filter 0.15s ease !important;
+}
+
+.aegis-overlay-root .aegis-close-badge-svg,
+.aegis-overlay-root .aegis-reload-badge-svg {
+  width: 28px !important;
+  height: 28px !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+  pointer-events: none !important;
+  transition: transform 0.15s ease, filter 0.15s ease !important;
+}
+
+.aegis-overlay-root .aegis-header-btn:hover,
+.aegis-overlay-root .aegis-fam-header-btn:hover {
+  transform: scale(1.12) !important;
+}
+
+.aegis-overlay-root .aegis-header-btn:active,
+.aegis-overlay-root .aegis-fam-header-btn:active {
+  transform: scale(0.92) !important;
+}
+
+.aegis-overlay-root .aegis-close-btn:hover .aegis-close-badge-svg,
+.aegis-overlay-root .aegis-fam-close-btn:hover .aegis-close-badge-svg {
+  filter: drop-shadow(0 0 6px rgba(217, 48, 37, 0.8)) !important;
+}
+
+.aegis-overlay-root .aegis-close-btn:hover .aegis-close-badge-svg circle,
+.aegis-overlay-root .aegis-fam-close-btn:hover .aegis-close-badge-svg circle {
+  stroke: var(--aegis-risk-red) !important;
+  fill: #1a0000 !important;
+}
+
+.aegis-overlay-root .aegis-close-btn:hover .aegis-close-badge-svg line,
+.aegis-overlay-root .aegis-fam-close-btn:hover .aegis-close-badge-svg line {
+  stroke: var(--aegis-risk-red) !important;
+}
+
+.aegis-overlay-root .aegis-reload-btn:hover .aegis-reload-badge-svg,
+.aegis-overlay-root .aegis-fam-reload-btn:hover .aegis-reload-badge-svg {
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8)) !important;
+}
+
+.aegis-overlay-root .aegis-reload-btn:hover .aegis-reload-badge-svg circle,
+.aegis-overlay-root .aegis-fam-reload-btn:hover .aegis-reload-badge-svg circle {
+  stroke: #38bdf8 !important;
+}
+
+.aegis-overlay-root .aegis-reload-btn:hover .aegis-reload-badge-svg path,
+.aegis-overlay-root .aegis-fam-reload-btn:hover .aegis-reload-badge-svg path {
+  stroke: #38bdf8 !important;
+}
+
+.aegis-overlay-root .aegis-reload-btn.spinning .aegis-reload-badge-svg,
+.aegis-overlay-root .aegis-fam-reload-btn.spinning .aegis-reload-badge-svg {
+  animation: aegis-spin 0.75s linear infinite !important;
+}
+
+@keyframes aegis-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Loading State */
@@ -461,7 +569,7 @@
   position: relative;
   z-index: 1;
   width: 92vw;
-  max-width: 1040px;
+  max-width: 1120px;
   max-height: 90vh;
   background: var(--aegis-analyzer-bg);
   border: 3px solid #000;
@@ -473,49 +581,144 @@
 
 /* FAM Header */
 .aegis-overlay-root .aegis-fam-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px;
-  border-bottom: 3px solid #000;
-  background-color: var(--aegis-analyzer-text);
-  color: var(--aegis-analyzer-bg);
-  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 14px 20px !important;
+  border-bottom: 3px solid #000 !important;
+  background-color: var(--aegis-analyzer-text) !important;
+  color: var(--aegis-analyzer-bg) !important;
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 16px !important;
 }
 
 .aegis-overlay-root .aegis-fam-header-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
 }
 
 .aegis-overlay-root .aegis-fam-logo {
-  font-size: 1.5rem;
-  color: var(--aegis-analyzer-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.aegis-overlay-root .aegis-fam-logo .aegis-header-logo-icon {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  object-fit: contain !important;
+  display: block !important;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.6)) !important;
+}
+
+.aegis-overlay-root .aegis-fam-header-left > div:not(.aegis-fam-logo) {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
 }
 
 .aegis-overlay-root .aegis-fam-title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--aegis-analyzer-bg);
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--aegis-analyzer-bg) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .aegis-overlay-root .aegis-fam-subtitle {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 2px;
-  font-weight: 500;
+  font-size: 0.76rem !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  margin-top: 2px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .aegis-overlay-root .aegis-fam-header-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+}
+
+/* FAM Magnification / Zoom Controls */
+.aegis-overlay-root .aegis-fam-zoom-controls {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.4) !important;
+  box-sizing: border-box !important;
+  height: 30px !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+}
+
+.aegis-overlay-root .aegis-fam-zoom-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0 8px !important;
+  height: 100% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  outline: none !important;
+  font-family: var(--aegis-font) !important;
+  font-weight: 800 !important;
+  font-size: 0.76rem !important;
+  line-height: 1 !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+  user-select: none !important;
+}
+
+.aegis-overlay-root .aegis-fam-zoom-btn:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.aegis-overlay-root .aegis-fam-zoom-btn:hover svg {
+  stroke: #000000 !important;
+}
+
+.aegis-overlay-root .aegis-fam-zoom-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.aegis-overlay-root .aegis-fam-zoom-btn:disabled,
+.aegis-overlay-root .aegis-fam-zoom-btn[disabled] {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+.aegis-overlay-root .aegis-fam-zoom-display {
+  border-left: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.35) !important;
+  font-variant-numeric: tabular-nums !important;
+  min-width: 48px !important;
+  font-size: 0.74rem !important;
+  letter-spacing: 0.04em !important;
+  padding: 0 6px !important;
 }
 
 /* Risk Badge in FAM Header */
@@ -549,21 +752,6 @@
   background: var(--aegis-risk-red-bg);
 }
 
-.aegis-overlay-root .aegis-fam-close-btn {
-  background: none;
-  border: 2px solid transparent;
-  color: var(--aegis-analyzer-bg);
-  font-size: 1.4rem;
-  cursor: pointer;
-  line-height: 1;
-  padding: 4px 8px;
-  transition: all 0.1s;
-}
-
-.aegis-overlay-root .aegis-fam-close-btn:hover {
-  color: var(--aegis-risk-red);
-  border-color: var(--aegis-risk-red);
-}
 
 /* FAM Scrollable Body Grid */
 .aegis-overlay-root .aegis-fam-body {

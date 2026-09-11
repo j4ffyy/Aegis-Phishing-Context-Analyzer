@@ -41,7 +41,8 @@
   ],
 
   "permissions": [
-    "storage"
+    "storage",
+    "activeTab"
   ],
 
   "host_permissions": [
@@ -58,7 +59,8 @@
         "whitelist/whitelist_dashboard.html",
         "icons/icon16.png",
         "icons/icon48.png",
-        "icons/icon128.png"
+        "icons/icon128.png",
+        "icons/close_icon.png"
       ],
       "matches": ["https://mail.google.com/*"]
     }
