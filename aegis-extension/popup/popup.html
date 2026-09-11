@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis Phishing Analyzer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Header with Brand, Reload, and Close Buttons -->
+  <header class="popup-header">
+    <div class="brand-section">
+      <img src="../icons/icon48.png" alt="Aegis Emblem" class="brand-icon" id="brand-icon">
+      <div class="brand-title-group">
+        <div class="brand-name">
+          AEGIS
+          <span class="brand-badge">SECURE</span>
+        </div>
+        <span class="brand-version">Phishing Context Analyzer</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Reload Button -->
+      <button class="action-btn reload-btn" id="btn-reload" title="Reload & Re-scan" aria-label="Reload extension & re-scan">
+        <svg viewBox="0 0 24 24">
+          <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+      </button>
+
+      <!-- Close (X) Button -->
+      <button class="action-btn close-btn" id="btn-close" title="Close" aria-label="Close popup">
+        <img src="../icons/close_icon.png" alt="Close" class="popup-close-img">
+      </button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="popup-content">
+    <!-- Active Status Card -->
+    <section class="status-card">
+      <div class="status-header">
+        <div class="status-indicator">
+          <div class="status-dot-wrapper">
+            <div class="status-pulse"></div>
+            <div class="status-dot"></div>
+          </div>
+          <span class="status-text">SHIELD ACTIVE</span>
+        </div>
+        <span class="status-tag">Real-Time</span>
+      </div>
+      <p class="status-desc">Aegis is actively monitoring email threads for phishing indicators and domain mismatches.</p>
+    </section>
+
+    <!-- Multi-Layer Defense Status -->
+    <section class="layers-grid">
+      <div class="layers-title">
+        <span>Defense Pipeline</span>
+        <span class="active-count">4 Layers Online</span>
+      </div>
+      <div class="layers-list">
+        <div class="layer-item">
+          <span class="layer-name">
+            <span class="layer-check">✓</span> Pre-filter Sanitization
+          </span>
+          <span class="layer-pill">Active</span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-name">
+            <span class="layer-check">✓</span> Layer 1: Auth (SPF/DKIM)
+          </span>
+          <span class="layer-pill">Active</span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-name">
+            <span class="layer-check">✓</span> Layer 2: Attachment Intel
+          </span>
+          <span class="layer-pill">Active</span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-name">
+            <span class="layer-check">✓</span> Layer 3: Behavioral Analysis
+          </span>
+          <span class="layer-pill">Active</span>
+        </div>
+        <div class="layer-item">
+          <span class="layer-name">
+            <span class="layer-check">✓</span> Layer 4: Deep NLP Context
+          </span>
+          <span class="layer-pill">Active</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Buttons -->
+    <div class="buttons-group">
+      <button class="btn-primary" id="btn-rescan">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+        </svg>
+        Re-Scan Current Email
+      </button>
+
+      <button class="btn-secondary" id="btn-dashboard">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+        </svg>
+        Open Whitelist Dashboard
+      </button>
+    </div>
+
+    <!-- Notification Toast Banner -->
+    <div class="toast-msg" id="toast-msg">
+      <span>⚡</span>
+      <span id="toast-text">Refreshed</span>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="popup-footer">
+    <span>MMDC Capstone 1 • v0.1.0</span>
+    <a href="#" id="btn-reload-ext" title="Reload Extension Runtime">Restart Runtime</a>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
