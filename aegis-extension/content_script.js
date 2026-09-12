@@ -404,10 +404,19 @@
         selectors: emailContext.metadata.selectorsUsed
       });
 
-      // Dispatch internal event for downstream components (PII Scrubber, Heuristics, UI Overlay)
+      // Apply client-side PII scrubbing per §5.1.3 & RA 10173 before inter-component transfer
+      let sanitizedPayload = emailContext;
+      if (typeof window.AegisPIIScrubber !== 'undefined' && typeof window.AegisPIIScrubber.scrubEmailPayload === 'function') {
+        sanitizedPayload = window.AegisPIIScrubber.scrubEmailPayload(emailContext);
+        if (sanitizedPayload.piiRedactionStats && sanitizedPayload.piiRedactionStats.total > 0) {
+          console.log(`${LOG_PREFIX} PII scrubbing applied:`, sanitizedPayload.piiRedactionStats);
+        }
+      }
+
+      // Dispatch internal event for downstream components (Heuristics, UI Overlay, Background Service Worker)
       window.dispatchEvent(
         new CustomEvent('aegis:email-extracted', {
-          detail: emailContext
+          detail: sanitizedPayload
         })
       );
     } catch (err) {
