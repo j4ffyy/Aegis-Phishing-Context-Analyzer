@@ -324,6 +324,11 @@
   };
 
   function generateStubAnalysis(emailContext) {
+    // Invoke client-side local heuristics engine (§6.2, Milestone 2.2)
+    if (typeof window.AegisLocalHeuristics !== 'undefined' && typeof window.AegisLocalHeuristics.evaluate === 'function') {
+      return window.AegisLocalHeuristics.evaluate(emailContext);
+    }
+
     const subjectLower = (emailContext.subject || '').toLowerCase();
     const hasSuspiciousKeywords =
       /urgent|password|account|verify|suspended|invoice|wire|transfer|click here/.test(subjectLower);
@@ -505,13 +510,23 @@
 
     el.famIndicators.innerHTML = '';
     const threats = [];
-    Object.values(analysis.layers).forEach(layer => {
-      if (layer.icon === 'fa-times-circle') {
-        threats.push({ text: layer.detail, pillClass: 'pill-red',    icon: 'fas fa-times-circle' });
-      } else if (layer.icon === 'fa-exclamation-triangle') {
-        threats.push({ text: layer.detail, pillClass: 'pill-yellow', icon: 'fas fa-exclamation-triangle' });
-      }
-    });
+    if (Array.isArray(analysis.flags) && analysis.flags.length > 0) {
+      analysis.flags.forEach(flag => {
+        threats.push({
+          text: `${flag.title} (${flag.evidence})`,
+          pillClass: flag.severity === 'critical' ? 'pill-red' : 'pill-yellow',
+          icon: flag.severity === 'critical' ? 'fas fa-times-circle' : 'fas fa-exclamation-triangle'
+        });
+      });
+    } else {
+      Object.values(analysis.layers).forEach(layer => {
+        if (layer.icon === 'fa-times-circle') {
+          threats.push({ text: layer.detail, pillClass: 'pill-red',    icon: 'fas fa-times-circle' });
+        } else if (layer.icon === 'fa-exclamation-triangle') {
+          threats.push({ text: layer.detail, pillClass: 'pill-yellow', icon: 'fas fa-exclamation-triangle' });
+        }
+      });
+    }
 
     if (threats.length === 0) {
       el.famIndicators.innerHTML = `
