@@ -641,13 +641,53 @@
       el.results.style.display = 'none';
       el.fab.style.display     = 'none';
 
-      setTimeout(() => {
-        const analysis = generateStubAnalysis(currentEmailContext);
+      // Dispatch through Background Service Worker Bridge (§3.1, Milestone 2.3)
+      // Enforces 2.0s network abort timeout, LRU cache lookup, and automatic fallback.
+      const handleAnalysisCompletion = (analysis) => {
         populateAnalysis(analysis);
         el.status.style.display  = 'none';
         el.results.style.display = 'flex';
         currentEmailContext._lastAnalysis = analysis;
-      }, 1500);
+      };
+
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(
+          { action: 'AEGIS_ANALYZE_EMAIL', payload: currentEmailContext },
+          (response) => {
+            if (chrome.runtime.lastError || !response || !response.success) {
+              console.warn(
+                `${LOG_PREFIX} Background bridge unreachable or error:`,
+                chrome.runtime.lastError?.message || response?.error
+              );
+              // Fallback directly to client-side heuristics engine
+              const fallback = generateStubAnalysis(currentEmailContext);
+              handleAnalysisCompletion(fallback);
+              return;
+            }
+
+            const data = response.data;
+            if (data && data._fallback) {
+              console.log(`${LOG_PREFIX} Background reported offline fallback. Reason:`, data._fallbackReason);
+              const fallback = generateStubAnalysis(currentEmailContext);
+              fallback._fallbackReason = data._fallbackReason;
+              handleAnalysisCompletion(fallback);
+            } else if (data && data.score !== undefined) {
+              // Remote backend or cached score
+              handleAnalysisCompletion(data);
+            } else {
+              // Standard fallback
+              const fallback = generateStubAnalysis(currentEmailContext);
+              handleAnalysisCompletion(fallback);
+            }
+          }
+        );
+      } else {
+        // Direct local heuristic execution if extension runtime messaging is unavailable
+        setTimeout(() => {
+          const analysis = generateStubAnalysis(currentEmailContext);
+          handleAnalysisCompletion(analysis);
+        }, 300);
+      }
     });
 
     el.fullAnalysisBtn.addEventListener('click', () => {
