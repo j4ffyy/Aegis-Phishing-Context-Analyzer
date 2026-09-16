@@ -1,1 +1,82 @@
-{}
+{
+  "http://paypal-verification-account-sec.com/login": {
+    "url": "http://paypal-verification-account-sec.com/login",
+    "malicious": true,
+    "positives": 18,
+    "total": 75,
+    "status": "malicious",
+    "category": "phishing_credential_harvesting"
+  },
+  "https://secure-wellsfargo-update.net/auth": {
+    "url": "https://secure-wellsfargo-update.net/auth",
+    "malicious": true,
+    "positives": 14,
+    "total": 74,
+    "status": "malicious",
+    "category": "phishing_banking_impersonation"
+  },
+  "http://appleid-support-security-alert.xyz/verify": {
+    "url": "http://appleid-support-security-alert.xyz/verify",
+    "malicious": true,
+    "positives": 22,
+    "total": 75,
+    "status": "malicious",
+    "category": "phishing_account_takeover"
+  },
+  "https://dhl-express-tracking-delivery.info/track": {
+    "url": "https://dhl-express-tracking-delivery.info/track",
+    "malicious": true,
+    "positives": 9,
+    "total": 72,
+    "status": "malicious",
+    "category": "phishing_delivery_fraud"
+  },
+  "http://office365-password-reset-portal.co/login": {
+    "url": "http://office365-password-reset-portal.co/login",
+    "malicious": true,
+    "positives": 26,
+    "total": 75,
+    "status": "malicious",
+    "category": "phishing_bec_credential_harvesting"
+  },
+  "https://www.google.com/": {
+    "url": "https://www.google.com/",
+    "malicious": false,
+    "positives": 0,
+    "total": 75,
+    "status": "clean",
+    "category": "legitimate_search_engine"
+  },
+  "https://github.com/": {
+    "url": "https://github.com/",
+    "malicious": false,
+    "positives": 0,
+    "total": 75,
+    "status": "clean",
+    "category": "legitimate_developer_platform"
+  },
+  "https://www.microsoft.com/": {
+    "url": "https://www.microsoft.com/",
+    "malicious": false,
+    "positives": 0,
+    "total": 75,
+    "status": "clean",
+    "category": "legitimate_enterprise_software"
+  },
+  "https://www.paypal.com/": {
+    "url": "https://www.paypal.com/",
+    "malicious": false,
+    "positives": 0,
+    "total": 75,
+    "status": "clean",
+    "category": "legitimate_financial_service"
+  },
+  "https://appleid.apple.com/": {
+    "url": "https://appleid.apple.com/",
+    "malicious": false,
+    "positives": 0,
+    "total": 75,
+    "status": "clean",
+    "category": "legitimate_identity_portal"
+  }
+}
