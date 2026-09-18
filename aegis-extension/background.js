@@ -404,6 +404,30 @@ async function checkBackendHealth() {
   }
 }
 
+/**
+ * Polls backend for VirusTotal background scan status (§3.1 step 85-88).
+ * @param {string} emailHash
+ * @returns {Promise<object>}
+ */
+async function checkVTStatus(emailHash) {
+  if (!emailHash) {
+    throw new Error('Missing emailHash for VT status check');
+  }
+
+  const backendBaseUrl = await getBackendUrl();
+  const targetUrl = `${backendBaseUrl.replace(/\/+$/, '')}/api/v1/vt-status/${encodeURIComponent(emailHash)}`;
+
+  const response = await fetchWithTimeout(targetUrl, { method: 'GET' }, CONFIG.NETWORK_TIMEOUT_MS);
+  if (!response.ok) {
+    if (response.status === 404) {
+      return { status: 'not_found', email_hash: emailHash };
+    }
+    throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 // ---------------------------------------------------------------------------
 // 7. Chrome Runtime Message Listener (MV3 Asynchronous Bridge)
 // ---------------------------------------------------------------------------
@@ -422,6 +446,26 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
         .then((result) => sendResponse({ success: true, data: result }))
         .catch((err) => sendResponse({ success: false, error: err.message }));
       return true; // Crucial: Keeps inter-process communication port open
+    }
+
+    if (action === 'AEGIS_CHECK_VT_STATUS') {
+      const emailHash = typeof payload === 'string' ? payload : payload?.emailHash;
+      checkVTStatus(emailHash)
+        .then((result) => sendResponse({ success: true, data: result }))
+        .catch((err) => sendResponse({ success: false, error: err.message }));
+      return true;
+    }
+
+    if (action === 'AEGIS_UPDATE_CACHE') {
+      const { cacheKey, analysis } = payload || {};
+      if (cacheKey && analysis) {
+        AegisCache.set(cacheKey, analysis)
+          .then(() => sendResponse({ success: true }))
+          .catch((err) => sendResponse({ success: false, error: err.message }));
+        return true;
+      }
+      sendResponse({ success: false, error: 'Missing cacheKey or analysis' });
+      return false;
     }
 
     if (action === 'AEGIS_CHECK_HEALTH') {
@@ -465,7 +509,8 @@ const BackgroundBridgeAPI = {
   AegisCache,
   fetchWithTimeout,
   dispatchEmailAnalysis,
-  checkBackendHealth
+  checkBackendHealth,
+  checkVTStatus
 };
 
 if (typeof module !== 'undefined' && module.exports) {

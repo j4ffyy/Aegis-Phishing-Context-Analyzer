@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from modules.link_scanner import load_vt_seed_cache
 from modules.nlp_classifier import warm_up_nlp
+from routes.analyze import router as analyze_router
 from routes.health import router as health_router
 
 load_dotenv()
@@ -71,24 +72,4 @@ app.add_middleware(
 )
 
 app.include_router(health_router, prefix="/api/v1")
-
-
-# ---------------------------------------------------------------------------
-# Stub Analysis Endpoint
-# TODO(Milestone 2.x): Replace this inline stub by mounting the modular
-# router from routes/analyze.py:
-#
-#   from routes.analyze import router as analyze_router
-#   app.include_router(analyze_router, prefix="/api/v1")
-#
-# Do NOT leave both the stub route and the mounted router active
-# simultaneously — FastAPI will raise a route registration conflict.
-# ---------------------------------------------------------------------------
-@app.post("/api/v1/analyze")
-async def analyze_stub(payload: dict) -> dict:
-    """
-    Week 1 developer skeleton stub.
-    Returns a placeholder response so the Chrome Extension can confirm
-    end-to-end connectivity before the real analysis pipeline is wired.
-    """
-    return {"status": "stub", "mode": "DEV_SKELETON"}
+app.include_router(analyze_router, prefix="/api/v1")

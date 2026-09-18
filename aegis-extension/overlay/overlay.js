@@ -371,6 +371,7 @@
   }
 
   function closeAnalyzer() {
+    stopVTPolling();
     el.overlay.classList.remove('active');
     if (currentEmailContext) {
       el.fab.style.display = 'flex';
@@ -378,6 +379,84 @@
     setTimeout(() => {
       el.overlay.className = 'aegis-analyzer-overlay';
     }, 400);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Asynchronous VirusTotal Polling & Score Fold-In (§3.1, Milestone 2.5)
+  // ---------------------------------------------------------------------------
+  let activeVTPollingTimer = null;
+  let activeVTPollingAttempts = 0;
+  const MAX_VT_POLLING_ATTEMPTS = 8;
+  const VT_POLLING_INTERVAL_MS = 3000;
+
+  function stopVTPolling() {
+    if (activeVTPollingTimer) {
+      clearInterval(activeVTPollingTimer);
+      activeVTPollingTimer = null;
+    }
+    activeVTPollingAttempts = 0;
+  }
+
+  function foldInVTResults(updatedAnalysis) {
+    if (!updatedAnalysis || !currentEmailContext) return;
+
+    console.log(`${LOG_PREFIX} Folding in completed VirusTotal intelligence:`, updatedAnalysis);
+
+    // Pulse animation cue on the score circle
+    if (el.scoreCircle) {
+      el.scoreCircle.classList.add('aegis-score-pulse');
+      setTimeout(() => el.scoreCircle.classList.remove('aegis-score-pulse'), 1200);
+    }
+
+    // Populate updated analysis into side overlay
+    populateAnalysis(updatedAnalysis);
+    currentEmailContext._lastAnalysis = updatedAnalysis;
+
+    // If Full Analysis Modal (FAM) is currently open, refresh it live
+    if (el.fam && el.fam.classList.contains('open')) {
+      openFullAnalysisModal(currentEmailContext, updatedAnalysis);
+    }
+  }
+
+  function startVTPolling(emailHash, initialAnalysis) {
+    stopVTPolling();
+    if (!emailHash) return;
+
+    console.log(`${LOG_PREFIX} Initiating rate-paced VT polling for hash: ${emailHash.slice(0, 8)}...`);
+
+    activeVTPollingTimer = setInterval(() => {
+      activeVTPollingAttempts++;
+      if (activeVTPollingAttempts > MAX_VT_POLLING_ATTEMPTS) {
+        console.warn(`${LOG_PREFIX} VT polling reached max attempts (${MAX_VT_POLLING_ATTEMPTS}). Finalizing.`);
+        stopVTPolling();
+        if (initialAnalysis && initialAnalysis.layers && initialAnalysis.layers.nlp) {
+          if (initialAnalysis.layers.nlp.icon === 'fa-spinner') {
+            initialAnalysis.layers.nlp.icon = 'fa-minus-circle';
+            initialAnalysis.layers.nlp.detail = 'VirusTotal scan timed out (evaluated with local heuristics)';
+            populateAnalysis(initialAnalysis);
+          }
+        }
+        return;
+      }
+
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(
+          { action: 'AEGIS_CHECK_VT_STATUS', payload: { emailHash } },
+          (response) => {
+            if (chrome.runtime.lastError || !response || !response.success) {
+              return; // Retry on next interval
+            }
+
+            const resData = response.data;
+            if (resData && resData.status === 'completed') {
+              stopVTPolling();
+              const finalAnalysis = resData.data || resData.vt_result || resData;
+              foldInVTResults(finalAnalysis);
+            }
+          }
+        );
+      }
+    }, VT_POLLING_INTERVAL_MS);
   }
 
   function populateAnalysis(analysis) {
@@ -400,6 +479,7 @@
       'fa-times-circle':        { cls: 'fas fa-times-circle aegis-icon-fail' },
       'fa-exclamation-triangle':{ cls: 'fas fa-exclamation-triangle aegis-icon-warn' },
       'fa-minus-circle':        { cls: 'fas fa-minus-circle aegis-icon-skip' },
+      'fa-spinner':             { cls: 'fas fa-spinner fa-spin aegis-icon-pending' },
     };
 
     Object.entries(layerEls).forEach(([key, listItem]) => {
@@ -490,6 +570,8 @@
           iconClass = 'fas fa-times'; iconType = 'icon-fail'; statusClass = 'status-fail'; statusText = 'Fail'; break;
         case 'fa-exclamation-triangle':
           iconClass = 'fas fa-exclamation'; iconType = 'icon-warn'; statusClass = 'status-warn'; statusText = 'Warn'; break;
+        case 'fa-spinner':
+          iconClass = 'fas fa-spinner fa-spin'; iconType = 'icon-pending'; statusClass = 'status-pending'; statusText = 'Scanning'; break;
         default:
           iconClass = 'fas fa-minus'; iconType = 'icon-skip'; statusClass = 'status-skip'; statusText = 'Skip';
       }
@@ -648,6 +730,14 @@
         el.status.style.display  = 'none';
         el.results.style.display = 'flex';
         currentEmailContext._lastAnalysis = analysis;
+
+        // Async score fold-in initiation (§3.1 step 83-92, Milestone 2.5)
+        if (analysis && analysis.vt_status === 'pending') {
+          const emailHash = analysis.emailHash || currentEmailContext.emailHash;
+          startVTPolling(emailHash, analysis);
+        } else {
+          stopVTPolling();
+        }
       };
 
       if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
@@ -775,6 +865,7 @@
       const emailContext = event.detail;
       if (!emailContext) return;
 
+      stopVTPolling();
       currentEmailContext = emailContext;
       el.fab.style.display = 'flex';
 

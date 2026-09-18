@@ -150,6 +150,29 @@ def get_vt_analysis_cache_size() -> int:
     return len(_vt_analysis_cache)
 
 
+def get_vt_analysis(email_hash: str) -> Optional[Dict[str, Any]]:
+    """Retrieves composite analysis result for an email hash if cached."""
+    return _vt_analysis_cache.get(email_hash)
+
+
+def are_urls_cached(urls: List[str]) -> bool:
+    """
+    Checks if all candidate URLs (up to MAX_LINKS_PER_EMAIL)
+    are already present in the in-memory URL cache.
+    """
+    if not urls:
+        return True
+    seen = set()
+    unique_urls = []
+    for u in urls:
+        norm = normalize_url(u)
+        if norm and norm not in seen:
+            seen.add(norm)
+            unique_urls.append(norm)
+    candidates = unique_urls[:MAX_LINKS_PER_EMAIL]
+    return all(c in _vt_url_cache for c in candidates)
+
+
 def clear_vt_cache() -> None:
     """Clears both in-memory caches and resets pacing timers (for testing)."""
     global _vt_url_cache, _vt_analysis_cache, _last_request_timestamp
