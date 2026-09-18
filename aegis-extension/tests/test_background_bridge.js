@@ -207,8 +207,63 @@ async function main() {
   });
 
   // ---------------------------------------------------------------------------
-  // 7. Summary
+  // 7. VirusTotal Status Polling Tests (Milestone 2.5)
   // ---------------------------------------------------------------------------
+  const { checkVTStatus } = backgroundBridge;
+
+  await runAsyncTest('checkVTStatus resolves completed analysis from backend', async () => {
+    const originalFetch = global.fetch;
+    const mockHash = 'a1b2c3d4e5f6';
+    global.fetch = async (url) => {
+      assert.ok(url.includes(`/api/v1/vt-status/${mockHash}`));
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          status: 'completed',
+          email_hash: mockHash,
+          data: { score: 75, riskLevel: 'Critical' }
+        })
+      };
+    };
+
+    try {
+      const res = await checkVTStatus(mockHash);
+      assert.strictEqual(res.status, 'completed');
+      assert.strictEqual(res.data.score, 75);
+      assert.strictEqual(res.data.riskLevel, 'Critical');
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  await runAsyncTest('checkVTStatus handles 404 not_found gracefully without throwing', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = async () => ({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found'
+    });
+
+    try {
+      const res = await checkVTStatus('missing_hash');
+      assert.strictEqual(res.status, 'not_found');
+      assert.strictEqual(res.email_hash, 'missing_hash');
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  await runAsyncTest('checkVTStatus rejects when emailHash is omitted', async () => {
+    let threw = false;
+    try {
+      await checkVTStatus('');
+    } catch (err) {
+      threw = true;
+      assert.ok(err.message.includes('Missing emailHash'));
+    }
+    assert.strictEqual(threw, true);
+  });
   console.log('\n========================================');
   console.log(`Test Execution Summary:`);
   console.log(`Passed: ${testsPassed}`);

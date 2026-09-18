@@ -392,6 +392,19 @@
 .aegis-overlay-root .aegis-icon-fail { color: var(--aegis-risk-red); }
 .aegis-overlay-root .aegis-icon-warn { color: var(--aegis-risk-yellow); }
 .aegis-overlay-root .aegis-icon-skip { color: var(--aegis-text-secondary); }
+.aegis-overlay-root .aegis-icon-pending { color: #0284c7; }
+.aegis-overlay-root .icon-pending { background: #e0f2fe !important; color: #0284c7 !important; }
+.aegis-overlay-root .status-pending { background: #e0f2fe !important; color: #0369a1 !important; border-color: #bae6fd !important; }
+
+@keyframes aegis-score-pulse-anim {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7); }
+  50% { transform: scale(1.08); box-shadow: 0 0 12px 6px rgba(2, 132, 199, 0.4); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+}
+
+.aegis-overlay-root .aegis-score-pulse {
+  animation: aegis-score-pulse-anim 0.8s ease-in-out !important;
+}
 
 /* ============================================================
    XAI Explanation Box (Side Panel)
