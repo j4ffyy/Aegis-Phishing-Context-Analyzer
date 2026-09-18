@@ -32,6 +32,7 @@ from modules.link_scanner import (
     normalize_url,
     scan_email_links,
 )
+from modules.nlp_classifier import classify_email_text
 
 logger = logging.getLogger(__name__)
 
@@ -252,16 +253,29 @@ def evaluate_nlp_intent(
     has_typosquatting: bool = False,
 ) -> int:
     """
-    Evaluates Layer 2 Semantic Intent ($S_{nlp}$).
-    Calibrated heuristic stub pending full DistilBERT ONNX session in Milestone 3.1.
+    Evaluates Layer 2 Semantic Intent ($S_{nlp}$) using DistilBERT ONNX (§5.2.1, §6.3).
+    Extracts email text context, calculates heuristic urgency and spoofing penalties,
+    and returns the clamped composite NLP score.
     """
-    if has_typosquatting:
-        return 65 if keyword_hits > 0 else 50
-    if keyword_hits >= 2:
-        return 45
-    elif keyword_hits == 1:
-        return 25
-    return 10
+    subject = (payload.subject or "").strip()
+    body = (payload.bodyText or "").strip()
+    text = f"{subject}\n\n{body}".strip() if subject else body
+
+    # Calculate heuristic adjustments (§6.3)
+    urgency_penalty = min(keyword_hits * 8, 20)
+    bec_penalty = 20 if has_typosquatting else 0
+
+    if not text:
+        # Default baseline when neither subject nor body text is available
+        base = 10
+        return min(100, base + urgency_penalty + bec_penalty)
+
+    result = classify_email_text(
+        text=text,
+        urgency_penalty=urgency_penalty,
+        bec_penalty=bec_penalty,
+    )
+    return int(result.get("nlp_score", 10))
 
 
 def evaluate_behavioral(payload: EmailPayload) -> int:
