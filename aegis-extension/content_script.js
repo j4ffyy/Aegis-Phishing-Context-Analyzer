@@ -1,527 +1,404 @@
-/**
+﻿/**
  * Aegis: AI-Powered Phishing Context Analyzer
  * Component: Content Script (Gmail DOM Extractor & MutationObserver)
- * Specification: Implementation Plan §5.1.2 (Milestone 1.2)
+ * Specification: Implementation Plan §5.1.2 (Milestone 1.2), §6.4 (Milestone 3.2)
  *
  * Responsibilities:
  * - Debounced MutationObserver monitoring Gmail's [role="main"] container.
- * - Resilient multi-selector fallback chains for Subject, Sender, Body, and Attachments.
- * - Strict extraction safeguards: Senders extracted strictly from `email` attributes to prevent spoofing.
- * - Extraction of hyperlinks, timestamps, and attachment metadata.
+ * - Resilient multi-selector fallback chains for Subject, Sender, Body, Attachments.
+ * - Strict extraction safeguards: Senders extracted from `email` attributes only.
  * - Deduplication via email context signature to prevent redundant processing.
- * - Non-blocking diagnostic logging on selector misses.
+ * - [Milestone 3.2] Client-side Behavioral Baseline: circular distance scoring and
+ *   sender novelty detection backed by chrome.storage.local (§6.4).
  */
 
 (function () {
   'use strict';
 
-  // Prevent double injection on Gmail SPA navigations
-  if (window.__AEGIS_CONTENT_SCRIPT_LOADED__) {
-    return;
-  }
+  if (window.__AEGIS_CONTENT_SCRIPT_LOADED__) return;
   window.__AEGIS_CONTENT_SCRIPT_LOADED__ = true;
 
-  const LOG_PREFIX = '[Aegis::ContentScript]';
-  const DEBOUNCE_DELAY_MS = 300;
+  var LOG_PREFIX = '[Aegis::ContentScript]';
+  var DEBOUNCE_DELAY_MS = 300;
+  var OBSERVER_RETRY_BASE_MS = 250;
+  var OBSERVER_RETRY_MAX_ATTEMPTS = 8;
 
-  /**
-   * Observer initialization retry configuration.
-   * Gmail's SPA may not have rendered [role="main"] immediately on injection.
-   * We poll with exponential backoff before falling back to document.body.
-   */
-  const OBSERVER_RETRY_BASE_MS = 250;
-  const OBSERVER_RETRY_MAX_ATTEMPTS = 8;
-
-  /**
-   * Resilient DOM selector chains per Implementation Plan §5.1.2
-   */
-  const SELECTORS = {
-    subject: [
-      'h2.hP',
-      '[data-thread-perm-id] h2',
-      '.ha h2',
-      '[role="main"] h2'
-    ],
-    sender: [
-      'span.gD',
-      'span[email]',
-      '.go span',
-      '[data-hovercard-id]'
-    ],
-    body: [
-      '.a3s.aiL',
-      '.ii.gt',
-      '[role="listitem"] .a3s',
-      'div[dir="ltr"]'
-    ],
-    attachments: [
-      '.aV3',
-      '.aZo',
-      '[aria-label*="Attachment"]'
-    ],
-    timestamp: [
-      'span.g3',
-      'span[data-timestamp]',
-      '.gH span',
-      '[role="main"] .g3'
-    ],
-    mainContainer: [
-      '[role="main"]',
-      '.bkK',
-      'div.aeF'
-    ]
+  var SELECTORS = {
+    subject: ['h2.hP', '[data-thread-perm-id] h2', '.ha h2', '[role="main"] h2'],
+    sender: ['span.gD', 'span[email]', '.go span', '[data-hovercard-id]'],
+    body: ['.a3s.aiL', '.ii.gt', '[role="listitem"] .a3s', 'div[dir="ltr"]'],
+    attachments: ['.aV3', '.aZo', '[aria-label*="Attachment"]'],
+    timestamp: ['span.g3', 'span[data-timestamp]', '.gH span', '[role="main"] .g3'],
+    mainContainer: ['[role="main"]', '.bkK', 'div.aeF']
   };
 
-  /**
-   * State management
-   */
-  let observer = null;
-  let debounceTimer = null;
-  let lastProcessedSignature = null;
+  var observer = null;
+  var debounceTimer = null;
+  var lastProcessedSignature = null;
 
-  /**
-   * Resolves the first matching element from a prioritized selector list.
-   * @param {string[]} selectorList - Array of CSS selectors in order of priority.
-   * @param {Element|Document} root - Context root for querySelector.
-   * @returns {{ element: Element|null, selector: string|null }}
-   */
-  function queryFirst(selectorList, root = document) {
-    for (const selector of selectorList) {
+  function queryFirst(selectorList, root) {
+    root = root || document;
+    for (var i = 0; i < selectorList.length; i++) {
       try {
-        const el = root.querySelector(selector);
-        if (el) {
-          return { element: el, selector };
-        }
-      } catch (err) {
-        console.warn(`${LOG_PREFIX} Invalid selector query "${selector}":`, err);
-      }
+        var el = root.querySelector(selectorList[i]);
+        if (el) return { element: el, selector: selectorList[i] };
+      } catch (err) { /* skip bad selector */ }
     }
     return { element: null, selector: null };
   }
 
-  /**
-   * Resolves all matching elements from the first working selector in a prioritized list.
-   * @param {string[]} selectorList - Array of CSS selectors in order of priority.
-   * @param {Element|Document} root - Context root for querySelectorAll.
-   * @returns {{ elements: Element[], selector: string|null }}
-   */
-  function queryAllFirstWorking(selectorList, root = document) {
-    for (const selector of selectorList) {
+  function queryAllFirstWorking(selectorList, root) {
+    root = root || document;
+    for (var i = 0; i < selectorList.length; i++) {
       try {
-        const list = root.querySelectorAll(selector);
-        if (list && list.length > 0) {
-          return { elements: Array.from(list), selector };
-        }
-      } catch (err) {
-        console.warn(`${LOG_PREFIX} Invalid selector queryAll "${selector}":`, err);
-      }
+        var list = root.querySelectorAll(selectorList[i]);
+        if (list && list.length > 0) return { elements: Array.from(list), selector: selectorList[i] };
+      } catch (err) { /* skip bad selector */ }
     }
     return { elements: [], selector: null };
   }
 
-  /**
-   * Strict email regex validation helper.
-   */
-  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  /**
-   * Extracts clean sender information adhering to §5.1.2 Integrity Safeguards.
-   *
-   * Extraction priority order:
-   *  1. `email` attribute (Gmail's canonical machine-readable sender address)
-   *  2. `data-hovercard-id` attribute (used by newer Gmail layouts)
-   *  3. `textContent` — only accepted if it passes strict email regex validation
-   *
-   * The `name` attribute is captured separately as `senderName` for heuristic
-   * display-name spoofing comparison but is NEVER used for identity or routing.
-   *
-   * Return shape is always { senderEmail: string|null, senderName: string|null }.
-   * Callers record `senderRes.selector` independently from `queryFirst()`.
-   *
-   * @param {Element|null} senderElement
-   * @returns {{ senderEmail: string|null, senderName: string|null }}
-   */
-  function extractSender(senderElement) {
-    if (!senderElement) {
-      return { senderEmail: null, senderName: null };
-    }
-
-    let email = senderElement.getAttribute('email');
-
-    // Fallback 1: check hovercard ID if email attribute is absent or malformed
+  function extractSender(el) {
+    if (!el) return { senderEmail: null, senderName: null };
+    var email = el.getAttribute('email');
     if (!email || !EMAIL_REGEX.test(email.trim())) {
-      const hovercard = senderElement.getAttribute('data-hovercard-id');
-      if (hovercard && EMAIL_REGEX.test(hovercard.trim())) {
-        email = hovercard.trim();
-      } else {
-        email = null;
-      }
+      var hc = el.getAttribute('data-hovercard-id');
+      email = (hc && EMAIL_REGEX.test(hc.trim())) ? hc.trim() : null;
     }
-
-    // Fallback 2: textContent — only if strictly valid email (prevents display-name contamination)
     if (!email) {
-      const textContent = (senderElement.textContent || '').trim();
-      if (EMAIL_REGEX.test(textContent)) {
-        email = textContent;
-      }
+      var txt = (el.textContent || '').trim();
+      if (EMAIL_REGEX.test(txt)) email = txt;
     }
-
-    // Display name captured for heuristic comparison only — NOT used for identity
-    const displayName =
-      senderElement.getAttribute('name') ||
-      (senderElement.textContent || '').trim() ||
-      null;
-
     return {
       senderEmail: email ? email.trim().toLowerCase() : null,
-      senderName: displayName
+      senderName: el.getAttribute('name') || (el.textContent || '').trim() || null
     };
   }
 
-  /**
-   * Extracts hyperlink targets and labels from the email body.
-   */
-  function extractLinks(bodyElement) {
-    if (!bodyElement) return [];
-
-    const anchors = bodyElement.querySelectorAll('a[href]');
-    const links = [];
-    const seenUrls = new Set();
-
-    anchors.forEach((a) => {
-      let href = (a.getAttribute('href') || '').trim();
-
-      // Filter out non-actionable links
-      if (!href || href.startsWith('mailto:') || href.startsWith('javascript:') || href === '#') {
-        return;
-      }
-
-      // Handle Google redirect wrappers (e.g., https://www.google.com/url?q=...)
+  function extractLinks(bodyEl) {
+    if (!bodyEl) return [];
+    var anchors = bodyEl.querySelectorAll('a[href]');
+    var links = [], seen = new Set();
+    anchors.forEach(function (a) {
+      var href = (a.getAttribute('href') || '').trim();
+      if (!href || href.startsWith('mailto:') || href.startsWith('javascript:') || href === '#') return;
       try {
         if (href.includes('google.com/url?') && href.includes('q=')) {
-          const parsed = new URL(href);
-          const realTarget = parsed.searchParams.get('q');
-          if (realTarget) {
-            href = realTarget;
-          }
+          var u = new URL(href), q = u.searchParams.get('q');
+          if (q) href = q;
         }
-      } catch (e) {
-        // Fall back to original href if parsing fails
-      }
-
-      if (!seenUrls.has(href)) {
-        seenUrls.add(href);
-        links.push({
-          url: href,
-          text: (a.textContent || '').trim(),
-          isExternal: !href.includes('mail.google.com')
-        });
+      } catch (e) {}
+      if (!seen.has(href)) {
+        seen.add(href);
+        links.push({ url: href, text: (a.textContent || '').trim(), isExternal: !href.includes('mail.google.com') });
       }
     });
-
     return links;
   }
 
-  /**
-   * Extracts attachment file names and count.
-   */
-  function extractAttachments(rootElement) {
-    const { elements, selector } = queryAllFirstWorking(SELECTORS.attachments, rootElement);
-    const attachmentNames = [];
-
-    elements.forEach((el) => {
-      const name = (el.textContent || el.getAttribute('aria-label') || '').trim();
-      if (name) {
-        attachmentNames.push(name);
-      }
+  function extractAttachments(root) {
+    var res = queryAllFirstWorking(SELECTORS.attachments, root);
+    var names = [];
+    res.elements.forEach(function (el) {
+      var n = (el.textContent || el.getAttribute('aria-label') || '').trim();
+      if (n) names.push(n);
     });
-
-    return {
-      count: attachmentNames.length,
-      names: attachmentNames,
-      selectorUsed: selector
-    };
+    return { count: names.length, names: names, selectorUsed: res.selector };
   }
 
-  /**
-   * Extracts timestamp text from the thread.
-   */
-  function extractTimestamp(rootElement) {
-    const { element, selector } = queryFirst(SELECTORS.timestamp, rootElement);
-    if (!element) return { timestamp: null, selectorUsed: null };
-
-    const raw = element.getAttribute('title') ||
-                element.getAttribute('data-timestamp') ||
-                element.textContent || '';
-
-    return {
-      timestamp: raw.trim() || null,
-      selectorUsed: selector
-    };
+  function extractTimestamp(root) {
+    var res = queryFirst(SELECTORS.timestamp, root);
+    if (!res.element) return { timestamp: null, selectorUsed: null };
+    var raw = res.element.getAttribute('title') || res.element.getAttribute('data-timestamp') || res.element.textContent || '';
+    return { timestamp: raw.trim() || null, selectorUsed: res.selector };
   }
 
-  /**
-   * Primary extraction engine.
-   * Walks the multi-selector fallback chains to extract the full email context.
-   */
   function extractEmailContext() {
-    const mainContainerRes = queryFirst(SELECTORS.mainContainer, document);
-    const contextRoot = mainContainerRes.element || document;
+    var containerRes = queryFirst(SELECTORS.mainContainer, document);
+    var root = containerRes.element || document;
 
-    // 1. Subject extraction
-    const subjectRes = queryFirst(SELECTORS.subject, contextRoot);
-    const subject = subjectRes.element ? (subjectRes.element.textContent || '').trim() : null;
+    var subjectRes = queryFirst(SELECTORS.subject, root);
+    var subject = subjectRes.element ? (subjectRes.element.textContent || '').trim() : null;
 
-    // 2. Sender extraction
-    const senderRes = queryFirst(SELECTORS.sender, contextRoot);
-    const { senderEmail, senderName } = extractSender(senderRes.element);
+    var senderRes = queryFirst(SELECTORS.sender, root);
+    var senderData = extractSender(senderRes.element);
 
-    // 3. Body extraction (select the most recent expanded message body if multiple are present)
-    const bodyElementsRes = queryAllFirstWorking(SELECTORS.body, contextRoot);
-    let bodyElement = null;
-    let bodyText = '';
-    // NOTE: bodyHtml is intentionally NOT extracted into the dispatched payload.
-    // Raw innerHTML contains unscrubbed PII (names, emails, phone numbers in attributes
-    // and text nodes). Per §5.1.3 and RA 10173, only plain text is exported from this
-    // context. PII scrubbing (pii_scrubber.js, Milestone 2.1) operates on bodyText.
-
-    if (bodyElementsRes.elements.length > 0) {
-      // In Gmail threads, the last expanded element contains the most recently received message.
-      // Earlier entries are prior replies (collapsed or quoted) and are intentionally excluded
-      // to prevent signature/disclaimer blocks from inflating body length.
-      bodyElement = bodyElementsRes.elements[bodyElementsRes.elements.length - 1];
-      bodyText = (bodyElement.innerText || bodyElement.textContent || '').trim();
+    var bodyRes = queryAllFirstWorking(SELECTORS.body, root);
+    var bodyEl = null, bodyText = '';
+    if (bodyRes.elements.length > 0) {
+      bodyEl = bodyRes.elements[bodyRes.elements.length - 1];
+      bodyText = (bodyEl.innerText || bodyEl.textContent || '').trim();
     }
 
-    // 4. Attachments
-    const attachments = extractAttachments(contextRoot);
+    var attachments = extractAttachments(root);
+    var links = extractLinks(bodyEl);
+    var tsData = extractTimestamp(root);
 
-    // 5. Links
-    const links = extractLinks(bodyElement);
-
-    // 6. Timestamp
-    const timestampData = extractTimestamp(contextRoot);
-
-    // Diagnostic validation: Check for selector misses
-    const missing = [];
+    var missing = [];
     if (!subject) missing.push('subject');
-    if (!senderEmail) missing.push('senderEmail');
+    if (!senderData.senderEmail) missing.push('senderEmail');
     if (!bodyText) missing.push('body');
+    if (missing.length === 3) return null;
+    if (missing.length > 0) console.warn(LOG_PREFIX + ' Partial selector failure: [' + missing.join(', ') + ']');
 
-    if (missing.length > 0) {
-      // If none of the primary fields exist, we are likely on an inbox list view, not an email thread
-      if (missing.length === 3) {
-        return null;
-      }
-      console.warn(`${LOG_PREFIX} Partial selector failure. Missing fields: [${missing.join(', ')}].`, {
-        subjectSelector: subjectRes.selector,
-        senderSelector: senderRes.selector,
-        bodySelector: bodyElementsRes.selector
-      });
-    }
-
-    const emailPayload = {
+    return {
       subject: subject || '(No Subject)',
-      senderName: senderName || '(Unknown Sender)',
-      senderEmail: senderEmail || null,
+      senderName: senderData.senderName || '(Unknown Sender)',
+      senderEmail: senderData.senderEmail || null,
       bodyText: bodyText || '',
-      // bodyHtml deliberately omitted — see §5.1.3 PII compliance note above.
       links: links,
       attachments: attachments.names,
       attachmentCount: attachments.count,
-      timestamp: timestampData.timestamp,
+      timestamp: tsData.timestamp,
       extractedAt: new Date().toISOString(),
-      metadata: {
-        selectorsUsed: {
-          subject: subjectRes.selector,
-          sender: senderRes.selector,
-          body: bodyElementsRes.selector,
-          attachments: attachments.selectorUsed,
-          timestamp: timestampData.selectorUsed
-        }
-      }
+      metadata: { selectorsUsed: { subject: subjectRes.selector, sender: senderRes.selector, body: bodyRes.selector, attachments: attachments.selectorUsed, timestamp: tsData.selectorUsed } }
     };
+  }
 
-    return emailPayload;
+  function generateSignature(ctx) {
+    if (!ctx) return null;
+    var urlHash = window.location.hash || '';
+    var permEl = document.querySelector('[data-thread-perm-id]');
+    var permId = permEl ? (permEl.getAttribute('data-thread-perm-id') || '') : '';
+    return urlHash + '|' + permId + '|' + (ctx.senderEmail || '') + '::' + (ctx.subject || '');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Milestone 3.2: Behavioral Baseline — Circular Distance Scoring (§6.4)
+  // ---------------------------------------------------------------------------
+
+  var BEHAVIORAL_STORAGE_KEY = 'aegis_behavioral_baseline';
+  var BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS = 5;
+  var BEHAVIORAL_OFF_HOURS_THRESHOLD_H = 6;
+
+  var behavioralStorage = {
+    _mem: null,
+    get: function () {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        return new Promise(function (resolve) {
+          chrome.storage.local.get([BEHAVIORAL_STORAGE_KEY], function (res) {
+            resolve((res && res[BEHAVIORAL_STORAGE_KEY]) || {});
+          });
+        });
+      }
+      if (!behavioralStorage._mem) behavioralStorage._mem = {};
+      return Promise.resolve(behavioralStorage._mem);
+    },
+    set: function (store) {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        return new Promise(function (resolve) {
+          var p = {}; p[BEHAVIORAL_STORAGE_KEY] = store;
+          chrome.storage.local.set(p, function () { resolve(); });
+        });
+      }
+      behavioralStorage._mem = store;
+      return Promise.resolve();
+    },
+    clear: function () {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        return new Promise(function (resolve) {
+          chrome.storage.local.remove([BEHAVIORAL_STORAGE_KEY], function () { resolve(); });
+        });
+      }
+      behavioralStorage._mem = {};
+      return Promise.resolve();
+    }
+  };
+
+  /**
+   * Computes circular distance between two clock hours (0-23).
+   * Eliminates midnight-boundary artifact: 23h and 01h are 2h apart, not 22h.
+   * delta_t = min(|h1-h2|, 24-|h1-h2|)
+   *
+   * @param {number} h1
+   * @param {number} h2
+   * @returns {number} distance in hours [0,12]
+   */
+  function circularHourDistance(h1, h2) {
+    var linear = Math.abs(h1 - h2);
+    return Math.min(linear, 24 - linear);
   }
 
   /**
-   * Generates a collision-resistant deduplication signature for the current email view.
+   * Records a sender interaction in the behavioral baseline store.
+   * Appends current hour to hoursSeen ring (capped at 50 entries).
    *
-   * Design rationale:
-   *  - Gmail encodes the active thread ID in the URL hash (e.g., /#inbox/FMfcgzQXKhpJRmBq).
-   *    This is the most reliable stable identifier — it changes on every thread navigation.
-   *  - We also capture the DOM-level thread permalink attribute as a secondary anchor.
-   *  - Falling back to sender+subject+body prefix alone is deliberately avoided because
-   *    it causes false deduplication in multi-reply threads where sender and subject are
-   *    the same across all replies (e.g., "Re: Invoice").
-   *
-   * @param {object} context - Extracted email payload.
-   * @returns {string|null}
+   * @param {string} senderEmail
+   * @param {number} [hourOfDay] defaults to current local hour
+   * @returns {Promise<void>}
    */
-  function generateSignature(context) {
-    if (!context) return null;
-
-    // Primary: Gmail thread URL hash (changes on every distinct thread open)
-    const urlHash = window.location.hash || '';
-
-    // Secondary: DOM thread permalink attribute if present (set by Gmail on thread containers)
-    const threadPermId =
-      (document.querySelector('[data-thread-perm-id]') || {})
-        .getAttribute?.('data-thread-perm-id') || '';
-
-    // Tertiary: sender + subject as a human-readable discriminator for logging
-    const humanKey = `${context.senderEmail || ''}::${context.subject || ''}`;
-
-    return `${urlHash}|${threadPermId}|${humanKey}`;
+  function updateBehavioralBaseline(senderEmail, hourOfDay) {
+    if (!senderEmail) return Promise.resolve();
+    var hour = (hourOfDay !== undefined && hourOfDay !== null) ? Math.floor(hourOfDay) % 24 : new Date().getHours();
+    return behavioralStorage.get().then(function (store) {
+      var key = senderEmail.toLowerCase().trim();
+      var rec = store[key] || { interactionCount: 0, hoursSeen: [], lastSeen: 0 };
+      rec.interactionCount += 1;
+      rec.hoursSeen.push(hour);
+      if (rec.hoursSeen.length > 50) rec.hoursSeen = rec.hoursSeen.slice(rec.hoursSeen.length - 50);
+      rec.lastSeen = Date.now();
+      store[key] = rec;
+      return behavioralStorage.set(store).then(function () {
+        console.log(LOG_PREFIX + ' [Behavioral] Updated ' + key + ': count=' + rec.interactionCount + ' hour=' + hour);
+      });
+    }).catch(function (err) {
+      console.warn(LOG_PREFIX + ' [Behavioral] updateBehavioralBaseline error:', err);
+    });
   }
 
   /**
-   * Main inspection cycle triggered on debounced DOM mutations.
+   * Computes S_behavioral per §6.4 scoring table.
+   *
+   * count === 0                    -> 25  (first_time_sender)
+   * count < 3                      -> 15  (unfamiliar_sender)
+   * 3 <= count < 5                 ->  5  (warming_up)
+   * count >= 5, minDist > 6h       -> 20  (off_hours_anomaly)
+   * count >= 5, minDist <= 6h      ->  0  (established_on_schedule)
+   *
+   * @param {string} senderEmail
+   * @param {number} [hourOfDay] defaults to current local hour
+   * @returns {Promise<{score:number, reason:string, interactionCount:number, minCircularDistanceH?:number}>}
    */
+  function scoreBehavioral(senderEmail, hourOfDay) {
+    var DEFAULT = { score: 15, reason: 'unknown_sender', interactionCount: 0 };
+    if (!senderEmail) return Promise.resolve(DEFAULT);
+    var hour = (hourOfDay !== undefined && hourOfDay !== null) ? Math.floor(hourOfDay) % 24 : new Date().getHours();
+    return behavioralStorage.get().then(function (store) {
+      var key = senderEmail.toLowerCase().trim();
+      var rec = store[key];
+      if (!rec || rec.interactionCount === 0) return { score: 25, reason: 'first_time_sender', interactionCount: 0 };
+      var count = rec.interactionCount;
+      var hoursSeen = rec.hoursSeen || [];
+      if (count < 3) return { score: 15, reason: 'unfamiliar_sender', interactionCount: count };
+      if (count < BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS) return { score: 5, reason: 'warming_up', interactionCount: count };
+      var dists = hoursSeen.map(function (h) { return circularHourDistance(hour, h); });
+      var minDist = dists.length > 0 ? Math.min.apply(null, dists) : BEHAVIORAL_OFF_HOURS_THRESHOLD_H + 1;
+      if (minDist > BEHAVIORAL_OFF_HOURS_THRESHOLD_H) {
+        return { score: 20, reason: 'off_hours_anomaly', interactionCount: count, minCircularDistanceH: Math.round(minDist * 10) / 10 };
+      }
+      return { score: 0, reason: 'established_on_schedule', interactionCount: count, minCircularDistanceH: Math.round(minDist * 10) / 10 };
+    }).catch(function (err) {
+      console.warn(LOG_PREFIX + ' [Behavioral] scoreBehavioral error:', err);
+      return DEFAULT;
+    });
+  }
+
+  function getBehavioralStore() { return behavioralStorage.get(); }
+  function clearBehavioralBaseline() { return behavioralStorage.clear(); }
+
+  // ---------------------------------------------------------------------------
+  // Main Inspection Cycle
+  // ---------------------------------------------------------------------------
+
   function handleDOMMutation() {
     try {
-      const emailContext = extractEmailContext();
+      var emailContext = extractEmailContext();
+      if (!emailContext) return;
 
-      if (!emailContext) {
-        // User is browsing folder/list view, or email has not rendered yet
-        return;
-      }
-
-      const signature = generateSignature(emailContext);
-      if (signature === lastProcessedSignature) {
-        // Already processed this email view
-        return;
-      }
-
+      var signature = generateSignature(emailContext);
+      if (signature === lastProcessedSignature) return;
       lastProcessedSignature = signature;
 
-      console.log(`${LOG_PREFIX} Email thread detected and extracted:`, {
+      console.log(LOG_PREFIX + ' Email extracted:', {
         subject: emailContext.subject,
-        sender: `${emailContext.senderName} <${emailContext.senderEmail}>`,
-        linksCount: emailContext.links.length,
-        attachmentsCount: emailContext.attachmentCount,
-        selectors: emailContext.metadata.selectorsUsed
+        sender: emailContext.senderName + ' <' + emailContext.senderEmail + '>',
+        links: emailContext.links.length,
+        attachments: emailContext.attachmentCount
       });
 
-      // Apply client-side PII scrubbing per §5.1.3 & RA 10173 before inter-component transfer
-      let sanitizedPayload = emailContext;
+      var sanitizedPayload = emailContext;
       if (typeof window.AegisPIIScrubber !== 'undefined' && typeof window.AegisPIIScrubber.scrubEmailPayload === 'function') {
         sanitizedPayload = window.AegisPIIScrubber.scrubEmailPayload(emailContext);
         if (sanitizedPayload.piiRedactionStats && sanitizedPayload.piiRedactionStats.total > 0) {
-          console.log(`${LOG_PREFIX} PII scrubbing applied:`, sanitizedPayload.piiRedactionStats);
+          console.log(LOG_PREFIX + ' PII scrubbing applied:', sanitizedPayload.piiRedactionStats);
         }
       }
 
-      // Dispatch internal event for downstream components (Heuristics, UI Overlay, Background Service Worker)
-      window.dispatchEvent(
-        new CustomEvent('aegis:email-extracted', {
-          detail: sanitizedPayload
-        })
-      );
+      var currentHour = new Date().getHours();
+      var senderKey = sanitizedPayload.senderEmail || emailContext.senderEmail;
+
+      // Score BEFORE recording to avoid self-bias (§6.4)
+      scoreBehavioral(senderKey, currentHour).then(function (behavioralResult) {
+        return updateBehavioralBaseline(senderKey, currentHour).then(function () {
+          return behavioralResult;
+        });
+      }).then(function (behavioralResult) {
+        console.log(LOG_PREFIX + ' [Behavioral] Layer 3 score for ' + senderKey + ':', behavioralResult);
+        sanitizedPayload._behavioral = behavioralResult;
+        window.dispatchEvent(new CustomEvent('aegis:email-extracted', { detail: sanitizedPayload }));
+      }).catch(function (err) {
+        console.warn(LOG_PREFIX + ' [Behavioral] Non-fatal, dispatching without score:', err);
+        window.dispatchEvent(new CustomEvent('aegis:email-extracted', { detail: sanitizedPayload }));
+      });
+
     } catch (err) {
-      console.error(`${LOG_PREFIX} Error during DOM extraction cycle:`, err);
+      console.error(LOG_PREFIX + ' Error during DOM extraction cycle:', err);
     }
   }
 
-  /**
-   * Debounced mutation callback per §5.1.2 & §3.1 (300ms window).
-   */
   function onMutationObserved() {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-    debounceTimer = setTimeout(() => {
-      handleDOMMutation();
-    }, DEBOUNCE_DELAY_MS);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function () { handleDOMMutation(); }, DEBOUNCE_DELAY_MS);
   }
 
-  /**
-   * Initializes the MutationObserver targeting Gmail's [role="main"].
-   *
-   * Gmail is a complex SPA. When the content script is injected, [role="main"] may not
-   * yet exist in the DOM because Gmail's thread view renders asynchronously after
-   * navigation. This function uses exponential backoff polling to wait for the element
-   * before attaching the observer.
-   *
-   * Retry schedule (OBSERVER_RETRY_BASE_MS = 250ms, max 8 attempts):
-   *   Attempt 1: 250ms, 2: 500ms, 3: 1000ms, 4: 2000ms ... up to ~32s total.
-   * After exhausting retries, falls back to document.body to ensure the observer
-   * is always active, even if Gmail's DOM structure has changed significantly.
-   *
-   * @param {number} [attempt=0] - Current retry attempt index.
-   */
-  function initObserver(attempt = 0) {
-    const mainNode = document.querySelector('[role="main"]');
-
+  function initObserver(attempt) {
+    attempt = attempt || 0;
+    var mainNode = document.querySelector('[role="main"]');
     if (!mainNode) {
       if (attempt < OBSERVER_RETRY_MAX_ATTEMPTS) {
-        // Exponential backoff: 250ms, 500ms, 1000ms, 2000ms ...
-        const delay = OBSERVER_RETRY_BASE_MS * Math.pow(2, attempt);
-        console.warn(
-          `${LOG_PREFIX} [role="main"] not found. Retrying in ${delay}ms (attempt ${attempt + 1}/${OBSERVER_RETRY_MAX_ATTEMPTS})...`
-        );
-        setTimeout(() => initObserver(attempt + 1), delay);
+        var delay = OBSERVER_RETRY_BASE_MS * Math.pow(2, attempt);
+        console.warn(LOG_PREFIX + ' [role="main"] not found. Retry in ' + delay + 'ms...');
+        setTimeout(function () { initObserver(attempt + 1); }, delay);
         return;
       }
-
-      // All retries exhausted — attach to document.body as last resort
-      console.warn(
-        `${LOG_PREFIX} [role="main"] not found after ${OBSERVER_RETRY_MAX_ATTEMPTS} attempts. Falling back to document.body.`
-      );
+      console.warn(LOG_PREFIX + ' Falling back to document.body.');
     }
-
-    const targetNode = mainNode || document.body;
-
-    if (observer) {
-      observer.disconnect();
-    }
-
+    var targetNode = mainNode || document.body;
+    if (observer) observer.disconnect();
     observer = new MutationObserver(onMutationObserved);
-
-    observer.observe(targetNode, {
-      childList: true,
-      subtree: true,
-      characterData: false
-    });
-
-    console.log(
-      `${LOG_PREFIX} MutationObserver attached to`,
-      mainNode ? '[role="main"]' : 'document.body (fallback after retry exhaustion)'
-    );
-
-    // Trigger an immediate extraction pass in case an email thread is
-    // already open when the observer attaches (e.g., direct URL navigation).
+    observer.observe(targetNode, { childList: true, subtree: true, characterData: false });
+    console.log(LOG_PREFIX + ' MutationObserver attached to', mainNode ? '[role="main"]' : 'document.body (fallback)');
     onMutationObserved();
   }
 
-  // Initialize observer when document is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initObserver);
+    document.addEventListener('DOMContentLoaded', function () { initObserver(0); });
   } else {
-    initObserver();
+    initObserver(0);
   }
 
-  // Listen for re-scan / reload signals from popup or background
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       if (request.action === 'AEGIS_RESCAN' || request.action === 'AEGIS_RELOAD') {
-        console.log(`${LOG_PREFIX} Received re-scan trigger from extension popup.`);
-        initObserver();
-        const fab = document.getElementById('aegis-fab');
-        if (fab && fab.style.display !== 'none') {
-          fab.click();
-        }
+        console.log(LOG_PREFIX + ' Re-scan triggered from popup.');
+        initObserver(0);
+        var fab = document.getElementById('aegis-fab');
+        if (fab && fab.style.display !== 'none') fab.click();
         sendResponse({ status: 'ok', message: 'Aegis re-scan initiated' });
       }
       return true;
     });
   }
 
-  // Expose API for testing and extension communication
+  // Public API
   window.AegisContentScript = {
-    extractEmailContext,
-    SELECTORS,
+    extractEmailContext: extractEmailContext,
+    SELECTORS: SELECTORS,
     reinitialize: initObserver
   };
+
+  // [Milestone 3.2] Behavioral baseline API
+  window.AegisBehavioralBaseline = {
+    updateBehavioralBaseline: updateBehavioralBaseline,
+    scoreBehavioral: scoreBehavioral,
+    circularHourDistance: circularHourDistance,
+    getBehavioralStore: getBehavioralStore,
+    clearBehavioralBaseline: clearBehavioralBaseline,
+    BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS: BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS,
+    BEHAVIORAL_OFF_HOURS_THRESHOLD_H: BEHAVIORAL_OFF_HOURS_THRESHOLD_H,
+    BEHAVIORAL_STORAGE_KEY: BEHAVIORAL_STORAGE_KEY
+  };
+
 })();
