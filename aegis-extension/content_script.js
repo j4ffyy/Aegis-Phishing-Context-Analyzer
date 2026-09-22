@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Aegis: AI-Powered Phishing Context Analyzer
  * Component: Content Script (Gmail DOM Extractor & MutationObserver)
  * Specification: Implementation Plan §5.1.2 (Milestone 1.2), §6.4 (Milestone 3.2)
@@ -319,8 +319,16 @@
       var currentHour = new Date().getHours();
       var senderKey = sanitizedPayload.senderEmail || emailContext.senderEmail;
 
+      // Evaluate Whitelist & Dual-Trigger Revocation (§7.1)
+      var whitelistPromise = (typeof window.AegisWhitelist !== 'undefined' && typeof window.AegisWhitelist.checkWhitelistStatus === 'function')
+        ? window.AegisWhitelist.checkWhitelistStatus(sanitizedPayload)
+        : Promise.resolve({ whitelisted: false, revoked: false, trigger: null, score: null });
+
       // Score BEFORE recording to avoid self-bias (§6.4)
-      scoreBehavioral(senderKey, currentHour).then(function (behavioralResult) {
+      whitelistPromise.then(function (whitelistResult) {
+        sanitizedPayload._whitelist = whitelistResult;
+        return scoreBehavioral(senderKey, currentHour);
+      }).then(function (behavioralResult) {
         return updateBehavioralBaseline(senderKey, currentHour).then(function () {
           return behavioralResult;
         });
@@ -329,7 +337,7 @@
         sanitizedPayload._behavioral = behavioralResult;
         window.dispatchEvent(new CustomEvent('aegis:email-extracted', { detail: sanitizedPayload }));
       }).catch(function (err) {
-        console.warn(LOG_PREFIX + ' [Behavioral] Non-fatal, dispatching without score:', err);
+        console.warn(LOG_PREFIX + ' [Behavioral/Whitelist] Non-fatal, dispatching without score:', err);
         window.dispatchEvent(new CustomEvent('aegis:email-extracted', { detail: sanitizedPayload }));
       });
 

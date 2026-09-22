@@ -2,17 +2,254 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Aegis — Whitelist Management</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 24px;
-      color: #1e293b;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis — SME Whitelist Dashboard & Auto-Revocation Engine</title>
+  <link rel="stylesheet" href="whitelist.css">
 </head>
 <body>
-  <h1>Aegis Whitelist Dashboard</h1>
-  <p>Scheduled for Milestone 3.3 — Dynamic whitelist management & auto-revocation rules.</p>
+  <div class="dashboard-container">
+
+    <!-- Header Navigation & Brand Bar (Neobrutalist Black Banner) -->
+    <header class="header-bar">
+      <div class="brand-group">
+        <div class="brand-icon-wrapper">
+          <img src="../icons/icon48.png" alt="Aegis Emblem" class="brand-icon-img" id="aegis-logo">
+        </div>
+        <div class="brand-titles">
+          <h1>
+            Aegis Whitelist Dashboard
+            <span class="badge-privacy">Protected Enclave</span>
+          </h1>
+          <p>SME Identity Management & Automated Revocation Engine (§7.1)</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="btn-export-json" title="Export Whitelist as JSON">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+          </svg>
+          Export
+        </button>
+        <button class="btn btn-secondary" id="btn-reset-defaults" title="Restore Default Seed Identities">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+            <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+          </svg>
+          Reset Seeds
+        </button>
+        <button class="btn btn-primary" id="btn-open-add-modal">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Add Trusted Identity
+        </button>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <!-- Key Metrics & Dual-Trigger Status Cards -->
+      <section class="metrics-grid" aria-label="System Metrics">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Whitelisted Identities</span>
+            <span class="metric-badge active">Directory</span>
+          </div>
+          <div class="metric-value" id="stat-total-identities">0</div>
+          <div class="metric-desc">Registered internal VIPs & trusted external partners</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Trigger 1: Display Spoofing</span>
+            <span class="metric-badge active">Armed</span>
+          </div>
+          <div class="metric-value" style="font-size: 1.55rem; color: #000000; padding-top: 4px;">
+            Active Guard
+          </div>
+          <div class="metric-desc">Auto-revokes status if display name matches but domain differs (score 95%)</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Trigger 2: Auth Failure</span>
+            <span class="metric-badge active">Armed</span>
+          </div>
+          <div class="metric-value" style="font-size: 1.55rem; color: #000000; padding-top: 4px;">
+            SPF/DKIM Guard
+          </div>
+          <div class="metric-desc">Auto-revokes status if whitelisted sender fails domain authentication (score 95%)</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Client-Side Privacy</span>
+            <span class="metric-badge active">RA 10173</span>
+          </div>
+          <div class="metric-value" style="font-size: 1.55rem; color: #000000; padding-top: 4px;">
+            Local Enclave
+          </div>
+          <div class="metric-desc">Whitelist stored strictly in local browser storage; 0 bytes transmitted remotely</div>
+        </div>
+      </section>
+
+      <!-- Interactive Dual-Trigger Revocation Simulator -->
+      <section class="simulator-section" aria-label="Dual-Trigger Revocation Simulator">
+        <div class="simulator-header">
+          <div class="simulator-titles">
+            <h2>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="#000000">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+              </svg>
+              Interactive Revocation Simulator (§7.1 Live Demonstration)
+            </h2>
+            <p>Test incoming email parameters to evaluate how the dual-trigger auto-revocation engine responds.</p>
+          </div>
+        </div>
+
+        <!-- Quick Preset Buttons -->
+        <div class="simulator-presets">
+          <span style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--aegis-text-primary);">Presets:</span>
+          <button class="preset-btn" id="preset-legit">✓ Preset A: Authentic Payroll Partner</button>
+          <button class="preset-btn preset-alert-btn" id="preset-name-spoof">⚠ Preset B: Executive Display-Name Spoof</button>
+          <button class="preset-btn preset-alert-btn" id="preset-auth-fail">⚠ Preset C: Domain Hijack (SPF Fail)</button>
+        </div>
+
+        <!-- Simulation Form -->
+        <div class="simulator-form">
+          <div class="form-group">
+            <label class="form-label" for="sim-sender-name">Sender Display Name</label>
+            <input type="text" class="form-input" id="sim-sender-name" value="Executive Director">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sim-sender-email">Sender Email Address</label>
+            <input type="email" class="form-input" id="sim-sender-email" value="exec.director.urgent@gmail.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sim-spf-status">SPF Auth</label>
+            <select class="form-select" id="sim-spf-status">
+              <option value="pass" selected>Pass (Valid)</option>
+              <option value="fail">Fail (Spoofed)</option>
+              <option value="none">Neutral / None</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sim-dkim-status">DKIM Auth</label>
+            <select class="form-select" id="sim-dkim-status">
+              <option value="pass" selected>Pass (Valid)</option>
+              <option value="fail">Fail (Spoofed)</option>
+              <option value="none">Neutral / None</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" id="btn-run-simulation" style="height: 42px;">
+            Evaluate
+          </button>
+        </div>
+
+        <!-- Simulation Result Output Box -->
+        <div class="simulator-result-box" id="sim-result-box">
+          <div class="result-header">
+            <span class="result-badge" id="sim-result-badge">EVALUATION RESULT</span>
+            <span class="result-score" id="sim-result-score">--</span>
+          </div>
+          <div class="result-reason" id="sim-result-reason">--</div>
+        </div>
+      </section>
+
+      <!-- Whitelist Directory Table -->
+      <section class="directory-section" aria-label="Whitelist Directory">
+        <div class="directory-toolbar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="search-input" placeholder="Search by name, email, department, or role...">
+          </div>
+          <div style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--aegis-text-secondary);">
+            Dual-Trigger Auto-Revocation Active on All Identities
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="whitelist-table">
+            <thead>
+              <tr>
+                <th>Identity</th>
+                <th>Verified Email & Domain Lock</th>
+                <th>Department</th>
+                <th>Protection Mechanisms</th>
+                <th>Added Date</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="whitelist-table-body">
+              <!-- Rendered dynamically by dashboard_controller.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="empty-state" id="table-empty-state" style="display: none;">
+          <div class="empty-icon">🛡️</div>
+          <p>No whitelisted identities found matching your search.</p>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Add Identity Modal Dialog -->
+  <div class="modal-backdrop" id="add-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title">Add Trusted Identity</h3>
+        <button class="modal-close-btn" id="btn-close-modal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form class="modal-form" id="form-add-identity">
+        <div class="form-group">
+          <label class="form-label" for="input-email">Sender Email Address *</label>
+          <input type="email" class="form-input" id="input-email" required placeholder="e.g. cfo@sme-corp.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-name">Contact Display Name</label>
+          <input type="text" class="form-input" id="input-name" placeholder="e.g. Jane Doe">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-role">Organizational Role / Title</label>
+          <input type="text" class="form-input" id="input-role" placeholder="e.g. Chief Financial Officer">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-department">Department / Category</label>
+          <input type="text" class="form-input" id="input-department" placeholder="e.g. Executive Management, Treasury, Partner">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-domain">Allowed Domain Lock (Optional)</label>
+          <input type="text" class="form-input" id="input-domain" placeholder="e.g. sme-corp.com (defaults to email domain)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-notes">Security Notes</label>
+          <input type="text" class="form-input" id="input-notes" placeholder="e.g. Authorized signatory for invoices">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Identity</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="whitelist.js"></script>
+  <script src="dashboard_controller.js"></script>
 </body>
 </html>

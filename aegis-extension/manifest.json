@@ -32,6 +32,7 @@
       "js": [
         "pii_scrubber.js",
         "local_heuristics.js",
+        "whitelist/whitelist.js",
         "content_script.js",
         "overlay/overlay.js"
       ],
@@ -57,6 +58,9 @@
         "overlay/overlay.html",
         "overlay/overlay.css",
         "whitelist/whitelist_dashboard.html",
+        "whitelist/whitelist.css",
+        "whitelist/whitelist.js",
+        "whitelist/dashboard_controller.js",
         "icons/icon16.png",
         "icons/icon48.png",
         "icons/icon128.png",
