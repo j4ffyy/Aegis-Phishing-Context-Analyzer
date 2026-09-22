@@ -324,6 +324,45 @@
   };
 
   function generateStubAnalysis(emailContext) {
+    // Whitelist Dual-Trigger Auto-Revocation Override (§7.1)
+    if (emailContext && emailContext._whitelist && emailContext._whitelist.revoked) {
+      const wl = emailContext._whitelist;
+      return {
+        score: 95,
+        riskLevel: 'Critical',
+        riskClass: 'threat-critical',
+        desc: wl.flag || 'Auto-revocation rule triggered.',
+        layers: {
+          sanitization: { text: 'Pre-filter: Sanitization', detail: 'HTML Stripped', icon: 'fa-check-circle' },
+          auth:         { text: 'Layer 1: Auth & Whitelist', detail: `Revoked: ${wl.trigger}`, icon: 'fa-times-circle' },
+          attach:       { text: 'Layer 2: Attachment Check', detail: 'Secondary to critical revocation', icon: 'fa-minus-circle' },
+          behavior:     { text: 'Layer 3: Behavioral Analysis', detail: 'Impersonation pattern detected', icon: 'fa-times-circle' },
+          nlp:          { text: 'Layer 4: Deep NLP Context', detail: 'Critical spoof alert', icon: 'fa-times-circle' },
+        },
+        xai: wl.reason || 'SME Whitelist auto-revocation triggered.',
+        _whitelistRevoked: true
+      };
+    }
+
+    if (emailContext && emailContext._whitelist && emailContext._whitelist.whitelisted) {
+      const wl = emailContext._whitelist;
+      return {
+        score: 5,
+        riskLevel: 'Safe',
+        riskClass: 'threat-safe',
+        desc: 'Verified trusted whitelist sender.',
+        layers: {
+          sanitization: { text: 'Pre-filter: Sanitization', detail: 'Passed', icon: 'fa-check-circle' },
+          auth:         { text: 'Layer 1: Auth & Whitelist', detail: 'Verified Trusted Identity', icon: 'fa-check-circle' },
+          attach:       { text: 'Layer 2: Attachment Check', detail: 'Nominal', icon: 'fa-check-circle' },
+          behavior:     { text: 'Layer 3: Behavioral Analysis', detail: 'Established Whitelisted Partner', icon: 'fa-check-circle' },
+          nlp:          { text: 'Layer 4: Deep NLP Context', detail: 'Verified clean context', icon: 'fa-check-circle' },
+        },
+        xai: wl.reason || 'Verified trusted identity on SME Whitelist.',
+        _whitelisted: true
+      };
+    }
+
     // Invoke client-side local heuristics engine (§6.2, Milestone 2.2)
     if (typeof window.AegisLocalHeuristics !== 'undefined' && typeof window.AegisLocalHeuristics.evaluate === 'function') {
       return window.AegisLocalHeuristics.evaluate(emailContext);
@@ -762,7 +801,19 @@
               fallback._fallbackReason = data._fallbackReason;
               handleAnalysisCompletion(fallback);
             } else if (data && data.score !== undefined) {
-              // Remote backend or cached score
+              // Remote backend or cached score — apply client-side auto-revocation override if present (§7.1)
+              if (currentEmailContext && currentEmailContext._whitelist && currentEmailContext._whitelist.revoked) {
+                const wl = currentEmailContext._whitelist;
+                data.score = 95;
+                data.riskLevel = 'Critical';
+                data.riskClass = 'threat-critical';
+                data.desc = wl.flag || 'Auto-revocation rule triggered.';
+                data.xai = `[WHITELIST AUTO-REVOKE] ${wl.reason} ${data.xai || ''}`.trim();
+                if (data.layers && data.layers.auth) {
+                  data.layers.auth.icon = 'fa-times-circle';
+                  data.layers.auth.detail = `Revoked: ${wl.trigger}`;
+                }
+              }
               handleAnalysisCompletion(data);
             } else {
               // Standard fallback
@@ -824,6 +875,17 @@
     el.whitelistBtn.addEventListener('click', function () {
       const orig = this.innerHTML;
       this.innerHTML = '<i class="fas fa-check"></i> Whitelisted!';
+      if (currentEmailContext && currentEmailContext.senderEmail) {
+        if (typeof window.AegisWhitelist !== 'undefined' && typeof window.AegisWhitelist.addWhitelistEntry === 'function') {
+          window.AegisWhitelist.addWhitelistEntry({
+            email: currentEmailContext.senderEmail,
+            displayName: currentEmailContext.senderName || currentEmailContext.senderEmail,
+            role: 'Trusted Contact',
+            department: 'Whitelisted Senders',
+            notes: 'Whitelisted via Aegis Overlay action button'
+          }).catch((err) => console.warn(`${LOG_PREFIX} Whitelist add error:`, err));
+        }
+      }
       setTimeout(() => { this.innerHTML = orig; }, 2000);
     });
 
@@ -842,6 +904,17 @@
     el.famWhitelistBtn.addEventListener('click', function () {
       const orig = this.innerHTML;
       this.innerHTML = '<i class="fas fa-check"></i> Whitelisted!';
+      if (currentEmailContext && currentEmailContext.senderEmail) {
+        if (typeof window.AegisWhitelist !== 'undefined' && typeof window.AegisWhitelist.addWhitelistEntry === 'function') {
+          window.AegisWhitelist.addWhitelistEntry({
+            email: currentEmailContext.senderEmail,
+            displayName: currentEmailContext.senderName || currentEmailContext.senderEmail,
+            role: 'Trusted Contact',
+            department: 'Whitelisted Senders',
+            notes: 'Whitelisted via Aegis Full Analysis Modal'
+          }).catch((err) => console.warn(`${LOG_PREFIX} Whitelist add error:`, err));
+        }
+      }
       setTimeout(() => { this.innerHTML = orig; closeFullAnalysisModal(); }, 1800);
     });
 
