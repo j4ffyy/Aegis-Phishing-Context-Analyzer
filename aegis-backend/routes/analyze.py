@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from modules.link_scanner import (
     MAX_LINKS_PER_EMAIL,
@@ -31,6 +31,13 @@ from modules.link_scanner import (
     get_vt_analysis,
     normalize_url,
     scan_email_links,
+)
+from modules.meta_classifier import (
+    build_layers_status,
+    derive_risk_tier,
+    generate_xai_rationale,
+    synthesize_assessment,
+    synthesize_composite_score,
 )
 from modules.nlp_classifier import classify_email_text
 
@@ -55,6 +62,8 @@ _analysis_store: Dict[str, Dict[str, Any]] = {}
 
 class EmailPayload(BaseModel):
     """Sanitized email context received from the Chrome Extension."""
+    model_config = ConfigDict(populate_by_name=True)
+
     senderEmail: str = Field(default="", description="Sender email address")
     senderName: Optional[str] = Field(default="", description="Sender display name")
     subject: Optional[str] = Field(default="", description="Email subject line")
@@ -67,6 +76,8 @@ class EmailPayload(BaseModel):
     spfPass: Optional[bool] = Field(default=None, description="SPF authentication status")
     dkimPass: Optional[bool] = Field(default=None, description="DKIM authentication status")
     emailHash: Optional[str] = Field(default=None, description="Client-derived SHA-256 hash")
+    behavioralScore: Optional[int] = Field(default=None, description="Client-side behavioral anomaly score (0-100)")
+    behavioral_meta: Optional[Dict[str, Any]] = Field(default=None, alias="_behavioral", description="Client-side behavioral context details")
 
 
 # ---------------------------------------------------------------------------
@@ -281,86 +292,28 @@ def evaluate_nlp_intent(
 def evaluate_behavioral(payload: EmailPayload) -> int:
     """
     Evaluates Layer 3 Behavioral Anomaly ($S_{behavioral}$).
-    Default neutral baseline per §6.4 pending local storage history in Milestone 3.2.
+    Ingests client-computed behavioral score if available (§6.4);
+    otherwise defaults to neutral baseline 15.
     """
+    if payload.behavioralScore is not None:
+        try:
+            return max(0, min(100, int(payload.behavioralScore)))
+        except (ValueError, TypeError):
+            pass
+    if payload.behavioral_meta and isinstance(payload.behavioral_meta, dict):
+        raw_score = payload.behavioral_meta.get("score")
+        if raw_score is not None:
+            try:
+                return max(0, min(100, int(raw_score)))
+            except (ValueError, TypeError):
+                pass
     return 15
 
 
 # ---------------------------------------------------------------------------
-# Risk Synthesis Formulation (§6.1)
+# Risk Synthesis Formulation (§6.1, §6.5, §6.6)
+# Delegated to modules.meta_classifier
 # ---------------------------------------------------------------------------
-
-def synthesize_composite_score(
-    s_heuristic: int,
-    s_nlp: int,
-    s_behavioral: int,
-    s_vt: int,
-    vt_pending: bool = False,
-) -> int:
-    """
-    Computes composite score:
-    R_final = min(100, round(0.25 * S_h + 0.45 * S_nlp + 0.15 * S_b + 0.15 * S_vt))
-    """
-    if vt_pending:
-        # 3-layer preliminary score scaled over active weights (0.25 + 0.45 + 0.15 = 0.85)
-        raw = (0.25 * s_heuristic + 0.45 * s_nlp + 0.15 * s_behavioral) / 0.85
-        return min(100, round(raw))
-
-    composite = (
-        0.25 * s_heuristic
-        + 0.45 * s_nlp
-        + 0.15 * s_behavioral
-        + 0.15 * s_vt
-    )
-    return min(100, round(composite))
-
-
-def derive_risk_tier(score: int) -> tuple[str, str, str]:
-    """
-    Categorizes score into (riskLevel, riskClass, description) per §6.6:
-    - Safe: < 45%
-    - Warning: 45% - 74%
-    - Critical: >= 75%
-    """
-    if score < 45:
-        return "Safe", "risk-safe", "No significant threats detected. Standard communication pattern."
-    elif score < 75:
-        return "Warning", "risk-warning", "Suspicious characteristics detected. Exercise caution before opening links or attachments."
-    else:
-        return "Critical", "risk-critical", "High-probability phishing attempt detected. Do not click links, send funds, or disclose credentials."
-
-
-def generate_xai_rationale(
-    risk_level: str,
-    flags: List[Dict[str, Any]],
-    s_vt: int,
-    vt_status: str,
-    links_count: int,
-) -> str:
-    """Generates plain-language Explainable AI rationale (§6.1, §6.6)."""
-    parts = []
-
-    if flags:
-        flag_descs = [f["evidence"] for f in flags[:2]]
-        parts.append(f"Threat indicators flagged: {'; '.join(flag_descs)}.")
-
-    if vt_status == "pending":
-        parts.append("VirusTotal URL intelligence is currently scanning hyperlinks in the background.")
-    elif vt_status == "completed":
-        if s_vt > 0:
-            parts.append(f"VirusTotal detected {s_vt // 50} malicious/suspicious hyperlink destination(s).")
-        elif links_count > 0:
-            parts.append("Hyperlink destinations verified clean by VirusTotal threat intelligence.")
-
-    if risk_level == "Safe":
-        if not parts:
-            return "This email follows standard communication patterns. No deceptive URLs, authentication failures, or high-risk urgency language were detected."
-        return f"Email evaluated as generally safe. {' '.join(parts)}"
-    elif risk_level == "Warning":
-        return f"Aegis detected potential anomalies requiring verification. {' '.join(parts)} Avoid interacting with sensitive links until confirmed."
-    else:
-        return f"CRITICAL SECURITY ALERT: High-risk indicators confirmed across multiple analytical layers. {' '.join(parts)} Aegis strongly advises blocking this communication."
-
 
 def build_analysis_response(
     email_hash: str,
@@ -372,85 +325,23 @@ def build_analysis_response(
     flags: List[Dict[str, Any]],
     urls: List[str],
     vt_result: Optional[Dict[str, Any]] = None,
+    behavioral_meta: Optional[Dict[str, Any]] = None,
     execution_time_ms: int = 0,
 ) -> Dict[str, Any]:
-    """Constructs the canonical Aegis analysis payload compatible with the overlay."""
-    is_pending = vt_status == "pending"
-    final_score = synthesize_composite_score(s_heuristic, s_nlp, s_behavioral, s_vt, vt_pending=is_pending)
-    risk_level, risk_class, desc = derive_risk_tier(final_score)
-    xai = generate_xai_rationale(risk_level, flags, s_vt, vt_status, len(urls))
-
-    # Determine layer icons and details
-    auth_icon = "fa-check-circle"
-    auth_detail = "Pass"
-    for f in flags:
-        if "SPF" in f["title"] or "DKIM" in f["title"]:
-            auth_icon = "fa-times-circle"
-            auth_detail = "Failed: " + f["evidence"]
-
-    nlp_icon = "fa-exclamation-triangle" if s_nlp > 20 else "fa-check-circle"
-    nlp_detail = "Urgency / coercion patterns detected" if s_nlp > 20 else "Intent pattern nominal"
-
-    # Layer 4: Link / Attachment status
-    if is_pending:
-        vt_icon = "fa-spinner"
-        vt_detail = f"Scanning {len(urls)} link(s) (rate-paced VT v3)..."
-    elif s_vt > 0:
-        vt_icon = "fa-times-circle"
-        mal_count = vt_result.get("malicious_count", 1) if vt_result else 1
-        vt_detail = f"VirusTotal flagged {mal_count} malicious link(s)"
-    elif urls:
-        vt_icon = "fa-check-circle"
-        vt_detail = f"{min(len(urls), MAX_LINKS_PER_EMAIL)} link(s) verified clean"
-    else:
-        vt_icon = "fa-minus-circle"
-        vt_detail = "No external links present"
-
-    layers = {
-        "sanitization": {
-            "text": "Pre-processing: HTML Sanitization",
-            "detail": "Client-side PII scrubbed & HTML normalized",
-            "icon": "fa-check-circle",
-        },
-        "auth": {
-            "text": "Layer 1: Email Auth & Domain Spoofing",
-            "detail": auth_detail,
-            "icon": auth_icon,
-        },
-        "attach": {
-            "text": "Layer 2: Attachment Intelligence",
-            "detail": "No dangerous file types detected" if s_heuristic < 30 else "Suspicious attachment flagged",
-            "icon": "fa-times-circle" if any("Attachment" in f["title"] for f in flags) else "fa-minus-circle",
-        },
-        "behavior": {
-            "text": "Layer 3: Behavioral Analysis",
-            "detail": "Baseline sender interaction normal",
-            "icon": "fa-check-circle",
-        },
-        "nlp": {
-            "text": "Layer 4: Deep NLP Context & Links",
-            "detail": vt_detail if urls else nlp_detail,
-            "icon": vt_icon if urls else nlp_icon,
-        },
-    }
-
-    return {
-        "score": final_score,
-        "riskLevel": risk_level,
-        "riskClass": risk_class,
-        "desc": desc,
-        "layers": layers,
-        "flags": flags,
-        "xai": xai,
-        "vt_status": vt_status,
-        "emailHash": email_hash,
-        "s_heuristic": s_heuristic,
-        "s_nlp": s_nlp,
-        "s_behavioral": s_behavioral,
-        "s_vt": s_vt,
-        "vt_result": vt_result or {},
-        "_executionTimeMs": execution_time_ms,
-    }
+    """Constructs the canonical Aegis analysis payload compatible with the overlay via meta_classifier."""
+    return synthesize_assessment(
+        email_hash=email_hash,
+        s_heuristic=s_heuristic,
+        s_nlp=s_nlp,
+        s_behavioral=s_behavioral,
+        s_vt=s_vt,
+        vt_status=vt_status,
+        flags=flags,
+        urls=urls,
+        vt_result=vt_result,
+        behavioral_meta=behavioral_meta,
+        execution_time_ms=execution_time_ms,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -498,6 +389,7 @@ async def _execute_background_vt_scan(
             flags=flags,
             urls=urls,
             vt_result=vt_result,
+            behavioral_meta=base_state.get("behavioral_meta"),
             execution_time_ms=duration_ms,
         )
 
@@ -527,6 +419,7 @@ async def _execute_background_vt_scan(
             flags=base_state["flags"],
             urls=urls,
             vt_result={"status": "error", "error": str(exc)},
+            behavioral_meta=base_state.get("behavioral_meta"),
             execution_time_ms=int((time.time() - start_time) * 1000),
         )
         _analysis_store[email_hash] = final_analysis
@@ -611,6 +504,7 @@ async def analyze_email(
         flags=flags,
         urls=urls,
         vt_result=vt_result,
+        behavioral_meta=payload.behavioral_meta,
         execution_time_ms=execution_time_ms,
     )
 
@@ -624,6 +518,7 @@ async def analyze_email(
             "s_nlp": s_nlp,
             "s_behavioral": s_behavioral,
             "flags": flags,
+            "behavioral_meta": payload.behavioral_meta,
         }
         _in_flight_scans[email_hash] = {
             "status": "pending",
