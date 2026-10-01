@@ -27,27 +27,24 @@ The prototype includes four example emails demonstrating:
 3. A warning-level BEC-style request from a suspicious sender
 4. A malicious security certificate scam with embedded link
 
-## How to Run Locally
+## Getting Started & Chrome Extension Setup
 
-1. Open `Aegis_Prototype/index.html` in your browser
-2. Click any email in the left pane to view its content
-3. Use the analyzer overlay features to see the phishing risk score and insights
+> 🚀 **Fresh Clone? Read the Complete Step-by-Step Setup Guide:**
+> 👉 **[SETUP_GUIDE.md](SETUP_GUIDE.md)** 👈
+>
+> The guide covers backend virtual environment setup, downloading the ONNX DistilBERT model, running the FastAPI server, loading the unpacked extension in Google Chrome (`chrome://extensions`), and testing live on Gmail.
 
-## Development Notes
+---
 
-- This is a static prototype intended for demonstration only
-- No backend or server-side logic is required
-- The analyzer is simulated with hardcoded sample data
+## Repository Structure
 
-## Repository Contents
-
-- `Aegis_Prototype/`
-  - `index.html`
-  - `styles.css`
-  - `app.js`
-- `.gitignore`
-- `README.md`
+- **[`aegis-extension/`](aegis-extension/)** — Chrome Extension (Manifest V3) for Gmail with client-side PII scrubbing, local heuristics, and in-Gmail overlay UI.
+- **[`aegis-backend/`](aegis-backend/)** — Lightweight FastAPI backend hosting the DistilBERT ONNX classification model, VirusTotal URL scanner, and XAI generator.
+- **[`Aegis_Prototype/`](Aegis_Prototype/)** — Standalone mock webmail client demonstrating 4 simulated phishing scenarios without needing a live Gmail account.
+- **[`docs/`](docs/)** — Capstone development plans, presentation defense guides, and technical specifications.
+- **[`SETUP_GUIDE.md`](SETUP_GUIDE.md)** — Step-by-step setup instructions for running the extension and backend on Google Chrome.
 
 ## License
 
-This repository is currently a self-contained prototype. Feel free to adapt it for your capstone demo or research showcase.
+This repository is developed for MMDC Capstone 1 research.
+
