@@ -38,26 +38,48 @@
   // Storage Adapter: chrome.storage.local with In-Memory Fallback
   // ---------------------------------------------------------------------------
 
+  function isExtensionContextValid() {
+    try {
+      return typeof chrome !== 'undefined' && !!chrome.runtime && !!chrome.runtime.id;
+    } catch (e) {
+      return false;
+    }
+  }
+
   var whitelistStorage = {
     _mem: null,
 
     get: function () {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
         return new Promise(function (resolve) {
-          chrome.storage.local.get([STORAGE_KEY_WHITELIST], function (res) {
-            var data = res && res[STORAGE_KEY_WHITELIST];
-            if (!Array.isArray(data)) {
-              // Initialize with defaults if empty
-              var initial = DEFAULT_WHITELIST.slice();
-              var payload = {};
-              payload[STORAGE_KEY_WHITELIST] = initial;
-              chrome.storage.local.set(payload, function () {
-                resolve(initial);
-              });
-            } else {
-              resolve(data);
-            }
-          });
+          try {
+            chrome.storage.local.get([STORAGE_KEY_WHITELIST], function (res) {
+              if (chrome.runtime.lastError) {
+                if (whitelistStorage._mem === null) whitelistStorage._mem = DEFAULT_WHITELIST.slice();
+                resolve(whitelistStorage._mem.slice());
+                return;
+              }
+              var data = res && res[STORAGE_KEY_WHITELIST];
+              if (!Array.isArray(data)) {
+                // Initialize with defaults if empty
+                var initial = DEFAULT_WHITELIST.slice();
+                var payload = {};
+                payload[STORAGE_KEY_WHITELIST] = initial;
+                try {
+                  chrome.storage.local.set(payload, function () {
+                    resolve(initial);
+                  });
+                } catch (e) {
+                  resolve(initial);
+                }
+              } else {
+                resolve(data);
+              }
+            });
+          } catch (e) {
+            if (whitelistStorage._mem === null) whitelistStorage._mem = DEFAULT_WHITELIST.slice();
+            resolve(whitelistStorage._mem.slice());
+          }
         });
       }
 
@@ -70,13 +92,18 @@
 
     set: function (entries) {
       if (!Array.isArray(entries)) entries = [];
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
         return new Promise(function (resolve) {
-          var payload = {};
-          payload[STORAGE_KEY_WHITELIST] = entries;
-          chrome.storage.local.set(payload, function () {
+          try {
+            var payload = {};
+            payload[STORAGE_KEY_WHITELIST] = entries;
+            chrome.storage.local.set(payload, function () {
+              resolve();
+            });
+          } catch (e) {
+            whitelistStorage._mem = entries.slice();
             resolve();
-          });
+          }
         });
       }
 
@@ -85,11 +112,16 @@
     },
 
     clear: function () {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
         return new Promise(function (resolve) {
-          chrome.storage.local.remove([STORAGE_KEY_WHITELIST], function () {
+          try {
+            chrome.storage.local.remove([STORAGE_KEY_WHITELIST], function () {
+              resolve();
+            });
+          } catch (e) {
+            whitelistStorage._mem = [];
             resolve();
-          });
+          }
         });
       }
       whitelistStorage._mem = [];

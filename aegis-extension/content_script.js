@@ -22,6 +22,37 @@
   var DEBOUNCE_DELAY_MS = 300;
   var OBSERVER_RETRY_BASE_MS = 250;
   var OBSERVER_RETRY_MAX_ATTEMPTS = 8;
+  // Incremented each time initObserver is called fresh (attempt===0).
+  // Retry callbacks check this token before continuing — if it changed,
+  // a newer initObserver chain superseded this one and we abort silently.
+  var observerInitToken = 0;
+
+  /**
+   * Returns false when the extension has been hot-reloaded and this stale
+   * content script no longer has a valid runtime context.
+   * Accessing chrome.runtime.id throws if the context is invalidated.
+   */
+  function isExtensionContextValid() {
+    try {
+      return typeof chrome !== 'undefined' && !!chrome.runtime && !!chrome.runtime.id;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * Called when the extension context is invalidated (e.g. after a hot-reload
+   * in chrome://extensions). Stops all timers and observers so the stale script
+   * stops running silently in the background.
+   */
+  function teardown() {
+    try {
+      if (typeof observer !== 'undefined' && observer) { observer.disconnect(); }
+      if (typeof debounceTimer !== 'undefined' && debounceTimer) { clearTimeout(debounceTimer); }
+      if (typeof nullRetryTimer !== 'undefined' && nullRetryTimer) { clearTimeout(nullRetryTimer); }
+    } catch (e) { /* ignore */ }
+    console.log(LOG_PREFIX + ' Extension context invalidated — content script torn down cleanly.');
+  }
 
   var SELECTORS = {
     subject: ['h2.hP', '[data-thread-perm-id] h2', '.ha h2', '[role="main"] h2'],
@@ -35,6 +66,7 @@
   var observer = null;
   var debounceTimer = null;
   var lastProcessedSignature = null;
+  var nullRetryTimer = null;
 
   function queryFirst(selectorList, root) {
     root = root || document;
@@ -122,6 +154,11 @@
     var subjectRes = queryFirst(SELECTORS.subject, root);
     var subject = subjectRes.element ? (subjectRes.element.textContent || '').trim() : null;
 
+    // Filter out Gmail list-view header "Conversations" or "Conversation"
+    if (subject && /^conversations?$/i.test(subject.trim())) {
+      subject = null;
+    }
+
     var senderRes = queryFirst(SELECTORS.sender, root);
     var senderData = extractSender(senderRes.element);
 
@@ -136,12 +173,20 @@
     var links = extractLinks(bodyEl);
     var tsData = extractTimestamp(root);
 
+    // If there is no thread perm id and no senderEmail and no subject, this is a list view, not an email
+    var permEl = document.querySelector('[data-thread-perm-id]');
+    if (!permEl && (!subject || !senderData.senderEmail)) return null;
+
     var missing = [];
     if (!subject) missing.push('subject');
     if (!senderData.senderEmail) missing.push('senderEmail');
     if (!bodyText) missing.push('body');
     if (missing.length === 3) return null;
-    if (missing.length > 0) console.warn(LOG_PREFIX + ' Partial selector failure: [' + missing.join(', ') + ']');
+    // Only warn about partial selector failures when inside a real email thread
+    // (avoids flooding the console with expected fallback noise on list/compose views)
+    if (missing.length > 0 && document.querySelector('[data-thread-perm-id]')) {
+      console.warn(LOG_PREFIX + ' Partial selector failure: [' + missing.join(', ') + ']');
+    }
 
     return {
       subject: subject || '(No Subject)',
@@ -176,30 +221,37 @@
   var behavioralStorage = {
     _mem: null,
     get: function () {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
         return new Promise(function (resolve) {
-          chrome.storage.local.get([BEHAVIORAL_STORAGE_KEY], function (res) {
-            resolve((res && res[BEHAVIORAL_STORAGE_KEY]) || {});
-          });
+          try {
+            chrome.storage.local.get([BEHAVIORAL_STORAGE_KEY], function (res) {
+              if (chrome.runtime.lastError) { resolve({}); return; }
+              resolve((res && res[BEHAVIORAL_STORAGE_KEY]) || {});
+            });
+          } catch (e) { resolve({}); }
         });
       }
       if (!behavioralStorage._mem) behavioralStorage._mem = {};
       return Promise.resolve(behavioralStorage._mem);
     },
     set: function (store) {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
         return new Promise(function (resolve) {
-          var p = {}; p[BEHAVIORAL_STORAGE_KEY] = store;
-          chrome.storage.local.set(p, function () { resolve(); });
+          try {
+            var p = {}; p[BEHAVIORAL_STORAGE_KEY] = store;
+            chrome.storage.local.set(p, function () { resolve(); });
+          } catch (e) { resolve(); }
         });
       }
       behavioralStorage._mem = store;
       return Promise.resolve();
     },
     clear: function () {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
         return new Promise(function (resolve) {
-          chrome.storage.local.remove([BEHAVIORAL_STORAGE_KEY], function () { resolve(); });
+          try {
+            chrome.storage.local.remove([BEHAVIORAL_STORAGE_KEY], function () { resolve(); });
+          } catch (e) { resolve(); }
         });
       }
       behavioralStorage._mem = {};
@@ -292,10 +344,34 @@
   // Main Inspection Cycle
   // ---------------------------------------------------------------------------
 
-  function handleDOMMutation() {
+  function handleDOMMutation(isRetry) {
+    // GUARD: If the extension was hot-reloaded, this stale content script must stop.
+    // Without this, the debounce timer fires and the chrome.storage calls below throw
+    // "Extension context invalidated" errors.
+    if (!isExtensionContextValid()) { teardown(); return; }
+
+    if (nullRetryTimer) { clearTimeout(nullRetryTimer); nullRetryTimer = null; }
+    if (isGmailListView()) {
+      if (lastProcessedSignature !== '__LIST_VIEW__') {
+        lastProcessedSignature = '__LIST_VIEW__';
+        console.log(LOG_PREFIX + ' [SPA] List view detected (' + (window.location.hash || '#inbox') + ') — dispatching aegis:no-email.');
+        window.dispatchEvent(new CustomEvent('aegis:no-email'));
+      }
+      return;
+    }
     try {
       var emailContext = extractEmailContext();
-      if (!emailContext) return;
+      if (!emailContext || (emailContext.subject && /^conversations?$/i.test(emailContext.subject.trim()))) {
+        if (!isRetry) {
+          // Gmail SPA transition: DOM not yet settled. Retry once after a longer delay.
+          nullRetryTimer = setTimeout(function () { handleDOMMutation(true); }, 800);
+        } else {
+          // Still no email after retry — we are on a list view or compose. Signal no-email.
+          console.log(LOG_PREFIX + ' [SPA] No email context after retry — dispatching aegis:no-email.');
+          window.dispatchEvent(new CustomEvent('aegis:no-email'));
+        }
+        return;
+      }
 
       var signature = generateSignature(emailContext);
       if (signature === lastProcessedSignature) return;
@@ -337,7 +413,10 @@
         sanitizedPayload._behavioral = behavioralResult;
         window.dispatchEvent(new CustomEvent('aegis:email-extracted', { detail: sanitizedPayload }));
       }).catch(function (err) {
-        console.warn(LOG_PREFIX + ' [Behavioral/Whitelist] Non-fatal, dispatching without score:', err);
+        // If the extension context was invalidated (hot-reload), stop cleanly
+        if (!isExtensionContextValid()) { teardown(); return; }
+        // Otherwise this is a non-fatal behavioral scoring error — dispatch without score
+        console.warn(LOG_PREFIX + ' [Behavioral/Whitelist] Non-fatal, dispatching without score:', err.message || err);
         window.dispatchEvent(new CustomEvent('aegis:email-extracted', { detail: sanitizedPayload }));
       });
 
@@ -351,34 +430,129 @@
     debounceTimer = setTimeout(function () { handleDOMMutation(); }, DEBOUNCE_DELAY_MS);
   }
 
-  function initObserver(attempt) {
-    attempt = attempt || 0;
+  function initObserver(attempt, _token) {
+    // If the extension context was invalidated (hot-reload), stop everything
+    if (!isExtensionContextValid()) { teardown(); return; }
+
+    // Fresh start: bump the global token so any in-flight retry chain self-cancels
+    if (!attempt) {
+      attempt = 0;
+      observerInitToken = (observerInitToken + 1) | 0;
+      _token = observerInitToken;
+    }
+    // Stale retry: a newer initObserver(0) has superseded this chain — abort silently
+    if (_token !== observerInitToken) return;
+
+    // Query once and reuse in both branches
     var mainNode = document.querySelector('[role="main"]');
+
+    // On list views (e.g. #inbox), [role="main"] may not exist yet and we don't need it.
+    // Silently attach to body as a lightweight fallback so navigation events can still fire.
+    if (isGmailListView() && attempt === 0) {
+      if (!mainNode) {
+        if (observer) observer.disconnect();
+        observer = new MutationObserver(onMutationObserved);
+        observer.observe(document.body, { childList: true, subtree: false });
+        return;
+      }
+    }
+
     if (!mainNode) {
       if (attempt < OBSERVER_RETRY_MAX_ATTEMPTS) {
         var delay = OBSERVER_RETRY_BASE_MS * Math.pow(2, attempt);
-        console.warn(LOG_PREFIX + ' [role="main"] not found. Retry in ' + delay + 'ms...');
-        setTimeout(function () { initObserver(attempt + 1); }, delay);
+        // console.debug (not warn) — retries are expected SPA behavior, not errors
+        if (!isGmailListView()) {
+          console.debug(LOG_PREFIX + ' [role="main"] not yet ready. Retry ' + (attempt + 1) + '/' + OBSERVER_RETRY_MAX_ATTEMPTS + ' in ' + delay + 'ms...');
+        }
+        var tok = _token;
+        setTimeout(function () { initObserver(attempt + 1, tok); }, delay);
         return;
       }
-      console.warn(LOG_PREFIX + ' Falling back to document.body.');
+      if (!isGmailListView()) {
+        console.debug(LOG_PREFIX + ' Falling back to document.body (max retries reached).');
+      }
     }
     var targetNode = mainNode || document.body;
     if (observer) observer.disconnect();
     observer = new MutationObserver(onMutationObserved);
     observer.observe(targetNode, { childList: true, subtree: true, characterData: false });
-    console.log(LOG_PREFIX + ' MutationObserver attached to', mainNode ? '[role="main"]' : 'document.body (fallback)');
+    if (mainNode) {
+      console.log(LOG_PREFIX + ' MutationObserver attached to [role="main"].');
+    }
     onMutationObserved();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { initObserver(0); });
-  } else {
-    initObserver(0);
+  /**
+   * Returns true when the current Gmail URL is a list/folder view
+   * (inbox, starred, sent, drafts, snoozed, spam, trash, category/*, label/*)
+   * rather than an individual email thread.
+   *
+   * Gmail thread URLs look like: #inbox/FMfcgzQXKWmHFjprLstFCGGckFfZkVnr
+   *   — a folder name followed by a / and a 10+ character alphanumeric thread ID.
+   * List/folder views are just: #inbox  #starred  #category/promotions  etc.
+   */
+  function isGmailListView() {
+    var hash = (window.location.hash || '').replace(/^#/, '');
+    if (!hash) return true;
+    // If the hash contains a slash, the part after must be a thread ID (10+ alphanum chars).
+    // Anything shorter (e.g. "category/promotions") is still a list view.
+    var slashIdx = hash.indexOf('/');
+    if (slashIdx === -1) return true;  // No slash — definitely a list view (#inbox, #starred)
+    var afterSlash = hash.slice(slashIdx + 1);
+    // Thread IDs are 16+ hex/base64 characters; category names are short English words
+    return !/^[A-Za-z0-9_\-]{10,}$/.test(afterSlash);
   }
 
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+  /**
+   * Gmail SPA navigation handler.
+   * Resets the deduplication signature so the next email extraction always
+   * re-fires, then schedules a delayed extraction to let Gmail's DOM settle.
+   * For list views, immediately signals aegis:no-email without waiting.
+   */
+  function onGmailNavigate() {
+    lastProcessedSignature = null;
+    if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+    if (nullRetryTimer)  { clearTimeout(nullRetryTimer);  nullRetryTimer  = null; }
+
+    if (isGmailListView()) {
+      // User navigated to a list/folder view — no email is open. Signal immediately.
+      console.log(LOG_PREFIX + ' [SPA] List view detected (' + window.location.hash + ') — dispatching aegis:no-email.');
+      window.dispatchEvent(new CustomEvent('aegis:no-email'));
+      return;
+    }
+
+    // Thread view — delay extraction to let Gmail finish rendering
+    debounceTimer = setTimeout(function () { handleDOMMutation(false); }, 800);
+    console.log(LOG_PREFIX + ' [SPA] Thread navigation detected — signature reset, delayed re-scan scheduled.');
+  }
+
+  // Give Gmail's SPA framework ~400ms to render the initial DOM before the first
+  // observer attach. This reduces or eliminates the "not yet ready" retry chain
+  // on initial page load / extension injection.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () { initObserver(0); }, 400);
+    });
+  } else {
+    setTimeout(function () { initObserver(0); }, 400);
+  }
+
+  // Listen for Gmail SPA navigation (hash-based routing)
+  window.addEventListener('hashchange', onGmailNavigate);
+  window.addEventListener('popstate',   onGmailNavigate);
+  // Re-scan when the tab becomes visible again (user switches back from another tab)
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      lastProcessedSignature = null;
+      if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+      debounceTimer = setTimeout(function () { handleDOMMutation(false); }, 600);
+      console.log(LOG_PREFIX + ' [SPA] Tab became visible — signature reset, re-scan scheduled.');
+    }
+  });
+
+  if (isExtensionContextValid() && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+      if (!isExtensionContextValid()) { teardown(); return; }
       if (request.action === 'AEGIS_RESCAN' || request.action === 'AEGIS_RELOAD') {
         console.log(LOG_PREFIX + ' Re-scan triggered from popup.');
         initObserver(0);
@@ -394,7 +568,17 @@
   window.AegisContentScript = {
     extractEmailContext: extractEmailContext,
     SELECTORS: SELECTORS,
-    reinitialize: initObserver
+    reinitialize: initObserver,
+    /**
+     * Soft re-scan: clears the deduplication signature so the current email
+     * is re-analyzed without a full page reload. Called by overlay.js reload buttons.
+     */
+    resetSignature: function () {
+      lastProcessedSignature = null;
+      if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+      debounceTimer = setTimeout(function () { handleDOMMutation(false); }, 300);
+      console.log(LOG_PREFIX + ' [SPA] Soft re-scan triggered via resetSignature().');
+    }
   };
 
   // [Milestone 3.2] Behavioral baseline API
