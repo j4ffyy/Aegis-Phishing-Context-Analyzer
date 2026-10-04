@@ -260,8 +260,13 @@ def build_layers_status(
     # Layer 2: Attachment Intelligence
     has_attachment_flag = any("Attachment" in f.get("title", "") for f in flags)
     if has_attachment_flag:
-        attach_icon = "fa-times-circle"
-        attach_detail = "Suspicious or executable attachment detected"
+        is_crit = any("Dangerous" in f.get("title", "") or f.get("severity") == "critical" for f in flags if "Attachment" in f.get("title", ""))
+        if is_crit:
+            attach_icon = "fa-times-circle"
+            attach_detail = "Suspicious or executable attachment detected"
+        else:
+            attach_icon = "fa-exclamation-triangle"
+            attach_detail = "Compressed archive attachment detected (inspection evasion risk)"
     elif s_heuristic >= 30:
         attach_icon = "fa-minus-circle"
         attach_detail = "Elevated heuristic risk in attachments"
@@ -354,14 +359,29 @@ def synthesize_assessment(
     and layer breakdowns into a standardized Aegis analysis dictionary.
     """
     is_pending = vt_status == "pending"
+    has_links = len(urls) > 0
     final_score = synthesize_composite_score(
         s_heuristic=s_heuristic,
         s_nlp=s_nlp,
         s_behavioral=s_behavioral,
         s_vt=s_vt,
-        vt_pending=is_pending,
+        vt_pending=is_pending or not has_links,
         critical_floor=True,
     )
+
+    # Multi-Indicator Warning Threat Floor (§6.5):
+    # If multiple distinct threat layers are flagged (e.g. suspicious attachment + urgency coercion),
+    # ensure the score is bounded by a minimum Warning threshold (52%) so active threats
+    # are not diluted into "Safe" simply because external links or sender novelty are absent.
+    has_attachment_threat = any("Attachment" in f.get("title", "") for f in flags)
+    has_urgency_threat = any("Urgency" in f.get("title", "") for f in flags) or s_nlp >= 25
+    if (has_attachment_threat and has_urgency_threat) or s_heuristic >= 40:
+        if final_score < 52:
+            logger.info(
+                "[MetaClassifier] Elevating score %d -> 52 due to combined attachment and urgency indicators",
+                final_score,
+            )
+            final_score = 52
 
     risk_level, risk_class, desc = derive_risk_tier(final_score)
 

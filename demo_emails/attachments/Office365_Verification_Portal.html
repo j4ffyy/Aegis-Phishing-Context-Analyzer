@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Microsoft Office 365 - Session Expired</title>
+    <!-- 
+      ACADEMIC DEMO SIMULATION FILE ONLY
+      Used for Capstone Phishing Context Analyzer demonstration.
+      This file does not transmit data or perform malicious actions.
+    -->
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f2f2f2; margin: 0; padding: 50px 0; display: flex; justify-content: center; }
+        .login-box { background: #fff; width: 440px; padding: 44px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); border-radius: 2px; }
+        .logo { font-size: 24px; font-weight: 600; color: #0078d4; margin-bottom: 20px; }
+        h2 { font-size: 24px; margin: 0 0 12px 0; color: #1b1b1b; }
+        p { font-size: 15px; color: #505050; margin-bottom: 20px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #868686; box-sizing: border-box; }
+        button { background-color: #0067b8; color: white; border: none; padding: 10px 24px; cursor: pointer; float: right; font-weight: 600; }
+        .warning-banner { background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; border: 1px solid #ffeeba; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="warning-banner">⚠️ <b>DEMO HARVESTER SIMULATION</b>: This is a simulated phishing attachment for Capstone evaluation.</div>
+        <div class="logo">Microsoft</div>
+        <h2>Sign in to restore session</h2>
+        <p>Your organization's authentication token has expired. Please verify your credentials to view secure shared documents.</p>
+        <form onsubmit="alert('Aegis Phishing Analyzer Demo: In a real attack, this attachment would exfiltrate entered credentials.'); return false;">
+            <input type="text" placeholder="Email, phone, or Skype" value="employee@sme-corp.com" readonly>
+            <input type="password" placeholder="Password" required>
+            <button type="submit">Sign in</button>
+        </form>
+    </div>
+</body>
+</html>

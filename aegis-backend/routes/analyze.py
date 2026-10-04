@@ -142,14 +142,23 @@ URGENCY_REGEX = re.compile(
     r"verify your (?:account|identity)|confirm your identity|verification required|re-activate|verify now|"
     r"unauthorized (?:login|access|transaction)|security breach|suspicious activity(?: detected)?|"
     r"within 24 hours|within 48 hours|24 hours? left|limited time|final notice|expires (?:today|soon)|"
-    r"wire transfer|unauthorized payment|fraud alert|update billing|payment overdue|"
-    r"password expired|reset password immediately|click here(?: to verify)?)\b",
+    r"wire transfer|unauthorized payment|fraud alert|update billing|payment overdue|overdue invoice|"
+    r"past due|remit payment|payment required|unverified payment|discrepanc(?:y|ies)|"
+    r"ledger records?|invoice statement|billing notice|settlement invoice|"
+    r"password expired|reset password immediately|click here(?: to verify)?|"
+    r"mandatory review|immediate response required|failure to comply|deactivation notice)\b",
     re.IGNORECASE,
 )
 
 DANGEROUS_EXTENSIONS = {
-    "exe", "scr", "vbs", "iso", "bat", "cmd", "js", "wsf", "ps1", "html", "htm", "hta"
+    "exe", "scr", "vbs", "iso", "bat", "cmd", "js", "wsf", "ps1", "html", "htm", "hta", "img", "vhd", "apk"
 }
+ARCHIVE_EXTENSIONS = {"zip", "rar", "7z", "tar", "gz"}
+
+DOUBLE_EXT_REGEX = re.compile(
+    r"\.(pdf|docx?|xlsx?|txt|csv|jpg|png)\.(exe|scr|vbs|iso|bat|cmd|js|ps1|html|htm|zip|rar|7z|hta|img)$",
+    re.IGNORECASE,
+)
 
 
 def _levenshtein(s1: str, s2: str) -> int:
@@ -234,15 +243,32 @@ def evaluate_heuristics(payload: EmailPayload) -> Dict[str, Any]:
             "severity": "critical",
         })
 
-    # 4. Dangerous attachment extensions
+    # 4. Dangerous / Archive attachment extensions
     for att in payload.attachments or []:
         ext = att.split(".")[-1].lower() if "." in att else ""
+
+        # Check for deceptive double extensions (e.g., Invoice.pdf.zip)
+        if DOUBLE_EXT_REGEX.search(att):
+            score += 40
+            flags.append({
+                "title": "Deceptive Double Extension Attachment",
+                "evidence": f"File '{att}' disguises executable/archive payload using a fake document extension",
+                "severity": "critical",
+            })
+
         if ext in DANGEROUS_EXTENSIONS:
-            score += 30
+            score += 35
             flags.append({
                 "title": "Dangerous Attachment Detected",
                 "evidence": f"File '{att}' has executable/script extension .{ext}",
                 "severity": "critical",
+            })
+        elif ext in ARCHIVE_EXTENSIONS:
+            score += 25
+            flags.append({
+                "title": "Compressed Archive Attachment",
+                "evidence": f"Attachment '{att}' is an archive file commonly used to evade scanner inspection",
+                "severity": "warn",
             })
 
     heuristic_score = min(100, score)
