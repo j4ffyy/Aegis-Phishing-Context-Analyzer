@@ -11,7 +11,6 @@
 > **MMDC IT200D1 — Capstone Project 1**  
 > **Institution:** Mapúa Malayan Digital College (MMDC)  
 > **Proponents:** **Jafphet P. Grengia** (Lead Developer / UX Lead) & **Michael Angelo L. Bernardo** (Co-Developer / Systems Lead)  
-> **Capstone Adviser:** **Mr. Ryan Dalmacio**
 
 ---
 

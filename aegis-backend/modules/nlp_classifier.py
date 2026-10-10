@@ -19,8 +19,13 @@ Scoring formulation:
 """
 
 import logging
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+# Silence non-critical HuggingFace transformers PyTorch detection notice
+# Aegis uses ONNX Runtime for CPU inference and only requires transformers for tokenization.
+os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
 
 import numpy as np
 

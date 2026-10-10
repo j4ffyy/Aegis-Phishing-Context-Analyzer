@@ -30,3 +30,18 @@ pydantic>=2.6.0
 
 # Environment variable loading
 python-dotenv>=1.0.0
+
+# ---------------------------------------------------------------------------
+# PR-01: Ensemble ML Classifier (Random Forest + XGBoost)
+# NOTE: CatBoost (~140MB) intentionally excluded to stay within Render.com
+#       free-tier 512MB RAM ceiling (onnxruntime already consumes ~140MB).
+# ---------------------------------------------------------------------------
+
+# Random Forest classifier
+scikit-learn>=1.4.0
+
+# XGBoost classifier
+xgboost>=2.0.0
+
+# Model serialization (used by train_ensemble.py + ensemble_classifier.py)
+joblib>=1.3.0

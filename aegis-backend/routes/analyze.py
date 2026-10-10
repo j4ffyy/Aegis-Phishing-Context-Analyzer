@@ -40,6 +40,7 @@ from modules.meta_classifier import (
     synthesize_composite_score,
 )
 from modules.nlp_classifier import classify_email_text
+from modules.ensemble_classifier import score_with_ensemble
 
 logger = logging.getLogger(__name__)
 
@@ -280,6 +281,63 @@ def evaluate_heuristics(payload: EmailPayload) -> Dict[str, Any]:
     }
 
 
+def evaluate_layer1(payload: EmailPayload, urls: List[str]) -> Dict[str, Any]:
+    """
+    Evaluates the blended Layer 1 score (§4.3 Layer 1 — PR-01).
+
+    Combines rule-based heuristics (60%) with the pre-trained ensemble ML
+    classifier (RF + XGB, 40%) into a single S_layer1 score.
+
+    If ensemble models are not yet trained (models/*.pkl absent), the blend
+    degrades gracefully to 100% rule-based heuristics (ensemble_score=0,
+    ensemble_used=False) with no change to existing behaviour.
+
+    Blend formula:
+        S_layer1 = 0.60 × S_heuristic + 0.40 × S_ensemble
+    """
+    heuristics = evaluate_heuristics(payload)
+    s_heuristic = heuristics["score"]
+
+    ensemble_result = score_with_ensemble(
+        urls=urls,
+        subject=payload.subject or "",
+        body=payload.bodyText or "",
+        urgency_keyword_count=heuristics["keyword_hits"],
+        has_typosquatting=heuristics["has_typosquatting"],
+        has_attachment=payload.hasAttachment or False,
+        attachment_count=payload.attachmentCount or 0,
+        attachments=payload.attachments or [],
+        spf_pass=payload.spfPass,
+    )
+
+    ensemble_used = ensemble_result["ensemble_used"]
+    s_ensemble = ensemble_result["ensemble_score"]
+
+    if ensemble_used:
+        blended = round(0.60 * s_heuristic + 0.40 * s_ensemble)
+        s_layer1 = min(100, blended)
+        logger.debug(
+            "[Layer1] rule=%d  ensemble=%d  blended=%d (rf=%.3f xgb=%.3f)",
+            s_heuristic, s_ensemble, s_layer1,
+            ensemble_result["rf_prob"] or 0.0,
+            ensemble_result["xgb_prob"] or 0.0,
+        )
+    else:
+        s_layer1 = s_heuristic
+
+    return {
+        "score": s_layer1,
+        "flags": heuristics["flags"],
+        "keyword_hits": heuristics["keyword_hits"],
+        "has_typosquatting": heuristics["has_typosquatting"],
+        "s_heuristic_raw": s_heuristic,
+        "s_ensemble": s_ensemble,
+        "ensemble_used": ensemble_used,
+        "rf_prob": ensemble_result["rf_prob"],
+        "xgb_prob": ensemble_result["xgb_prob"],
+    }
+
+
 # ---------------------------------------------------------------------------
 # Layer 2 & 3: Semantic NLP & Behavioral Baselines (Week 2 Stubs)
 # ---------------------------------------------------------------------------
@@ -482,8 +540,8 @@ async def analyze_email(
     # 2. Extract hyperlinks
     urls = extract_url_strings(payload.links or [])
 
-    # 3. Synchronous evaluation of Layer 1 (Heuristics)
-    heuristics = evaluate_heuristics(payload)
+    # 3. Synchronous evaluation of Layer 1 (Heuristics + Ensemble ML blend — PR-01)
+    heuristics = evaluate_layer1(payload, urls)
     s_heuristic = heuristics["score"]
     flags = heuristics["flags"]
 
@@ -545,6 +603,8 @@ async def analyze_email(
             "s_behavioral": s_behavioral,
             "flags": flags,
             "behavioral_meta": payload.behavioral_meta,
+            "ensemble_used": heuristics.get("ensemble_used", False),
+            "s_ensemble": heuristics.get("s_ensemble", 0),
         }
         _in_flight_scans[email_hash] = {
             "status": "pending",

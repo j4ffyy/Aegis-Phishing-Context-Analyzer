@@ -10,7 +10,14 @@ Responsibilities:
 
 from contextlib import asynccontextmanager
 
+import os
+
 from dotenv import load_dotenv
+
+# Silence non-critical HuggingFace transformers PyTorch detection notice
+# Aegis uses ONNX Runtime for CPU inference and only requires transformers for tokenization.
+os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -73,3 +80,11 @@ app.add_middleware(
 
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(analyze_router, prefix="/api/v1")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Silence browser favicon requests without generating 404 logs."""
+    from fastapi import Response
+    return Response(status_code=204)
+
