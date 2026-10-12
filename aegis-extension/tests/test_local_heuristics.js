@@ -271,7 +271,72 @@ runTest('Gracefully handles null or empty input without throwing', () => {
   assert.strictEqual(rEmpty.riskLevel, 'Safe');
 });
 
+// ---------------------------------------------------------------------------
+// 12. PR-02: Cryptographic Email Authentication (SPF / DKIM)
+// ---------------------------------------------------------------------------
+runTest('Flags SPF authentication failure with +25 points and critical flag', () => {
+  const email = {
+    subject: 'Vendor Invoice #4829',
+    senderName: 'Vendor Accounts',
+    senderEmail: 'billing@legitimate-vendor.com',
+    bodyText: 'Please review the attached invoice for services rendered.',
+    links: [],
+    attachments: [],
+    spfPass: false,
+    dkimPass: true
+  };
+
+  const res = heuristics.evaluate(email);
+  assert.strictEqual(res.score, 25);
+  const spfFlag = res.flags.find(f => f.id === 'RULE_SPF_FAIL');
+  assert.ok(spfFlag, 'Expected RULE_SPF_FAIL flag');
+  assert.strictEqual(spfFlag.points, 25);
+  assert.strictEqual(spfFlag.severity, 'critical');
+  assert.strictEqual(res.layers.auth.icon, 'fa-times-circle');
+});
+
+runTest('Flags DKIM signature failure with +20 points and warning flag', () => {
+  const email = {
+    subject: 'Quarterly Report Summary',
+    senderName: 'Corporate Reporting',
+    senderEmail: 'reports@internal-systems.com',
+    bodyText: 'Attached is the quarterly executive summary.',
+    links: [],
+    attachments: [],
+    spfPass: true,
+    dkimPass: false
+  };
+
+  const res = heuristics.evaluate(email);
+  assert.strictEqual(res.score, 20);
+  const dkimFlag = res.flags.find(f => f.id === 'RULE_DKIM_FAIL');
+  assert.ok(dkimFlag, 'Expected RULE_DKIM_FAIL flag');
+  assert.strictEqual(dkimFlag.points, 20);
+  assert.strictEqual(dkimFlag.severity, 'warning');
+  assert.strictEqual(res.layers.auth.icon, 'fa-exclamation-triangle');
+});
+
+runTest('Dual SPF + DKIM failure accumulates 45 points pushing to Warning tier', () => {
+  const email = {
+    subject: 'System Notification',
+    senderName: 'System Admin',
+    senderEmail: 'admin@portal-updates.com',
+    bodyText: 'Routine system update notice.',
+    links: [],
+    attachments: [],
+    spfPass: false,
+    dkimPass: false
+  };
+
+  const res = heuristics.evaluate(email);
+  assert.strictEqual(res.score, 45);
+  assert.strictEqual(res.riskLevel, 'Warning');
+  assert.strictEqual(res.riskClass, 'threat-warning');
+  assert.strictEqual(res.flags.length, 2);
+});
+
 console.log(`\nLocal Heuristics Results: ${testsPassed} passed, ${testsFailed} failed.`);
 if (testsFailed > 0) {
   process.exit(1);
 }
+

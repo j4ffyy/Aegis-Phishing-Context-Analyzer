@@ -15,8 +15,10 @@
 (function () {
   'use strict';
 
-  if (window.__AEGIS_CONTENT_SCRIPT_LOADED__) return;
-  window.__AEGIS_CONTENT_SCRIPT_LOADED__ = true;
+  if (typeof window !== 'undefined') {
+    if (window.__AEGIS_CONTENT_SCRIPT_LOADED__) return;
+    window.__AEGIS_CONTENT_SCRIPT_LOADED__ = true;
+  }
 
   var LOG_PREFIX = '[Aegis::ContentScript]';
   var DEBOUNCE_DELAY_MS = 300;
@@ -60,7 +62,18 @@
     body: ['.a3s.aiL', '.ii.gt', '[role="listitem"] .a3s', 'div[dir="ltr"]'],
     attachments: ['.aV3', '.aZo', '[aria-label*="Attachment"]'],
     timestamp: ['span.g3', 'span[data-timestamp]', '.gH span', '[role="main"] .g3'],
-    mainContainer: ['[role="main"]', '.bkK', 'div.aeF']
+    mainContainer: ['[role="main"]', '.bkK', 'div.aeF'],
+    authDetails: ['table.cf.gJ', '.gJ', '[role="region"] table.cf'],
+    authWarning: [
+      'div[role="alert"]',
+      'div.a6E',
+      '.msg-header-warning',
+      '.a98',
+      '[aria-label*="unverified"]',
+      '[data-tooltip*="could not verify"]',
+      '[data-tooltip*="unverified"]',
+      '.a8u'
+    ]
   };
 
   var observer = null;
@@ -147,6 +160,109 @@
     return { timestamp: raw.trim() || null, selectorUsed: res.selector };
   }
 
+  /**
+   * PR-02: Extracts SPF and DKIM authentication signals from Gmail DOM.
+   *
+   * Strategy:
+   * 1. Inspects Gmail security warning banners / unverified sender badges.
+   *    If Gmail explicitly flags an authentication failure or spoof alert,
+   *    both spfPass and dkimPass are marked false.
+   * 2. Inspects Gmail's message details panel (table.cf.gJ or .gJ).
+   *    If 'mailed-by' is present -> spfPass: true (SPF validated).
+   *    If 'signed-by' is present -> dkimPass: true (DKIM signature valid).
+   * 3. Checks data-aegis attributes on root container for testing/fixture overrides.
+   * 4. If indeterminate, returns null so heuristic penalties are not falsely triggered.
+   *
+   * @param {Element} root - Container element for current email thread.
+   * @returns {Object} { spfPass: boolean|null, dkimPass: boolean|null, mailedBy: string|null, signedBy: string|null, source: string, alertText: string|null }
+   */
+  function extractAuthStatus(root) {
+    root = root || document;
+
+    // 0. Test fixture override (allows deterministic testing in automated suites)
+    var testSpf = root.getAttribute && root.getAttribute('data-aegis-spf');
+    var testDkim = root.getAttribute && root.getAttribute('data-aegis-dkim');
+    if (testSpf !== null && testSpf !== undefined) {
+      return {
+        spfPass: testSpf === 'true' ? true : (testSpf === 'false' ? false : null),
+        dkimPass: testDkim === 'true' ? true : (testDkim === 'false' ? false : null),
+        mailedBy: root.getAttribute('data-aegis-mailed-by') || null,
+        signedBy: root.getAttribute('data-aegis-signed-by') || null,
+        source: 'test_fixture',
+        alertText: null
+      };
+    }
+
+    // 1. Check for explicit Gmail warning alerts (spoofing / unverified sender)
+    for (var w = 0; w < SELECTORS.authWarning.length; w++) {
+      try {
+        var warnEls = root.querySelectorAll(SELECTORS.authWarning[w]);
+        for (var i = 0; i < warnEls.length; i++) {
+          var el = warnEls[i];
+          var alertText = (el.textContent || el.getAttribute('aria-label') || el.getAttribute('data-tooltip') || '').toLowerCase();
+          if (
+            alertText.includes("couldn't verify") ||
+            alertText.includes("could not verify") ||
+            alertText.includes("spoof") ||
+            alertText.includes("failed authentication") ||
+            alertText.includes("unverified") ||
+            alertText.includes("be careful with this message")
+          ) {
+            return {
+              spfPass: false,
+              dkimPass: false,
+              mailedBy: null,
+              signedBy: null,
+              source: 'gmail_warning_banner',
+              alertText: alertText.slice(0, 150)
+            };
+          }
+        }
+      } catch (e) { /* ignore query errors */ }
+    }
+
+    // 2. Check for Gmail details table (table.cf.gJ or .gJ)
+    var detailsRes = queryFirst(SELECTORS.authDetails, root);
+    if (detailsRes.element) {
+      var rows = detailsRes.element.querySelectorAll('tr');
+      var mailedBy = null;
+      var signedBy = null;
+      rows.forEach(function (tr) {
+        var thEl = tr.querySelector('th');
+        var tdEl = tr.querySelector('td');
+        var th = (thEl ? thEl.textContent : '').toLowerCase().trim();
+        var td = (tdEl ? tdEl.textContent : '').trim();
+        if (th.includes('mailed-by') || th.includes('mailed by')) {
+          mailedBy = td;
+        }
+        if (th.includes('signed-by') || th.includes('signed by')) {
+          signedBy = td;
+        }
+      });
+
+      if (mailedBy || signedBy) {
+        return {
+          spfPass: mailedBy ? true : null,
+          dkimPass: signedBy ? true : null,
+          mailedBy: mailedBy,
+          signedBy: signedBy,
+          source: 'gmail_details_table',
+          alertText: null
+        };
+      }
+    }
+
+    // 3. Indeterminate state (details collapsed and no warning alert displayed)
+    return {
+      spfPass: null,
+      dkimPass: null,
+      mailedBy: null,
+      signedBy: null,
+      source: 'indeterminate',
+      alertText: null
+    };
+  }
+
   function extractEmailContext() {
     var containerRes = queryFirst(SELECTORS.mainContainer, document);
     var root = containerRes.element || document;
@@ -172,6 +288,7 @@
     var attachments = extractAttachments(root);
     var links = extractLinks(bodyEl);
     var tsData = extractTimestamp(root);
+    var authData = extractAuthStatus(root);
 
     // If there is no thread perm id and no senderEmail and no subject, this is a list view, not an email
     var permEl = document.querySelector('[data-thread-perm-id]');
@@ -197,8 +314,20 @@
       attachments: attachments.names,
       attachmentCount: attachments.count,
       timestamp: tsData.timestamp,
+      spfPass: authData.spfPass,
+      dkimPass: authData.dkimPass,
+      authMeta: authData,
       extractedAt: new Date().toISOString(),
-      metadata: { selectorsUsed: { subject: subjectRes.selector, sender: senderRes.selector, body: bodyRes.selector, attachments: attachments.selectorUsed, timestamp: tsData.selectorUsed } }
+      metadata: {
+        selectorsUsed: {
+          subject: subjectRes.selector,
+          sender: senderRes.selector,
+          body: bodyRes.selector,
+          attachments: attachments.selectorUsed,
+          timestamp: tsData.selectorUsed,
+          auth: authData.source
+        }
+      }
     };
   }
 
@@ -381,7 +510,9 @@
         subject: emailContext.subject,
         sender: emailContext.senderName + ' <' + emailContext.senderEmail + '>',
         links: emailContext.links.length,
-        attachments: emailContext.attachmentCount
+        attachments: emailContext.attachmentCount,
+        spfPass: emailContext.spfPass,
+        dkimPass: emailContext.dkimPass
       });
 
       var sanitizedPayload = emailContext;
@@ -396,8 +527,12 @@
       var senderKey = sanitizedPayload.senderEmail || emailContext.senderEmail;
 
       // Evaluate Whitelist & Dual-Trigger Revocation (§7.1)
+      var authStatus = {
+        spfPass: sanitizedPayload.spfPass,
+        dkimPass: sanitizedPayload.dkimPass
+      };
       var whitelistPromise = (typeof window.AegisWhitelist !== 'undefined' && typeof window.AegisWhitelist.checkWhitelistStatus === 'function')
-        ? window.AegisWhitelist.checkWhitelistStatus(sanitizedPayload)
+        ? window.AegisWhitelist.checkWhitelistStatus(sanitizedPayload, authStatus)
         : Promise.resolve({ whitelisted: false, revoked: false, trigger: null, score: null });
 
       // Score BEFORE recording to avoid self-bias (§6.4)
@@ -526,29 +661,31 @@
     console.log(LOG_PREFIX + ' [SPA] Thread navigation detected — signature reset, delayed re-scan scheduled.');
   }
 
-  // Give Gmail's SPA framework ~400ms to render the initial DOM before the first
-  // observer attach. This reduces or eliminates the "not yet ready" retry chain
-  // on initial page load / extension injection.
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    // Give Gmail's SPA framework ~400ms to render the initial DOM before the first
+    // observer attach. This reduces or eliminates the "not yet ready" retry chain
+    // on initial page load / extension injection.
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () { initObserver(0); }, 400);
+      });
+    } else {
       setTimeout(function () { initObserver(0); }, 400);
-    });
-  } else {
-    setTimeout(function () { initObserver(0); }, 400);
-  }
-
-  // Listen for Gmail SPA navigation (hash-based routing)
-  window.addEventListener('hashchange', onGmailNavigate);
-  window.addEventListener('popstate',   onGmailNavigate);
-  // Re-scan when the tab becomes visible again (user switches back from another tab)
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible') {
-      lastProcessedSignature = null;
-      if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
-      debounceTimer = setTimeout(function () { handleDOMMutation(false); }, 600);
-      console.log(LOG_PREFIX + ' [SPA] Tab became visible — signature reset, re-scan scheduled.');
     }
-  });
+
+    // Listen for Gmail SPA navigation (hash-based routing)
+    window.addEventListener('hashchange', onGmailNavigate);
+    window.addEventListener('popstate',   onGmailNavigate);
+    // Re-scan when the tab becomes visible again (user switches back from another tab)
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') {
+        lastProcessedSignature = null;
+        if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+        debounceTimer = setTimeout(function () { handleDOMMutation(false); }, 600);
+        console.log(LOG_PREFIX + ' [SPA] Tab became visible — signature reset, re-scan scheduled.');
+      }
+    });
+  }
 
   if (isExtensionContextValid() && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -556,7 +693,7 @@
       if (request.action === 'AEGIS_RESCAN' || request.action === 'AEGIS_RELOAD') {
         console.log(LOG_PREFIX + ' Re-scan triggered from popup.');
         initObserver(0);
-        var fab = document.getElementById('aegis-fab');
+        var fab = typeof document !== 'undefined' ? document.getElementById('aegis-fab') : null;
         if (fab && fab.style.display !== 'none') fab.click();
         sendResponse({ status: 'ok', message: 'Aegis re-scan initiated' });
       }
@@ -565,32 +702,46 @@
   }
 
   // Public API
-  window.AegisContentScript = {
-    extractEmailContext: extractEmailContext,
-    SELECTORS: SELECTORS,
-    reinitialize: initObserver,
-    /**
-     * Soft re-scan: clears the deduplication signature so the current email
-     * is re-analyzed without a full page reload. Called by overlay.js reload buttons.
-     */
-    resetSignature: function () {
-      lastProcessedSignature = null;
-      if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
-      debounceTimer = setTimeout(function () { handleDOMMutation(false); }, 300);
-      console.log(LOG_PREFIX + ' [SPA] Soft re-scan triggered via resetSignature().');
-    }
-  };
+  if (typeof window !== 'undefined') {
+    window.AegisContentScript = {
+      extractEmailContext: extractEmailContext,
+      extractAuthStatus: extractAuthStatus,
+      SELECTORS: SELECTORS,
+      reinitialize: initObserver,
+      /**
+       * Soft re-scan: clears the deduplication signature so the current email
+       * is re-analyzed without a full page reload. Called by overlay.js reload buttons.
+       */
+      resetSignature: function () {
+        lastProcessedSignature = null;
+        if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+        debounceTimer = setTimeout(function () { handleDOMMutation(false); }, 300);
+        console.log(LOG_PREFIX + ' [SPA] Soft re-scan triggered via resetSignature().');
+      }
+    };
 
-  // [Milestone 3.2] Behavioral baseline API
-  window.AegisBehavioralBaseline = {
-    updateBehavioralBaseline: updateBehavioralBaseline,
-    scoreBehavioral: scoreBehavioral,
-    circularHourDistance: circularHourDistance,
-    getBehavioralStore: getBehavioralStore,
-    clearBehavioralBaseline: clearBehavioralBaseline,
-    BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS: BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS,
-    BEHAVIORAL_OFF_HOURS_THRESHOLD_H: BEHAVIORAL_OFF_HOURS_THRESHOLD_H,
-    BEHAVIORAL_STORAGE_KEY: BEHAVIORAL_STORAGE_KEY
-  };
+    // [Milestone 3.2] Behavioral baseline API
+    window.AegisBehavioralBaseline = {
+      updateBehavioralBaseline: updateBehavioralBaseline,
+      scoreBehavioral: scoreBehavioral,
+      circularHourDistance: circularHourDistance,
+      getBehavioralStore: getBehavioralStore,
+      clearBehavioralBaseline: clearBehavioralBaseline,
+      BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS: BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS,
+      BEHAVIORAL_OFF_HOURS_THRESHOLD_H: BEHAVIORAL_OFF_HOURS_THRESHOLD_H,
+      BEHAVIORAL_STORAGE_KEY: BEHAVIORAL_STORAGE_KEY
+    };
+  }
+
+  // Node.js environment export for automated unit testing suites
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      extractAuthStatus: extractAuthStatus,
+      extractSender: extractSender,
+      extractLinks: extractLinks,
+      extractAttachments: extractAttachments,
+      SELECTORS: SELECTORS
+    };
+  }
 
 })();
