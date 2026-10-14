@@ -450,6 +450,24 @@
       totalPoints += 20;
     }
 
+    // 6. Layer 3 Behavioral Telemetry Integration (PR-03)
+    const beh = emailContext._behavioral || emailContext.behavioral_meta || {};
+    const behScore = typeof emailContext.behavioralScore === 'number'
+      ? emailContext.behavioralScore
+      : (typeof beh.score === 'number' ? beh.score : 0);
+
+    if (behScore >= 20) {
+      const behReasons = Array.isArray(beh.reasons) ? beh.reasons.join(', ') : (beh.reason || 'behavioral_anomaly');
+      flags.push({
+        id: 'RULE_BEHAVIORAL_ANOMALY',
+        title: 'Behavioral Baseline Anomaly',
+        severity: behScore >= 30 ? 'critical' : 'warning',
+        points: Math.min(25, Math.round(behScore * 0.5)),
+        evidence: `Uncharacteristic sender activity: ${behReasons.replace(/_/g, ' ')} (Anomaly: ${behScore}%)`
+      });
+      totalPoints += Math.min(25, Math.round(behScore * 0.5));
+    }
+
     // Composite score capped at 100 per §6.1
     const finalScore = Math.min(100, Math.max(0, totalPoints));
 
@@ -528,6 +546,7 @@
     const attachFlag = flags.find(f => f.id.includes('ATTACHMENT'));
     const linkFlag = flags.find(f => f.id.includes('LINK') || f.id.includes('IP') || f.id.includes('TLD'));
     const urgencyFlag = flags.find(f => f.id.includes('URGENCY'));
+    const behFlag = flags.find(f => f.id.includes('BEHAVIORAL'));
 
     return {
       sanitization: {
@@ -549,8 +568,8 @@
       },
       behavior: {
         text: 'Layer 3: Behavioral Analysis',
-        detail: 'Local baseline: Standard interaction pattern',
-        icon: 'fa-check-circle'
+        detail: behFlag ? behFlag.evidence : 'Local baseline: Standard interaction pattern',
+        icon: behFlag ? (behFlag.severity === 'critical' ? 'fa-times-circle' : 'fa-exclamation-triangle') : 'fa-check-circle'
       },
       nlp: {
         text: 'Layer 4: Heuristic Intent Analysis',
