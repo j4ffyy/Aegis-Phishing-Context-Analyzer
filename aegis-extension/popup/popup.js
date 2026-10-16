@@ -78,11 +78,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Whitelist Dashboard
+  // 4. Whitelist Admin Dashboard
   if (btnDashboard) {
     btnDashboard.addEventListener('click', () => {
       const dashboardUrl = chrome.runtime.getURL('whitelist/whitelist_dashboard.html');
       chrome.tabs.create({ url: dashboardUrl });
+      window.close();
+    });
+  }
+
+  // 5. SME Analytics Dashboard (PR-04)
+  const btnSmeDashboard = document.getElementById('btn-sme-dashboard');
+  if (btnSmeDashboard) {
+    btnSmeDashboard.addEventListener('click', () => {
+      const smeDashboardUrl = chrome.runtime.getURL('dashboard/dashboard.html');
+      chrome.tabs.create({ url: smeDashboardUrl });
       window.close();
     });
   }
