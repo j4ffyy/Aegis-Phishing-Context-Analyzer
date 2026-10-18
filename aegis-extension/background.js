@@ -428,6 +428,35 @@ async function checkVTStatus(emailHash) {
   return response.json();
 }
 
+/**
+ * Submits false-positive or confirmed threat feedback to backend (§PR-05).
+ * @param {object} feedbackData
+ * @returns {Promise<object>}
+ */
+async function submitFeedbackToBackend(feedbackData) {
+  const backendBaseUrl = await getBackendUrl();
+  const targetUrl = `${backendBaseUrl.replace(/\/+$/, '')}/api/v1/feedback`;
+
+  try {
+    const response = await fetchWithTimeout(
+      targetUrl,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedbackData || {})
+      },
+      CONFIG.NETWORK_TIMEOUT_MS
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (err) {
+    console.warn(`${LOG_PREFIX} Feedback submission to backend failed (offline/timeout):`, err.message);
+    return { ok: false, offline: true, error: err.message };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 7. Chrome Runtime Message Listener (MV3 Asynchronous Bridge)
 // ---------------------------------------------------------------------------
@@ -485,6 +514,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
     if (action === 'AEGIS_CLEAR_CACHE') {
       AegisCache.clear()
         .then(() => sendResponse({ success: true, message: 'Cache cleared successfully' }))
+        .catch((err) => sendResponse({ success: false, error: err.message }));
+      return true;
+    }
+
+    if (action === 'AEGIS_SUBMIT_FEEDBACK') {
+      submitFeedbackToBackend(payload)
+        .then((result) => sendResponse({ success: true, data: result }))
         .catch((err) => sendResponse({ success: false, error: err.message }));
       return true;
     }
