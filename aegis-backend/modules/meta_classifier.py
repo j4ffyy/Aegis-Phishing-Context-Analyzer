@@ -143,12 +143,21 @@ def generate_xai_rationale(
     vt_status: str,
     links_count: int,
     behavioral_meta: Optional[Dict[str, Any]] = None,
+    detected_language: Optional[str] = None,  # PR-06
 ) -> str:
     """
     Generates plain-language, multi-factor Explainable AI rationale synthesizing
     all 4 analytical defense layers into actionable guidance for SME employees.
     """
     evidence_points: List[str] = []
+
+    # 0. Language context hint (PR-06)
+    if detected_language in ("tl", "tl-en"):
+        lang_label = "Filipino (Tagalog)" if detected_language == "tl" else "Taglish (Filipino-English code-switching)"
+        evidence_points.append(
+            f"Email content was identified as {lang_label}. "
+            "Tagalog-language urgency and phishing patterns were evaluated alongside standard English indicators."
+        )
 
     # 1. Syntactic & Domain Flags (Layer 1)
     if flags:
@@ -353,6 +362,7 @@ def synthesize_assessment(
     vt_result: Optional[Dict[str, Any]] = None,
     behavioral_meta: Optional[Dict[str, Any]] = None,
     execution_time_ms: int = 0,
+    detected_language: Optional[str] = None,  # PR-06
 ) -> Dict[str, Any]:
     """
     Orchestrates 4-layer risk synthesis, risk tier classification, XAI generation,
@@ -395,6 +405,7 @@ def synthesize_assessment(
         vt_status=vt_status,
         links_count=len(urls),
         behavioral_meta=behavioral_meta,
+        detected_language=detected_language,  # PR-06
     )
 
     layers = build_layers_status(
