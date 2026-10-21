@@ -18,6 +18,7 @@ const LOG_PREFIX = '[Aegis::Background]';
 
 const CONFIG = {
   DEFAULT_BACKEND_URL: 'http://localhost:8000',
+  RENDER_BACKEND_URL:  'https://aegis-backend.onrender.com', // PR-07: production Render.com URL
   NETWORK_TIMEOUT_MS: 2000,          // 2.0-second network abort timeout per §5.1.4 & §3.1
   MAX_CACHE_ENTRIES: 100,            // LRU capacity ceiling per §5.1.5
   CACHE_TTL_MS: 7 * 24 * 60 * 60 * 1000, // 7-day TTL in milliseconds per §5.1.5
@@ -287,12 +288,23 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = CONFIG.NETWORK_TI
 }
 
 /**
- * Retrieves the currently configured backend endpoint URL.
+ * Retrieves the currently configured backend endpoint URL. (PR-07 updated)
+ *
+ * Resolution priority:
+ *   1. config.backendUrl (user-set override via popup settings)
+ *   2. CONFIG.RENDER_BACKEND_URL if config.useRender === true
+ *   3. CONFIG.DEFAULT_BACKEND_URL (http://localhost:8000) for local dev
+ *
+ * To switch to Render.com production backend, set { useRender: true } in
+ * chrome.storage.local under the 'aegis_config' key, OR set backendUrl
+ * directly to CONFIG.RENDER_BACKEND_URL.
  */
 async function getBackendUrl() {
   try {
     const config = (await storageAdapter.get(CONFIG.STORAGE_KEY_CONFIG)) || {};
-    return config.backendUrl || CONFIG.DEFAULT_BACKEND_URL;
+    if (config.backendUrl) return config.backendUrl;
+    if (config.useRender)  return CONFIG.RENDER_BACKEND_URL; // PR-07: production Render flag
+    return CONFIG.DEFAULT_BACKEND_URL;
   } catch {
     return CONFIG.DEFAULT_BACKEND_URL;
   }
