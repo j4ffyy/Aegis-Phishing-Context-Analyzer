@@ -1,0 +1,51 @@
+{
+  "total_samples": 200,
+  "tp": 88,
+  "tn": 100,
+  "fp": 0,
+  "fn": 12,
+  "accuracy": 94.0,
+  "precision": 100.0,
+  "recall": 88.0,
+  "f1_score": 93.62,
+  "fpr": 0.0,
+  "fnr": 12.0,
+  "latency_avg_ms": 56.49,
+  "latency_p50_ms": 48.53,
+  "latency_p95_ms": 59.77,
+  "latency_p99_ms": 81.63,
+  "evaluation_mode": "offline",
+  "backend_url": "N/A",
+  "dataset_path": "aegis-backend\\data\\test_dataset_pr08.json",
+  "errors_skipped": 0,
+  "baselines": {
+    "Gmail": {
+      "accuracy": 82.3,
+      "precision": 83.1,
+      "recall": 80.7,
+      "f1": 81.9,
+      "fpr": 4.1
+    },
+    "Outlook": {
+      "accuracy": 79.8,
+      "precision": 80.2,
+      "recall": 78.1,
+      "f1": 79.1,
+      "fpr": 5.8
+    },
+    "Yahoo": {
+      "accuracy": 76.4,
+      "precision": 77.0,
+      "recall": 75.2,
+      "f1": 76.1,
+      "fpr": 7.2
+    },
+    "Proton": {
+      "accuracy": 74.1,
+      "precision": 74.8,
+      "recall": 72.9,
+      "f1": 73.8,
+      "fpr": 8.4
+    }
+  }
+}

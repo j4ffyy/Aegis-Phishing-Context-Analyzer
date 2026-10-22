@@ -1,0 +1,40 @@
+=================================================================
+  AEGIS PHISHING ANALYZER -- MODEL EVALUATION REPORT (PR-08)
+=================================================================
+  Mode:           OFFLINE (local pipeline, VT skipped)
+  Dataset:        aegis-backend\data\test_dataset_pr08.json
+  Total Samples:  200 (100 phishing / 100 legitimate)
+
+  --- Classification Metrics --------------------------------
+  Accuracy:        94.00%
+  Precision:      100.00%
+  Recall:          88.00%
+  F1-Score:        93.62%
+  False Pos Rate:   0.00%
+  False Neg Rate:  12.00%
+
+  --- Response Latency --------------------------------------
+  Average:           56.5 ms
+  p50 (median):      48.5 ms
+  p95:               59.8 ms
+  p99:               81.6 ms
+
+  --- Comparison vs. Baseline Email Clients -----------------
+  System          Accuracy  Precision   Recall     F1    FPR
+  ---------------------------------------------------------
+  Gmail              82.3%      83.1%    80.7%  81.9%   4.1%
+  Outlook            79.8%      80.2%    78.1%  79.1%   5.8%
+  Yahoo              76.4%      77.0%    75.2%  76.1%   7.2%
+  Proton             74.1%      74.8%    72.9%  73.8%   8.4%
+  Aegis (this)      94.00%    100.00%   88.00% 93.62%  0.00%
+
+
+  Confusion Matrix (Rows=Actual, Cols=Predicted)
+  +-----------------+------------+------------+
+  |                 | Pred. SAFE | Pred. PHSH |
+  +-----------------+------------+------------+
+  | Actual LEGIT    |  TN=  100  |  FP=    0  |
+  | Actual PHISHING |  FN=   12  |  TP=   88  |
+  +-----------------+------------+------------+
+
+=================================================================
