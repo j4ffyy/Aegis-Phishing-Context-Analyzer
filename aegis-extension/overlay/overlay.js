@@ -65,6 +65,15 @@
           </div>
         </div>
 
+        <!-- PR-10: Degraded Offline Heuristic Mode Banner -->
+        <div class="aegis-degraded-mode-banner" id="aegis-degraded-mode-banner" style="display: none;">
+          <div class="aegis-degraded-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="aegis-degraded-content">
+            <div class="aegis-degraded-title">Offline Heuristic Mode</div>
+            <div class="aegis-degraded-msg">Protection running in Offline Heuristic Mode — relying on local behavioral baseline and cached threat rules.</div>
+          </div>
+        </div>
+
         <div class="aegis-analyzer-status" id="aegis-analyzer-status">
           <div class="aegis-spinner"></div>
           <p>Running Multi-Layered Analysis...</p>
@@ -184,6 +193,12 @@
                 </button>
               </div>
             </div>
+          </div>
+
+          <!-- PR-10: FAM Degraded Mode Notification Banner -->
+          <div class="aegis-fam-degraded-banner" id="aegis-fam-degraded-banner" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Protection running in Offline Heuristic Mode — relying on local behavioral baseline and cached threat rules.</span>
           </div>
 
           <div class="aegis-fam-body">
@@ -451,6 +466,9 @@
     get fbSubject()        { return document.getElementById('aegis-fb-subject'); },
     get fbNotes()          { return document.getElementById('aegis-fb-notes'); },
     get fbAddWhitelist()   { return document.getElementById('aegis-fb-add-whitelist'); },
+    // Degraded Mode Banners (PR-10)
+    get degradedBanner()    { return document.getElementById('aegis-degraded-mode-banner'); },
+    get famDegradedBanner() { return document.getElementById('aegis-fam-degraded-banner'); },
   };
 
   // ---------------------------------------------------------------------------
@@ -658,6 +676,12 @@
     el.riskLevel.textContent  = analysis.riskLevel;
     el.riskDesc.textContent   = analysis.desc;
 
+    // Toggle Degraded Offline Heuristic Mode Banner (PR-10)
+    const isDegraded = Boolean(analysis && (analysis._fallback || analysis._source === 'offline_fallback'));
+    if (el.degradedBanner) {
+      el.degradedBanner.style.display = isDegraded ? 'flex' : 'none';
+    }
+
     if (el.scoreCircle) {
       el.scoreCircle.className = `aegis-score-circle circle-${levelLower}`;
     }
@@ -733,7 +757,13 @@
     else                                        badge.classList.add('badge-critical');
 
     el.famSubtitle.textContent =
-      `Analyzed: ${emailContext.subject || '(No Subject)'} â€” ${emailContext.timestamp || 'Just now'}`;
+      `Analyzed: ${emailContext.subject || '(No Subject)'} — ${emailContext.timestamp || 'Just now'}`;
+
+    // Toggle FAM Degraded Offline Heuristic Mode Banner (PR-10)
+    const isFamDegraded = Boolean(analysis && (analysis._fallback || analysis._source === 'offline_fallback'));
+    if (el.famDegradedBanner) {
+      el.famDegradedBanner.style.display = isFamDegraded ? 'flex' : 'none';
+    }
 
     el.famGaugeScore.innerHTML = `${analysis.score}<span>%</span>`;
     el.famGaugeLabel.textContent = analysis.riskLevel;
@@ -1158,8 +1188,11 @@
                   `${LOG_PREFIX} Background bridge unreachable or error:`,
                   (!isExtensionContextValid() ? 'Extension context invalidated' : (chrome.runtime.lastError?.message || response?.error))
                 );
-                // Fallback directly to client-side heuristics engine
+                // Fallback directly to client-side heuristics engine (PR-10)
                 const fallback = generateStubAnalysis(currentEmailContext);
+                fallback._fallback = true;
+                fallback._source = 'offline_fallback';
+                fallback._fallbackReason = !isExtensionContextValid() ? 'Extension context invalidated' : (chrome.runtime.lastError?.message || response?.error || 'Backend bridge unreachable');
                 handleAnalysisCompletion(fallback);
                 return;
               }
@@ -1168,10 +1201,12 @@
               if (data && data._fallback) {
                 console.log(`${LOG_PREFIX} Background reported offline fallback. Reason:`, data._fallbackReason);
                 const fallback = generateStubAnalysis(currentEmailContext);
+                fallback._fallback = true;
+                fallback._source = 'offline_fallback';
                 fallback._fallbackReason = data._fallbackReason;
                 handleAnalysisCompletion(fallback);
               } else if (data && data.score !== undefined) {
-                // Remote backend or cached score â€” apply client-side auto-revocation override if present (Â§7.1)
+                // Remote backend or cached score — apply client-side auto-revocation override if present (§7.1)
                 if (currentEmailContext && currentEmailContext._whitelist && currentEmailContext._whitelist.revoked) {
                   const wl = currentEmailContext._whitelist;
                   data.score = 95;
@@ -1188,6 +1223,9 @@
               } else {
                 // Standard fallback
                 const fallback = generateStubAnalysis(currentEmailContext);
+                fallback._fallback = true;
+                fallback._source = 'offline_fallback';
+                fallback._fallbackReason = 'Incomplete response received';
                 handleAnalysisCompletion(fallback);
               }
             }
@@ -1195,12 +1233,18 @@
         } catch (err) {
           console.warn(`${LOG_PREFIX} Extension messaging threw (context invalidated), falling back to local heuristics:`, err);
           const fallback = generateStubAnalysis(currentEmailContext);
+          fallback._fallback = true;
+          fallback._source = 'offline_fallback';
+          fallback._fallbackReason = err.message || 'Messaging exception';
           handleAnalysisCompletion(fallback);
         }
       } else {
         // Direct local heuristic execution if extension runtime messaging is unavailable
         setTimeout(() => {
           const analysis = generateStubAnalysis(currentEmailContext);
+          analysis._fallback = true;
+          analysis._source = 'offline_fallback';
+          analysis._fallbackReason = 'Runtime messaging disconnected';
           handleAnalysisCompletion(analysis);
         }, 300);
       }

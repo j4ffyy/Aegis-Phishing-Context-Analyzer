@@ -417,6 +417,21 @@ async function checkBackendHealth() {
 }
 
 /**
+ * Probes the backend /api/v1/health endpoint to verify ML server connectivity (PR-10).
+ * @returns {Promise<object>} Health status payload
+ */
+async function checkBackendHealth() {
+  const backendBaseUrl = await getBackendUrl();
+  const targetUrl = `${backendBaseUrl.replace(/\/+$/, '')}/api/v1/health`;
+
+  const response = await fetchWithTimeout(targetUrl, { method: 'GET' }, CONFIG.NETWORK_TIMEOUT_MS);
+  if (!response.ok) {
+    throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
  * Polls backend for VirusTotal background scan status (§3.1 step 85-88).
  * @param {string} emailHash
  * @returns {Promise<object>}

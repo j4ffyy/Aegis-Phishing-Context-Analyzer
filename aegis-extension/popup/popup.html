@@ -49,7 +49,16 @@
         </div>
         <span class="status-tag">Real-Time</span>
       </div>
-      <p class="status-desc">Aegis is actively monitoring email threads for phishing indicators and domain mismatches.</p>
+      <p class="status-desc" id="status-desc">Aegis is actively monitoring email threads for phishing indicators and domain mismatches.</p>
+
+      <!-- PR-10: Live Backend Connectivity Probe Indicator -->
+      <div class="backend-status-row" id="backend-status-row">
+        <div class="backend-status-label-group">
+          <span class="backend-status-dot" id="backend-status-dot"></span>
+          <span class="backend-status-text" id="backend-status-text">Probing backend...</span>
+        </div>
+        <span class="backend-status-pill" id="backend-status-pill">PROBING</span>
+      </div>
     </section>
 
     <!-- Multi-Layer Defense Status -->
