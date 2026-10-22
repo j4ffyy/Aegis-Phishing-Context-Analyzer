@@ -57,7 +57,7 @@ logger = logging.getLogger(__name__)
 
 _CORS_ORIGIN_ENV    = os.getenv("CORS_ORIGIN", "").strip()
 _ENVIRONMENT        = os.getenv("ENVIRONMENT", "development").strip().lower()
-RENDER_BACKEND_URL  = "https://aegis-backend.onrender.com"  # PR-07: canonical production URL
+RENDER_BACKEND_URL  = "https://aegis-backend-oybm.onrender.com"  # PR-07: live production URL
 
 if _CORS_ORIGIN_ENV:
     # Explicit origin configured — strict production lockdown.
