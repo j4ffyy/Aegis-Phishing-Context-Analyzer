@@ -96,4 +96,60 @@ document.addEventListener('DOMContentLoaded', () => {
       window.close();
     });
   }
+
+  // 6. Backend Connectivity Live Probe (PR-10)
+  const backendDot  = document.getElementById('backend-status-dot');
+  const backendText = document.getElementById('backend-status-text');
+  const backendPill = document.getElementById('backend-status-pill');
+  const statusDesc  = document.getElementById('status-desc');
+
+  function setBackendStatus(isOnline) {
+    if (!backendDot || !backendText || !backendPill) return;
+
+    if (isOnline) {
+      backendDot.className = 'backend-status-dot online';
+      backendText.textContent = 'Remote ML Backend Connected';
+      backendPill.className = 'backend-status-pill online';
+      backendPill.textContent = 'ONLINE';
+      if (statusDesc) {
+        statusDesc.textContent = 'Aegis is actively monitoring email threads with multi-tier ML defense.';
+      }
+    } else {
+      backendDot.className = 'backend-status-dot offline';
+      backendText.textContent = 'Offline Heuristic Mode Active';
+      backendPill.className = 'backend-status-pill offline';
+      backendPill.textContent = 'OFFLINE MODE';
+      if (statusDesc) {
+        statusDesc.textContent = 'Protection running in Offline Heuristic Mode — relying on local behavioral baseline and cached threat rules.';
+      }
+    }
+  }
+
+  function checkBackendConnectivity() {
+    if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+      setBackendStatus(false);
+      return;
+    }
+
+    try {
+      chrome.runtime.sendMessage({ action: 'AEGIS_CHECK_HEALTH' }, (response) => {
+        if (chrome.runtime.lastError || !response || !response.success || (response.data && response.data.status !== 'healthy')) {
+          setBackendStatus(false);
+        } else {
+          setBackendStatus(true);
+        }
+      });
+    } catch {
+      setBackendStatus(false);
+    }
+  }
+
+  checkBackendConnectivity();
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    // Export helpers for headless testing if needed
+  };
+}
+

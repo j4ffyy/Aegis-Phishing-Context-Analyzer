@@ -1799,3 +1799,80 @@
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0px #000000;
 }
+
+/* ============================================================
+   PR-10: Graceful Degraded Offline Heuristic Mode Banners
+   ============================================================ */
+.aegis-overlay-root .aegis-degraded-mode-banner {
+  margin: 12px 16px 0 16px;
+  background-color: #fffbeb;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #000000;
+  flex-shrink: 0;
+  animation: aegis-banner-slide-in 0.25s ease-out;
+}
+
+.aegis-overlay-root .aegis-degraded-icon {
+  color: #b45309;
+  font-size: 1.1rem;
+  padding-top: 1px;
+  flex-shrink: 0;
+}
+
+.aegis-overlay-root .aegis-degraded-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.aegis-overlay-root .aegis-degraded-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #92400e;
+}
+
+.aegis-overlay-root .aegis-degraded-msg {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #451a03;
+}
+
+/* FAM Banner */
+.aegis-overlay-root .aegis-fam-degraded-banner {
+  background-color: #fff8e1;
+  border-bottom: 2px solid #000000;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #78350f;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.aegis-overlay-root .aegis-fam-degraded-banner i {
+  color: #d97706;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+@keyframes aegis-banner-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
