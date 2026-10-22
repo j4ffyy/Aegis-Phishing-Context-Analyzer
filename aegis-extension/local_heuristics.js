@@ -38,12 +38,25 @@
 
   // Protected brand identities for typosquatting & impersonation checks (PH & Global SMEs)
   const PROTECTED_BRANDS = [
+    // --- Philippine Banking & Finance ---
     { name: 'BDO Unibank', brand: 'bdo', domain: 'bdo.com.ph' },
     { name: 'Bank of the Philippine Islands', brand: 'bpi', domain: 'bpi.com.ph' },
     { name: 'Metrobank', brand: 'metrobank', domain: 'metrobank.com.ph' },
     { name: 'UnionBank', brand: 'unionbank', domain: 'unionbankph.com' },
     { name: 'GCash', brand: 'gcash', domain: 'gcash.com' },
     { name: 'Maya', brand: 'maya', domain: 'maya.ph' },
+    { name: 'Landbank', brand: 'landbank', domain: 'landbank.com' },
+    { name: 'RCBC', brand: 'rcbc', domain: 'rcbc.com' },
+    { name: 'Security Bank', brand: 'securitybank', domain: 'securitybank.com' },
+    { name: 'Palawan Pawnshop', brand: 'palawanpawnshop', domain: 'palawanpawnshop.com' },
+    // --- Philippine Government Services ---
+    { name: 'SSS', brand: 'sss', domain: 'sss.gov.ph' },
+    { name: 'PhilHealth', brand: 'philhealth', domain: 'philhealth.gov.ph' },
+    { name: 'Pag-IBIG Fund', brand: 'pagibig', domain: 'pagibigfund.gov.ph' },
+    // --- Philippine E-Commerce ---
+    { name: 'Shopee Philippines', brand: 'shopee', domain: 'shopee.ph' },
+    { name: 'Lazada Philippines', brand: 'lazada', domain: 'lazada.com.ph' },
+    // --- Global Tech & Finance ---
     { name: 'PayPal', brand: 'paypal', domain: 'paypal.com' },
     { name: 'Google', brand: 'google', domain: 'google.com' },
     { name: 'Microsoft', brand: 'microsoft', domain: 'microsoft.com' },
@@ -62,15 +75,27 @@
 
   const ARCHIVE_EXTENSIONS = new Set(['zip', 'rar', '7z', 'tar', 'gz']);
 
-  // Urgency & Coercion keyword patterns
+  // Urgency & Coercion keyword patterns — English + Tagalog/Taglish (PR-06)
   const URGENCY_PATTERNS = [
+    // --- English urgency patterns ---
     /\b(urgent(?:ly)?|immediate(?:ly)?|action required|immediate action)\b/i,
     /\b(account suspended|account blocked|account locked|access revoked|account terminated)\b/i,
     /\b(verify your (?:account|identity)|confirm your identity|verification required|re-activate)\b/i,
     /\b(unauthorized (?:login|access|transaction)|security breach|suspicious activity detected)\b/i,
     /\b(within 24 hours|within 48 hours|24 hours? left|limited time|final notice|expires (?:today|soon))\b/i,
     /\b(wire transfer|unauthorized payment|fraud alert|update billing|payment overdue)\b/i,
-    /\b(password expired|reset password immediately|click here to verify)\b/i
+    /\b(password expired|reset password immediately|click here to verify)\b/i,
+    // --- Tagalog / Taglish urgency patterns (PR-06) ---
+    /\b(i-verify|i-click|i-update|i-log\s+in|mag-log\s+in|mag-login)\b/i,
+    /\b(kailangan(?:\s+mo)?|agad(?:\s+na)?|ngayon\s+na|kaagad)\b/i,
+    /\b(account\s+mo|iyong\s+account|ang\s+iyong\s+account)\b/i,
+    /\b(piliin(?:\s+ang)?|pindutin(?:\s+ang)?|i-tap)\b/i,
+    /\b(na-block(?:\s+ang)?|naka-lock(?:\s+ang)?|na-suspend(?:\s+ang)?)\b/i,
+    /\b(i-confirm|kumpirmahin|patunayan(?:\s+ang)?)\b/i,
+    /\b(bayad(?:\s+na)?|bayaran(?:\s+agad)?|magbayad(?:\s+na)?)\b/i,
+    /\b(mag-update(?:\s+ng)?|i-renew|i-reactivate)\b/i,
+    /\b(libreng(?:\s+regalo)?|manalo(?:\s+ng)?|napili\s+kayo?)\b/i,
+    /\b(scam(?:\s+alert)?|huwag(?:\s+ibigay)?)\b/i,
   ];
 
   // ---------------------------------------------------------------------------

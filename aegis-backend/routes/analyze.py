@@ -79,6 +79,7 @@ class EmailPayload(BaseModel):
     emailHash: Optional[str] = Field(default=None, description="Client-derived SHA-256 hash")
     behavioralScore: Optional[int] = Field(default=None, description="Client-side behavioral anomaly score (0-100)")
     behavioral_meta: Optional[Dict[str, Any]] = Field(default=None, alias="_behavioral", description="Client-side behavioral context details")
+    detectedLanguage: Optional[str] = Field(default=None, description="Heuristic detected language code: 'en', 'tl', or 'tl-en' (Taglish). PR-06.")
 
 
 # ---------------------------------------------------------------------------
@@ -122,13 +123,58 @@ def extract_url_strings(links: List[Any]) -> List[str]:
 # Layer 1: Heuristics & Spoof Detection Engine
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# PR-06 — Philippine Brand & Multilingual Support
+# ---------------------------------------------------------------------------
+
+# Tagalog stopwords for lightweight language detection heuristic
+_TAGALOG_STOPWORDS = {
+    "ang", "ng", "mga", "sa", "na", "ay", "at", "ako", "siya", "kami",
+    "tayo", "kayo", "sila", "ito", "iyon", "dito", "doon", "nito", "noon",
+    "para", "pero", "kung", "kasi", "dahil", "paano", "bakit", "saan",
+    "kapag", "habang", "lamang", "lang", "po", "opo", "ho", "naman",
+    "pala", "yata", "talaga", "muli", "ulit", "din", "rin", "wala",
+    "hindi", "huwag", "mahal", "ingat", "pasensya", "salamat",
+}
+
+
+def detect_language(text: str) -> str:
+    """
+    Lightweight heuristic language detector (PR-06).
+    Counts Tagalog stopword hits over lowercased token set.
+    Returns: 'tl' (Filipino), 'tl-en' (Taglish), or 'en' (English/unknown).
+    """
+    tokens = set(re.findall(r"\b[a-zA-Z]+\b", text.lower()))
+    tl_hits = len(tokens & _TAGALOG_STOPWORDS)
+    total = max(len(tokens), 1)
+    ratio = tl_hits / total
+    if ratio >= 0.18:
+        return "tl"
+    elif ratio >= 0.06:
+        return "tl-en"
+    return "en"
+
+
 PROTECTED_BRANDS = [
+    # --- Philippine Banking & Finance ---
     {"name": "BDO Unibank", "brand": "bdo", "domain": "bdo.com.ph"},
     {"name": "BPI", "brand": "bpi", "domain": "bpi.com.ph"},
     {"name": "Metrobank", "brand": "metrobank", "domain": "metrobank.com.ph"},
     {"name": "UnionBank", "brand": "unionbank", "domain": "unionbankph.com"},
     {"name": "GCash", "brand": "gcash", "domain": "gcash.com"},
     {"name": "Maya", "brand": "maya", "domain": "maya.ph"},
+    {"name": "Landbank", "brand": "landbank", "domain": "landbank.com"},
+    {"name": "RCBC", "brand": "rcbc", "domain": "rcbc.com"},
+    {"name": "Security Bank", "brand": "securitybank", "domain": "securitybank.com"},
+    {"name": "Palawan Pawnshop", "brand": "palawanpawnshop", "domain": "palawanpawnshop.com"},
+    # --- Philippine Government Services ---
+    {"name": "SSS", "brand": "sss", "domain": "sss.gov.ph"},
+    {"name": "PhilHealth", "brand": "philhealth", "domain": "philhealth.gov.ph"},
+    {"name": "Pag-IBIG Fund", "brand": "pagibig", "domain": "pagibigfund.gov.ph"},
+    # --- Philippine E-Commerce ---
+    {"name": "Shopee Philippines", "brand": "shopee", "domain": "shopee.ph"},
+    {"name": "Lazada Philippines", "brand": "lazada", "domain": "lazada.com.ph"},
+    # --- Global Tech & Finance ---
     {"name": "PayPal", "brand": "paypal", "domain": "paypal.com"},
     {"name": "Google", "brand": "google", "domain": "google.com"},
     {"name": "Microsoft", "brand": "microsoft", "domain": "microsoft.com"},
@@ -137,8 +183,14 @@ PROTECTED_BRANDS = [
     {"name": "Netflix", "brand": "netflix", "domain": "netflix.com"},
 ]
 
+# ---------------------------------------------------------------------------
+# Urgency / Coercion Regex — English + Tagalog/Taglish (PR-06)
+# ---------------------------------------------------------------------------
+
 URGENCY_REGEX = re.compile(
-    r"\b(urgent(?:ly)?|immediate(?:ly)?|action required|immediate action|"
+    r"\b("
+    # --- English urgency patterns ---
+    r"urgent(?:ly)?|immediate(?:ly)?|action required|immediate action|"
     r"account suspended|account blocked|account locked|access revoked|account terminated|"
     r"verify your (?:account|identity)|confirm your identity|verification required|re-activate|verify now|"
     r"unauthorized (?:login|access|transaction)|security breach|suspicious activity(?: detected)?|"
@@ -147,7 +199,19 @@ URGENCY_REGEX = re.compile(
     r"past due|remit payment|payment required|unverified payment|discrepanc(?:y|ies)|"
     r"ledger records?|invoice statement|billing notice|settlement invoice|"
     r"password expired|reset password immediately|click here(?: to verify)?|"
-    r"mandatory review|immediate response required|failure to comply|deactivation notice)\b",
+    r"mandatory review|immediate response required|failure to comply|deactivation notice|"
+    # --- Tagalog / Taglish urgency patterns (PR-06) ---
+    r"i-verify|i-click|i-update|i-log in|mag-log in|mag-login|"
+    r"kailangan(?:\s+mo)?|agad(?:\s+na)?|ngayon na|kaagad|"
+    r"account mo|iyong account|ang iyong account|"
+    r"piliin(?:\s+ang)?|pindutin(?:\s+ang)?|i-tap|"
+    r"na-block(?:\s+ang)?|naka-lock(?:\s+ang)?|na-suspend(?:\s+ang)?|"
+    r"i-confirm|kumpirmahin|patunayan(?:\s+ang)?|"
+    r"bayad(?:\s+na)?|bayaran(?:\s+agad)?|magbayad(?:\s+na)?|"
+    r"mag-update(?:\s+ng)?|i-renew|i-reactivate|"
+    r"libreng(?:\s+regalo)?|manalo(?:\s+ng)?|napili kayo?|"
+    r"scam(?:\s+alert)?|huwag(?:\s+ibigay)?"
+    r")\b",
     re.IGNORECASE,
 )
 
@@ -215,16 +279,23 @@ def evaluate_heuristics(payload: EmailPayload) -> Dict[str, Any]:
                 })
                 break
 
-    # 2. Urgency keyword density
+    # 2. Urgency keyword density (English + Tagalog/Taglish — PR-06)
     full_text = f"{payload.subject or ''} {payload.bodyText or ''}"
     keyword_hits = URGENCY_REGEX.findall(full_text)
+
+    # PR-06: Language detection hint — stored on payload for XAI use
+    detected_lang = detect_language(full_text)
+    if not payload.detectedLanguage:
+        payload.detectedLanguage = detected_lang
+
     if keyword_hits:
         kw_penalty = min(len(keyword_hits) * 8, 30)
         score += kw_penalty
         unique_matches = list(set(k.lower() for k in keyword_hits))[:3]
+        lang_label = "Filipino/Taglish" if detected_lang in ("tl", "tl-en") else "English"
         flags.append({
             "title": "Urgency / Coercive Language",
-            "evidence": f"Found patterns: {', '.join(unique_matches)}",
+            "evidence": f"[{lang_label}] Detected patterns: {', '.join(unique_matches)}",
             "severity": "warn" if kw_penalty < 20 else "critical",
         })
 
@@ -411,9 +482,10 @@ def build_analysis_response(
     vt_result: Optional[Dict[str, Any]] = None,
     behavioral_meta: Optional[Dict[str, Any]] = None,
     execution_time_ms: int = 0,
+    detected_language: Optional[str] = None,  # PR-06
 ) -> Dict[str, Any]:
     """Constructs the canonical Aegis analysis payload compatible with the overlay via meta_classifier."""
-    return synthesize_assessment(
+    result = synthesize_assessment(
         email_hash=email_hash,
         s_heuristic=s_heuristic,
         s_nlp=s_nlp,
@@ -425,7 +497,11 @@ def build_analysis_response(
         vt_result=vt_result,
         behavioral_meta=behavioral_meta,
         execution_time_ms=execution_time_ms,
+        detected_language=detected_language,  # PR-06
     )
+    if detected_language:
+        result["detectedLanguage"] = detected_language  # PR-06: expose to frontend
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -590,6 +666,7 @@ async def analyze_email(
         vt_result=vt_result,
         behavioral_meta=payload.behavioral_meta,
         execution_time_ms=execution_time_ms,
+        detected_language=payload.detectedLanguage,  # PR-06
     )
 
     if vt_status == "completed":
