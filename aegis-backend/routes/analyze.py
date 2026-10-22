@@ -660,6 +660,159 @@ async def get_vt_status(email_hash: str) -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# PR-04: SME Analytics Dashboard — Detection Log & Stats Endpoints
+# ---------------------------------------------------------------------------
+
+# In-memory detection log (max 1000 entries, newest first)
+_detection_log: list[Dict[str, Any]] = []
+_DETECTION_LOG_MAX = 1000
+
+# In-memory false-positive feedback store
+_feedback_log: list[Dict[str, Any]] = []
+
+
+class LogResultPayload(BaseModel):
+    """Payload sent by extension to record each completed analysis result."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    emailHash: str       = Field(description="SHA-256 hash of the analysed email")
+    score:     int       = Field(ge=0, le=100, description="Composite Aegis risk score (0–100)")
+    riskLevel: str       = Field(description="Categorical tier: Safe | Warning | Critical")
+    sender:    str       = Field(default="[SENDER]", description="Sender email (PII-scrubbed)")
+    subject:   str       = Field(default="[SUBJECT]", description="Email subject (PII-scrubbed)")
+    source:    str       = Field(default="backend", description="backend | offline_fallback")
+    analyzedAt: Optional[str] = Field(default=None, description="ISO-8601 timestamp of the analysis")
+
+
+class FeedbackPayload(BaseModel):
+    """False-positive report submitted from the overlay UI."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    emailHash:    str = Field(description="Hash of the email being reported")
+    userVerdict:  str = Field(description="User's verdict: 'safe' | 'phishing'")
+    reportedAt:   Optional[str] = Field(default=None, description="ISO-8601 report timestamp")
+
+
+@router.post(
+    "/log-result",
+    summary="Log a completed analysis result to the detection store",
+    description=(
+        "Called by the Chrome extension after each analysis completes. "
+        "Stores a scrubbed summary in memory for the /stats and SME dashboard. "
+        "No raw email body or PII is stored."
+    ),
+)
+async def log_result(payload: LogResultPayload) -> Dict[str, Any]:
+    """Append one detection result entry to the in-memory log."""
+    import datetime as _dt
+
+    entry: Dict[str, Any] = {
+        "emailHash": payload.emailHash,
+        "score":     payload.score,
+        "riskLevel": payload.riskLevel,
+        "sender":    payload.sender,
+        "subject":   payload.subject,
+        "source":    payload.source,
+        "analyzedAt": payload.analyzedAt or _dt.datetime.utcnow().isoformat() + "Z",
+    }
+
+    _detection_log.insert(0, entry)
+
+    # Trim to max size
+    if len(_detection_log) > _DETECTION_LOG_MAX:
+        del _detection_log[_DETECTION_LOG_MAX:]
+
+    logger.info(
+        "Detection logged | hash=%s score=%d tier=%s",
+        payload.emailHash[:12], payload.score, payload.riskLevel,
+    )
+    return {"ok": True, "total_logged": len(_detection_log)}
+
+
+@router.get(
+    "/stats",
+    summary="Return aggregated detection statistics for the SME dashboard",
+    description=(
+        "Returns total counts per risk tier, false-positive report count, "
+        "and a 7-day bucket breakdown for the bar chart. No PII is exposed."
+    ),
+)
+async def get_stats() -> Dict[str, Any]:
+    """Return current aggregate statistics from the in-memory detection log."""
+    import datetime as _dt
+
+    total    = len(_detection_log)
+    critical = sum(1 for e in _detection_log if e.get("riskLevel") == "Critical")
+    warning  = sum(1 for e in _detection_log if e.get("riskLevel") == "Warning")
+    safe     = sum(1 for e in _detection_log if e.get("riskLevel") == "Safe")
+    fp_count = len(_feedback_log)
+
+    # 7-day daily buckets
+    today = _dt.date.today()
+    daily: Dict[str, Dict[str, int]] = {}
+    for i in range(6, -1, -1):
+        d = (today - _dt.timedelta(days=i)).isoformat()
+        daily[d] = {"Critical": 0, "Warning": 0, "Safe": 0}
+
+    for entry in _detection_log:
+        day = (entry.get("analyzedAt") or "")[:10]
+        if day in daily:
+            tier = entry.get("riskLevel", "Safe")
+            if tier in daily[day]:
+                daily[day][tier] += 1
+
+    return {
+        "total":    total,
+        "critical": critical,
+        "warning":  warning,
+        "safe":     safe,
+        "fp_reports": fp_count,
+        "daily_buckets": daily,
+    }
+
+
+@router.post(
+    "/feedback",
+    summary="Submit a false-positive (or confirmed phishing) feedback report",
+    description=(
+        "Stores the user's override verdict in memory. "
+        "If verdict is 'safe', a UI confirmation is returned so the extension "
+        "can suppress the warning overlay for this email hash."
+    ),
+)
+async def submit_feedback(payload: FeedbackPayload) -> Dict[str, Any]:
+    """Record user feedback and return a cache-override directive."""
+    import datetime as _dt
+
+    record: Dict[str, Any] = {
+        "emailHash":   payload.emailHash,
+        "userVerdict": payload.userVerdict,
+        "reportedAt":  payload.reportedAt or _dt.datetime.utcnow().isoformat() + "Z",
+    }
+    _feedback_log.append(record)
+
+    logger.info(
+        "Feedback received | hash=%s verdict=%s",
+        payload.emailHash[:12], payload.userVerdict,
+    )
+
+    # If user says safe, return an override score so the extension can patch its cache
+    override = None
+    if payload.userVerdict == "safe":
+        override = {
+            "score":      10,
+            "riskLevel":  "Safe",
+            "userOverride": True,
+        }
+
+    return {
+        "ok": True,
+        "total_feedback": len(_feedback_log),
+        "cacheOverride":  override,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Utility functions for testing
 # ---------------------------------------------------------------------------
 
@@ -667,3 +820,6 @@ def clear_analysis_store() -> None:
     """Clears in-memory stores (for automated tests)."""
     _analysis_store.clear()
     _in_flight_scans.clear()
+    _detection_log.clear()
+    _feedback_log.clear()
+

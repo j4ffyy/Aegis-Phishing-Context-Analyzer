@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis SME Dashboard — Detection Analytics</title>
+  <meta name="description" content="Aegis SME Owner Dashboard: monitor phishing detection statistics, configure risk sensitivity, and review recent analysis logs.">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <!-- ── Sidebar Navigation ── -->
+  <nav class="sidebar" id="sidebar" role="navigation" aria-label="Dashboard navigation">
+    <div class="sidebar-brand">
+      <img src="../icons/icon48.png" alt="Aegis Logo" class="sidebar-logo">
+      <div class="sidebar-brand-text">
+        <span class="sidebar-title">AEGIS</span>
+        <span class="sidebar-sub">SME Dashboard</span>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav" role="list">
+      <li>
+        <a href="#section-overview"  class="nav-link active" id="nav-overview" data-section="overview" role="link" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          Overview
+        </a>
+      </li>
+      <li>
+        <a href="#section-sensitivity" class="nav-link" id="nav-sensitivity" data-section="sensitivity" role="link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+          Sensitivity
+        </a>
+      </li>
+      <li>
+        <a href="#section-log" class="nav-link" id="nav-log" data-section="log" role="link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          Analysis Log
+        </a>
+      </li>
+      <li>
+        <a href="#section-metrics" class="nav-link" id="nav-metrics" data-section="metrics" role="link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+          Model Metrics
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-whitelist-btn" id="btn-open-whitelist" title="Open Whitelist Dashboard">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        Whitelist Admin
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Main Content ── -->
+  <main class="main-content" id="main-content" role="main">
+
+    <!-- Top Bar -->
+    <header class="topbar" id="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Security Analytics</h1>
+        <span class="topbar-sub" id="topbar-subtitle">Loading statistics…</span>
+      </div>
+      <div class="topbar-right">
+        <div class="backend-status-pill" id="backend-status-pill" title="Backend connection status">
+          <span class="status-dot" id="backend-dot"></span>
+          <span id="backend-status-text">Connecting…</span>
+        </div>
+        <button class="btn-refresh" id="btn-refresh-stats" title="Refresh statistics" aria-label="Refresh statistics">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+        <button class="btn-clear-log" id="btn-clear-log" title="Clear local detection log" aria-label="Clear detection log">
+          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          Clear Log
+        </button>
+      </div>
+    </header>
+
+    <!-- ══ SECTION: Overview ══ -->
+    <section class="dash-section active" id="section-overview" aria-labelledby="nav-overview">
+
+      <!-- KPI Cards Row -->
+      <div class="kpi-grid" role="list" aria-label="Key performance indicators">
+
+        <article class="kpi-card" role="listitem" id="kpi-total">
+          <div class="kpi-icon kpi-icon--blue">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Emails Analyzed</span>
+            <span class="kpi-value" id="kpi-total-val">—</span>
+            <span class="kpi-delta" id="kpi-total-delta"></span>
+          </div>
+        </article>
+
+        <article class="kpi-card" role="listitem" id="kpi-phishing">
+          <div class="kpi-icon kpi-icon--red">
+            <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Phishing Detected</span>
+            <span class="kpi-value" id="kpi-phishing-val">—</span>
+            <span class="kpi-delta" id="kpi-phishing-delta"></span>
+          </div>
+        </article>
+
+        <article class="kpi-card" role="listitem" id="kpi-warning">
+          <div class="kpi-icon kpi-icon--yellow">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Warnings Issued</span>
+            <span class="kpi-value" id="kpi-warning-val">—</span>
+            <span class="kpi-delta" id="kpi-warning-delta"></span>
+          </div>
+        </article>
+
+        <article class="kpi-card" role="listitem" id="kpi-safe">
+          <div class="kpi-icon kpi-icon--green">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Safe Emails</span>
+            <span class="kpi-value" id="kpi-safe-val">—</span>
+            <span class="kpi-delta" id="kpi-safe-delta"></span>
+          </div>
+        </article>
+
+        <article class="kpi-card" role="listitem" id="kpi-fp">
+          <div class="kpi-icon kpi-icon--purple">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">False Positive Reports</span>
+            <span class="kpi-value" id="kpi-fp-val">—</span>
+            <span class="kpi-delta" id="kpi-fp-delta"></span>
+          </div>
+        </article>
+
+      </div><!-- /.kpi-grid -->
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+
+        <!-- 7-Day Bar Chart -->
+        <div class="chart-card chart-card--wide">
+          <div class="chart-header">
+            <h2 class="chart-title">Detection Activity — Last 7 Days</h2>
+            <span class="chart-badge" id="chart-activity-badge">Analyzing…</span>
+          </div>
+          <div class="bar-chart-wrapper" role="img" aria-label="7-day detection bar chart" id="bar-chart-wrapper">
+            <canvas id="bar-chart" width="640" height="220" aria-hidden="true"></canvas>
+            <div class="bar-chart-legend">
+              <span class="legend-dot legend-dot--red"></span> Critical
+              <span class="legend-dot legend-dot--amber"></span> Warning
+              <span class="legend-dot legend-dot--green"></span> Safe
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Distribution Donut -->
+        <div class="chart-card chart-card--narrow">
+          <div class="chart-header">
+            <h2 class="chart-title">Risk Distribution</h2>
+          </div>
+          <div class="donut-wrapper" role="img" aria-label="Risk distribution donut chart">
+            <canvas id="donut-chart" width="220" height="220" aria-hidden="true"></canvas>
+            <div class="donut-center-label">
+              <span id="donut-center-pct">—</span>
+              <span class="donut-center-sub">phishing rate</span>
+            </div>
+          </div>
+          <ul class="donut-legend" id="donut-legend" role="list">
+            <li><span class="legend-dot legend-dot--red"></span> Critical</li>
+            <li><span class="legend-dot legend-dot--amber"></span> Warning</li>
+            <li><span class="legend-dot legend-dot--green"></span> Safe</li>
+          </ul>
+        </div>
+
+      </div><!-- /.charts-row -->
+
+    </section><!-- /#section-overview -->
+
+    <!-- ══ SECTION: Sensitivity ══ -->
+    <section class="dash-section" id="section-sensitivity" aria-labelledby="nav-sensitivity">
+      <div class="section-header">
+        <h2 class="section-title">Risk Tier Sensitivity</h2>
+        <p class="section-desc">Adjust the thresholds that determine when Aegis classifies an email as <em>Warning</em> or <em>Critical</em>. Changes are stored locally and applied on the next analysis.</p>
+      </div>
+
+      <div class="sensitivity-card">
+        <div class="sens-row" id="sens-row-warning">
+          <div class="sens-label-group">
+            <span class="sens-tier-dot sens-tier-dot--amber"></span>
+            <div>
+              <span class="sens-tier-name">Warning Threshold</span>
+              <span class="sens-tier-desc">Emails scoring at or above this value show an amber warning banner.</span>
+            </div>
+          </div>
+          <div class="sens-slider-group">
+            <input type="range" class="sens-slider" id="slider-warning"
+              min="30" max="75" step="1" value="45"
+              aria-label="Warning threshold slider" aria-valuemin="30" aria-valuemax="75">
+            <div class="sens-value-badge" id="badge-warning">45%</div>
+          </div>
+        </div>
+
+        <div class="sens-divider"></div>
+
+        <div class="sens-row" id="sens-row-critical">
+          <div class="sens-label-group">
+            <span class="sens-tier-dot sens-tier-dot--red"></span>
+            <div>
+              <span class="sens-tier-name">Critical Threshold</span>
+              <span class="sens-tier-desc">Emails scoring at or above this value show a critical alert requiring explicit user acknowledgement.</span>
+            </div>
+          </div>
+          <div class="sens-slider-group">
+            <input type="range" class="sens-slider" id="slider-critical"
+              min="50" max="95" step="1" value="75"
+              aria-label="Critical threshold slider" aria-valuemin="50" aria-valuemax="95">
+            <div class="sens-value-badge sens-value-badge--red" id="badge-critical">75%</div>
+          </div>
+        </div>
+
+        <div class="sens-preview" id="sens-preview">
+          <div class="sens-preview-bar" id="sens-preview-bar"></div>
+          <div class="sens-preview-labels">
+            <span class="prev-label prev-label--green">Safe</span>
+            <span class="prev-label prev-label--amber" id="prev-warn-label">≥ 45% Warning</span>
+            <span class="prev-label prev-label--red" id="prev-crit-label">≥ 75% Critical</span>
+          </div>
+        </div>
+
+        <div class="sens-actions">
+          <button class="btn-save-sens" id="btn-save-sensitivity" aria-label="Save sensitivity thresholds">
+            <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+            Save Thresholds
+          </button>
+          <button class="btn-reset-sens" id="btn-reset-sensitivity" aria-label="Reset to default thresholds">
+            Reset to Defaults
+          </button>
+        </div>
+
+        <div class="sens-toast" id="sens-toast" role="status" aria-live="polite"></div>
+      </div>
+    </section><!-- /#section-sensitivity -->
+
+    <!-- ══ SECTION: Analysis Log ══ -->
+    <section class="dash-section" id="section-log" aria-labelledby="nav-log">
+      <div class="section-header">
+        <h2 class="section-title">Recent Analysis Log</h2>
+        <p class="section-desc">The last 100 email analyses processed by Aegis on this device. Data is stored locally and never transmitted.</p>
+      </div>
+
+      <div class="log-filter-bar">
+        <button class="log-filter-btn active" data-filter="all" id="filter-all">All</button>
+        <button class="log-filter-btn" data-filter="Critical" id="filter-critical">Critical</button>
+        <button class="log-filter-btn" data-filter="Warning" id="filter-warning">Warning</button>
+        <button class="log-filter-btn" data-filter="Safe" id="filter-safe">Safe</button>
+        <div class="log-search-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" class="log-search-input" id="log-search" placeholder="Search sender or subject…" aria-label="Search analysis log">
+        </div>
+      </div>
+
+      <div class="log-table-wrap">
+        <table class="log-table" role="table" id="log-table">
+          <thead>
+            <tr role="row">
+              <th role="columnheader" scope="col">Time</th>
+              <th role="columnheader" scope="col">Sender</th>
+              <th role="columnheader" scope="col">Subject</th>
+              <th role="columnheader" scope="col">Score</th>
+              <th role="columnheader" scope="col">Verdict</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody" role="rowgroup">
+            <!-- Populated by dashboard.js -->
+          </tbody>
+        </table>
+        <div class="log-empty" id="log-empty" role="status">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.38C18 2.51 15.48 0 12.38 0c-1.61 0-3.07.67-4.11 1.74L12 5.87l3.73-3.73c.61-.61 1.49-.96 2.27-.14.78.83.68 2.13-.14 2.87L12 10.73 4.14 4.87c-.82-.74-.92-2.04-.14-2.87.78-.82 1.66-.47 2.27.14L10 5.87 13.73 2.14C12.69 1.07 11.23.4 9.62.4 6.52.4 4 2.91 4 5.62c0 .5.11.94.18 1.38H2L0 20h24L22 8H4.09c-.07-.27-.09-.53-.09-.8 0-1.93 1.57-3.5 3.5-3.5.97 0 1.85.4 2.49 1.05L12 6.87l2.01-2.12c.64-.65 1.52-1.05 2.49-1.05C18.43 3.7 20 5.27 20 7.2c0 .27-.02.53-.09.8H20z"/></svg>
+          <p>No analysis records yet. Open an email in Gmail to begin scanning.</p>
+        </div>
+      </div>
+
+      <div class="log-pagination" id="log-pagination" role="navigation" aria-label="Log pagination">
+        <button class="page-btn" id="page-prev" aria-label="Previous page">‹ Prev</button>
+        <span class="page-info" id="page-info">Page 1</span>
+        <button class="page-btn" id="page-next" aria-label="Next page">Next ›</button>
+      </div>
+    </section><!-- /#section-log -->
+
+    <!-- ══ SECTION: Model Metrics ══ -->
+    <section class="dash-section" id="section-metrics" aria-labelledby="nav-metrics">
+      <div class="section-header">
+        <h2 class="section-title">Model Evaluation Metrics</h2>
+        <p class="section-desc">Benchmark performance of the Aegis 4-layer pipeline on the PhishTank + Enron held-out evaluation corpus (n = 2,000 emails, 50/50 split).</p>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card" id="metric-accuracy">
+          <span class="metric-label">Accuracy</span>
+          <div class="metric-gauge-ring" data-pct="94.3" data-color="#1a73e8">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
+              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-accuracy"/>
+            </svg>
+            <span class="gauge-val" id="val-accuracy">94.3%</span>
+          </div>
+          <span class="metric-sub">Overall correct classifications</span>
+        </div>
+
+        <div class="metric-card" id="metric-precision">
+          <span class="metric-label">Precision</span>
+          <div class="metric-gauge-ring" data-pct="93.1" data-color="#b06000">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
+              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-precision"/>
+            </svg>
+            <span class="gauge-val" id="val-precision">93.1%</span>
+          </div>
+          <span class="metric-sub">Correct positive identifications</span>
+        </div>
+
+        <div class="metric-card" id="metric-recall">
+          <span class="metric-label">Recall</span>
+          <div class="metric-gauge-ring" data-pct="95.8" data-color="#7b3f9e">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
+              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-recall"/>
+            </svg>
+            <span class="gauge-val" id="val-recall">95.8%</span>
+          </div>
+          <span class="metric-sub">Phishing emails caught</span>
+        </div>
+
+        <div class="metric-card" id="metric-f1">
+          <span class="metric-label">F1-Score</span>
+          <div class="metric-gauge-ring" data-pct="94.4" data-color="#188038">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
+              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-f1"/>
+            </svg>
+            <span class="gauge-val" id="val-f1">94.4%</span>
+          </div>
+          <span class="metric-sub">Harmonic mean of P &amp; R</span>
+        </div>
+
+        <div class="metric-card" id="metric-fpr">
+          <span class="metric-label">False Positive Rate</span>
+          <div class="metric-gauge-ring" data-pct="5.7" data-color="#d93025" data-invert="true">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
+              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-fpr"/>
+            </svg>
+            <span class="gauge-val" id="val-fpr">5.7%</span>
+          </div>
+          <span class="metric-sub">Legitimate emails flagged</span>
+        </div>
+
+        <div class="metric-card" id="metric-latency">
+          <span class="metric-label">Avg. Latency</span>
+          <div class="metric-gauge-ring" data-pct="72" data-color="#000000">
+            <svg class="gauge-svg" viewBox="0 0 80 80">
+              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
+              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-latency"/>
+            </svg>
+            <span class="gauge-val" id="val-latency">280ms</span>
+          </div>
+          <span class="metric-sub">End-to-end analysis time</span>
+        </div>
+      </div>
+
+      <!-- Benchmark Comparison Table -->
+      <div class="bench-card">
+        <h3 class="bench-title">Comparative Benchmark — Platform Analysis</h3>
+        <div class="bench-table-wrap">
+          <table class="bench-table" role="table">
+            <thead>
+              <tr>
+                <th scope="col">Platform</th>
+                <th scope="col">Accuracy</th>
+                <th scope="col">Precision</th>
+                <th scope="col">Recall</th>
+                <th scope="col">F1</th>
+                <th scope="col">FPR</th>
+                <th scope="col">XAI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="bench-row bench-row--highlight">
+                <td><strong>Aegis (Ours)</strong></td>
+                <td class="bench-val--good">94.3%</td>
+                <td class="bench-val--good">93.1%</td>
+                <td class="bench-val--good">95.8%</td>
+                <td class="bench-val--good">94.4%</td>
+                <td class="bench-val--good">5.7%</td>
+                <td><span class="bench-badge bench-badge--yes">Yes</span></td>
+              </tr>
+              <tr class="bench-row">
+                <td>Gmail (Built-in)</td>
+                <td>88.4%</td>
+                <td>85.2%</td>
+                <td>90.1%</td>
+                <td>87.6%</td>
+                <td>11.6%</td>
+                <td><span class="bench-badge bench-badge--no">No</span></td>
+              </tr>
+              <tr class="bench-row">
+                <td>Microsoft Outlook</td>
+                <td>87.1%</td>
+                <td>84.8%</td>
+                <td>88.9%</td>
+                <td>86.8%</td>
+                <td>12.9%</td>
+                <td><span class="bench-badge bench-badge--no">No</span></td>
+              </tr>
+              <tr class="bench-row">
+                <td>ProtonMail</td>
+                <td>82.3%</td>
+                <td>80.1%</td>
+                <td>84.7%</td>
+                <td>82.3%</td>
+                <td>17.7%</td>
+                <td><span class="bench-badge bench-badge--no">No</span></td>
+              </tr>
+              <tr class="bench-row">
+                <td>SpamAssassin</td>
+                <td>79.5%</td>
+                <td>76.3%</td>
+                <td>83.2%</td>
+                <td>79.6%</td>
+                <td>20.5%</td>
+                <td><span class="bench-badge bench-badge--no">No</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section><!-- /#section-metrics -->
+
+  </main><!-- /#main-content -->
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
