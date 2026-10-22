@@ -266,9 +266,14 @@ def build_layers_status(
             auth_detail = f"Flagged: {f.get('title', 'Domain mismatch')}"
             break
 
-    # Layer 2: Attachment Intelligence
+    # Layer 2: Attachment Intelligence (PR-09)
+    has_malicious_hash = any("Malicious Attachment" in f.get("title", "") for f in flags)
     has_attachment_flag = any("Attachment" in f.get("title", "") for f in flags)
-    if has_attachment_flag:
+
+    if has_malicious_hash:
+        attach_icon = "fa-times-circle"
+        attach_detail = "VirusTotal confirmed malicious attachment malware signature"
+    elif has_attachment_flag:
         is_crit = any("Dangerous" in f.get("title", "") or f.get("severity") == "critical" for f in flags if "Attachment" in f.get("title", ""))
         if is_crit:
             attach_icon = "fa-times-circle"
@@ -276,6 +281,17 @@ def build_layers_status(
         else:
             attach_icon = "fa-exclamation-triangle"
             attach_detail = "Compressed archive attachment detected (inspection evasion risk)"
+    elif vt_result and vt_result.get("attachment_findings"):
+        findings = vt_result.get("attachment_findings", {}).get("findings", [])
+        if any(item.get("malicious") for item in findings):
+            attach_icon = "fa-times-circle"
+            attach_detail = "VirusTotal flagged malicious attachment file signature"
+        elif findings:
+            attach_icon = "fa-check-circle"
+            attach_detail = f"{len(findings)} attachment hash(es) verified clean by VirusTotal"
+        else:
+            attach_icon = "fa-check-circle"
+            attach_detail = "No dangerous attachment payloads detected"
     elif s_heuristic >= 30:
         attach_icon = "fa-minus-circle"
         attach_detail = "Elevated heuristic risk in attachments"
@@ -370,14 +386,27 @@ def synthesize_assessment(
     """
     is_pending = vt_status == "pending"
     has_links = len(urls) > 0
+    has_vt_targets = has_links or (vt_result and vt_result.get("attachment_findings")) or s_vt > 0
     final_score = synthesize_composite_score(
         s_heuristic=s_heuristic,
         s_nlp=s_nlp,
         s_behavioral=s_behavioral,
         s_vt=s_vt,
-        vt_pending=is_pending or not has_links,
+        vt_pending=is_pending or not has_vt_targets,
         critical_floor=True,
     )
+
+    # Critical Threat Floor for Confirmed Malicious Attachments (§6.5, PR-09):
+    # A confirmed malware payload must never be diluted into Warning or Safe
+    has_malicious_attachment = any("Malicious Attachment" in f.get("title", "") for f in flags) or (
+        vt_result and vt_result.get("attachment_findings", {}).get("has_malicious_attachment")
+    )
+    if has_malicious_attachment and final_score < 75:
+        logger.info(
+            "[MetaClassifier] Elevating score %d -> 75 due to confirmed malicious attachment payload",
+            final_score,
+        )
+        final_score = 75
 
     # Multi-Indicator Warning Threat Floor (§6.5):
     # If multiple distinct threat layers are flagged (e.g. suspicious attachment + urgency coercion),

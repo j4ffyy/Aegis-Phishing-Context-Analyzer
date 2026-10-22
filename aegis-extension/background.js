@@ -441,6 +441,30 @@ async function checkVTStatus(emailHash) {
 }
 
 /**
+ * Queries VirusTotal for an attachment file hash reputation (PR-09).
+ * @param {string} fileHash
+ * @returns {Promise<object>}
+ */
+async function checkVTHash(fileHash) {
+  if (!fileHash) {
+    throw new Error('Missing fileHash for VT hash check');
+  }
+
+  const backendBaseUrl = await getBackendUrl();
+  const targetUrl = `${backendBaseUrl.replace(/\/+$/, '')}/api/v1/vt-file-status/${encodeURIComponent(fileHash)}`;
+
+  const response = await fetchWithTimeout(targetUrl, { method: 'GET' }, CONFIG.NETWORK_TIMEOUT_MS);
+  if (!response.ok) {
+    if (response.status === 404) {
+      return { status: 'not_found', file_hash: fileHash, malicious: false };
+    }
+    throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
  * Submits false-positive or confirmed threat feedback to backend (§PR-05).
  * @param {object} feedbackData
  * @returns {Promise<object>}
@@ -537,6 +561,14 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
       return true;
     }
 
+    if (action === 'AEGIS_CHECK_VT_HASH') {
+      const fileHash = typeof payload === 'string' ? payload : payload?.fileHash;
+      checkVTHash(fileHash)
+        .then((result) => sendResponse({ success: true, data: result }))
+        .catch((err) => sendResponse({ success: false, error: err.message }));
+      return true;
+    }
+
     return false;
   });
 
@@ -558,7 +590,8 @@ const BackgroundBridgeAPI = {
   fetchWithTimeout,
   dispatchEmailAnalysis,
   checkBackendHealth,
-  checkVTStatus
+  checkVTStatus,
+  checkVTHash
 };
 
 if (typeof module !== 'undefined' && module.exports) {

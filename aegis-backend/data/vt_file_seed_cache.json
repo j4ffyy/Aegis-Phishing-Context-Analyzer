@@ -1,0 +1,47 @@
+{
+  "275a021bbfb341410736ae3d319e0666baeb82e9f91ceb857a142eb0ce3779b4": {
+    "hash": "275a021bbfb341410736ae3d319e0666baeb82e9f91ceb857a142eb0ce3779b4",
+    "malicious": true,
+    "positives": 62,
+    "total": 75,
+    "status": "malicious",
+    "threat_name": "EICAR-Test-Signature",
+    "type_description": "Standard Antivirus Test File"
+  },
+  "4f9543e3f7a4b0051e707e719546059c1901cb001b6b553655dc3858c56c2776": {
+    "hash": "4f9543e3f7a4b0051e707e719546059c1901cb001b6b553655dc3858c56c2776",
+    "malicious": true,
+    "positives": 58,
+    "total": 74,
+    "status": "malicious",
+    "threat_name": "Trojan.Emotet.BankingPayload",
+    "type_description": "Win32 Executable / Malicious DLL"
+  },
+  "8a8677c7f99997194abff87d1ef50fa15f5e3bc9b69998df4968fc2ad069a53f": {
+    "hash": "8a8677c7f99997194abff87d1ef50fa15f5e3bc9b69998df4968fc2ad069a53f",
+    "malicious": true,
+    "positives": 64,
+    "total": 75,
+    "status": "malicious",
+    "threat_name": "Ransom.Locky.Dropper",
+    "type_description": "Obfuscated Script / Dropper"
+  },
+  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "malicious": false,
+    "positives": 0,
+    "total": 75,
+    "status": "clean",
+    "threat_name": "None",
+    "type_description": "Empty Document / Benign File"
+  },
+  "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e": {
+    "hash": "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e",
+    "malicious": false,
+    "positives": 0,
+    "total": 74,
+    "status": "clean",
+    "threat_name": "None",
+    "type_description": "Microsoft Excel Spreadsheet / Verified Clean"
+  }
+}
