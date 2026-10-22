@@ -428,6 +428,28 @@
     flags.push(...attachResult.flags);
     totalPoints += attachResult.attachPoints;
 
+    // 5. SPF & DKIM Email Authentication Verification (PR-02)
+    if (emailContext.spfPass === false) {
+      flags.push({
+        id: 'RULE_SPF_FAIL',
+        title: 'SPF Authentication Failed',
+        severity: 'critical',
+        points: 25,
+        evidence: 'Sender domain failed Sender Policy Framework (SPF) validation.'
+      });
+      totalPoints += 25;
+    }
+    if (emailContext.dkimPass === false) {
+      flags.push({
+        id: 'RULE_DKIM_FAIL',
+        title: 'DKIM Signature Invalid',
+        severity: 'warning',
+        points: 20,
+        evidence: 'Email lacks valid DomainKeys Identified Mail (DKIM) cryptographic signature.'
+      });
+      totalPoints += 20;
+    }
+
     // Composite score capped at 100 per §6.1
     const finalScore = Math.min(100, Math.max(0, totalPoints));
 
@@ -502,7 +524,7 @@
     const hasCritical = flags.some(f => f.severity === 'critical');
     const hasWarning = flags.some(f => f.severity === 'warning');
 
-    const authFlag = flags.find(f => f.id.includes('SENDER') || f.id.includes('TYPO') || f.id.includes('SPOOF'));
+    const authFlag = flags.find(f => f.id.includes('SENDER') || f.id.includes('TYPO') || f.id.includes('SPOOF') || f.id.includes('SPF') || f.id.includes('DKIM'));
     const attachFlag = flags.find(f => f.id.includes('ATTACHMENT'));
     const linkFlag = flags.find(f => f.id.includes('LINK') || f.id.includes('IP') || f.id.includes('TLD'));
     const urgencyFlag = flags.find(f => f.id.includes('URGENCY'));
@@ -516,7 +538,7 @@
       auth: {
         text: 'Layer 1: Email Auth & Domain',
         detail: authFlag ? authFlag.title : 'Domain identity verified (Client Sandbox)',
-        icon: authFlag ? 'fa-exclamation-triangle' : 'fa-check-circle'
+        icon: authFlag ? (authFlag.severity === 'critical' ? 'fa-times-circle' : 'fa-exclamation-triangle') : 'fa-check-circle'
       },
       attach: {
         text: 'Layer 2: Attachment Intelligence',
