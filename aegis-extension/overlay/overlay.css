@@ -1473,3 +1473,329 @@
     max-height: 94vh;
   }
 }
+
+/* ============================================================
+   False Positive Feedback Dialog (PR-05)
+   Design System: Neo-brutalist (white card, 3px border, 8px drop-shadow)
+   ============================================================ */
+.aegis-overlay-root .aegis-fb-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: aegisFbFadeIn 0.18s ease;
+}
+
+@keyframes aegisFbFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.aegis-overlay-root .aegis-fb-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+}
+
+.aegis-overlay-root .aegis-fb-card {
+  position: relative;
+  width: 480px;
+  max-width: 94vw;
+  background-color: #ffffff;
+  border: 3px solid #000000;
+  box-shadow: 8px 8px 0px #000000;
+  font-family: 'Roboto', 'Inter', -apple-system, sans-serif;
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  animation: aegisFbScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes aegisFbScaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.aegis-overlay-root .aegis-fb-header {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #000000;
+}
+
+.aegis-overlay-root .aegis-fb-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.aegis-overlay-root .aegis-fb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #d97706;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border: 1.5px solid #ffffff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.aegis-overlay-root .aegis-fb-header h3 {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+}
+
+.aegis-overlay-root .aegis-fb-close-btn {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.1s ease;
+}
+
+.aegis-overlay-root .aegis-fb-close-btn:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.aegis-overlay-root .aegis-fb-body {
+  padding: 18px;
+  max-height: 72vh;
+  overflow-y: auto;
+}
+
+.aegis-overlay-root .aegis-fb-desc {
+  font-size: 11.5px;
+  color: #5f6368;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.aegis-overlay-root .aegis-fb-email-preview {
+  background-color: #f8f9fa;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.aegis-overlay-root .aegis-fb-preview-row {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.aegis-overlay-root .aegis-fb-preview-row:last-child {
+  margin-bottom: 0;
+}
+
+.aegis-overlay-root .aegis-fb-preview-label {
+  font-weight: 800;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5f6368;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.aegis-overlay-root .aegis-fb-preview-val {
+  font-weight: 700;
+  color: #000000;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aegis-overlay-root .aegis-fb-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #000000;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.aegis-overlay-root .aegis-fb-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.aegis-overlay-root .aegis-fb-radio-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.aegis-overlay-root .aegis-fb-radio-opt:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000000;
+  background-color: #f8f9fa;
+}
+
+.aegis-overlay-root .aegis-fb-radio-opt input[type="radio"] {
+  margin-top: 2px;
+  accent-color: #000000;
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+}
+
+.aegis-overlay-root .aegis-fb-radio-text strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #000000;
+  line-height: 1.25;
+}
+
+.aegis-overlay-root .aegis-fb-radio-text small {
+  display: block;
+  font-size: 10px;
+  color: #5f6368;
+  line-height: 1.3;
+  margin-top: 1px;
+}
+
+.aegis-overlay-root .aegis-fb-field {
+  margin-bottom: 12px;
+}
+
+.aegis-overlay-root .aegis-fb-textarea {
+  width: 100%;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 11px;
+  color: #000000;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.aegis-overlay-root .aegis-fb-textarea:focus {
+  border-color: #000000;
+  box-shadow: 3px 3px 0px #000000;
+}
+
+.aegis-overlay-root .aegis-fb-whitelist-check {
+  padding: 9px 12px;
+  background-color: #e6f4ea;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.aegis-overlay-root .aegis-fb-checkbox-opt {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.aegis-overlay-root .aegis-fb-checkbox-opt input[type="checkbox"] {
+  accent-color: #188038;
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+}
+
+.aegis-overlay-root .aegis-fb-check-text strong {
+  font-size: 11px;
+  font-weight: 800;
+  color: #188038;
+}
+
+.aegis-overlay-root .aegis-fb-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 3px solid #000000;
+  background-color: #f8f9fa;
+}
+
+.aegis-overlay-root .aegis-fb-btn-cancel {
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  color: #000000;
+  padding: 7px 14px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #000000;
+  transition: all 0.1s ease;
+}
+
+.aegis-overlay-root .aegis-fb-btn-cancel:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000000;
+  background-color: #eeeeee;
+}
+
+.aegis-overlay-root .aegis-fb-btn-submit {
+  background-color: #188038;
+  border: 2px solid #000000;
+  color: #ffffff;
+  padding: 7px 16px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px #000000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.1s ease;
+}
+
+.aegis-overlay-root .aegis-fb-btn-submit:hover {
+  background-color: #15803d;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.aegis-overlay-root .aegis-fb-btn-submit:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #000000;
+}

@@ -689,7 +689,11 @@ class FeedbackPayload(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     emailHash:    str = Field(description="Hash of the email being reported")
-    userVerdict:  str = Field(description="User's verdict: 'safe' | 'phishing'")
+    userVerdict:  str = Field(default="safe", description="User's verdict: 'safe' | 'phishing'")
+    reason:       Optional[str] = Field(default="trusted_partner", description="Reason: trusted_partner | expected_transaction | verified_content | other")
+    notes:        Optional[str] = Field(default="", description="Optional context notes")
+    sender:       Optional[str] = Field(default="", description="Sender email address")
+    subject:      Optional[str] = Field(default="", description="Email subject line")
     reportedAt:   Optional[str] = Field(default=None, description="ISO-8601 report timestamp")
 
 
@@ -787,23 +791,34 @@ async def submit_feedback(payload: FeedbackPayload) -> Dict[str, Any]:
     record: Dict[str, Any] = {
         "emailHash":   payload.emailHash,
         "userVerdict": payload.userVerdict,
+        "reason":      payload.reason,
+        "notes":       payload.notes,
+        "sender":      payload.sender,
+        "subject":     payload.subject,
         "reportedAt":  payload.reportedAt or _dt.datetime.utcnow().isoformat() + "Z",
     }
     _feedback_log.append(record)
 
     logger.info(
-        "Feedback received | hash=%s verdict=%s",
-        payload.emailHash[:12], payload.userVerdict,
+        "Feedback received | hash=%s verdict=%s reason=%s",
+        payload.emailHash[:12], payload.userVerdict, payload.reason,
     )
 
-    # If user says safe, return an override score so the extension can patch its cache
+    # If user says safe, update any matching entry in _detection_log
     override = None
     if payload.userVerdict == "safe":
         override = {
-            "score":      10,
-            "riskLevel":  "Safe",
+            "score":        10,
+            "riskLevel":    "Safe",
             "userOverride": True,
+            "feedbackReason": payload.reason,
         }
+        for entry in _detection_log:
+            if entry.get("emailHash") == payload.emailHash:
+                entry["userOverride"] = True
+                entry["riskLevel"] = "Safe"
+                entry["score"] = 10
+                entry["feedbackReason"] = payload.reason
 
     return {
         "ok": True,

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Aegis: AI-Powered Phishing Context Analyzer
  * Component: Overlay Controller
  */
@@ -290,6 +290,89 @@
           </div>
         </div>
       </div>
+
+      <!-- False Positive Feedback Dialog (PR-05) -->
+      <div class="aegis-fb-modal" id="aegis-fb-modal" role="dialog" aria-modal="true" aria-labelledby="aegis-fb-title" style="display: none;">
+        <div class="aegis-fb-backdrop" id="aegis-fb-backdrop"></div>
+        <div class="aegis-fb-card">
+          <div class="aegis-fb-header">
+            <div class="aegis-fb-header-left">
+              <span class="aegis-fb-badge"><i class="fas fa-flag"></i> FEEDBACK</span>
+              <h3 id="aegis-fb-title">Report False Positive</h3>
+            </div>
+            <button class="aegis-fb-close-btn" id="aegis-fb-close-btn" aria-label="Close dialog">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="aegis-fb-body">
+            <p class="aegis-fb-desc">
+              Was this email misclassified? Reporting false positives refines our local heuristics and updates your threat baseline.
+            </p>
+            <div class="aegis-fb-email-preview">
+              <div class="aegis-fb-preview-row">
+                <span class="aegis-fb-preview-label">SENDER:</span>
+                <span class="aegis-fb-preview-val" id="aegis-fb-sender">—</span>
+              </div>
+              <div class="aegis-fb-preview-row">
+                <span class="aegis-fb-preview-label">SUBJECT:</span>
+                <span class="aegis-fb-preview-val" id="aegis-fb-subject">—</span>
+              </div>
+            </div>
+
+            <label class="aegis-fb-label">Reason for override:</label>
+            <div class="aegis-fb-reasons">
+              <label class="aegis-fb-radio-opt">
+                <input type="radio" name="aegis-fb-reason" value="trusted_partner" checked>
+                <span class="aegis-fb-radio-text">
+                  <strong>Known & Trusted Contact</strong>
+                  <small>Recognized internal colleague, vendor, or client.</small>
+                </span>
+              </label>
+              <label class="aegis-fb-radio-opt">
+                <input type="radio" name="aegis-fb-reason" value="expected_transaction">
+                <span class="aegis-fb-radio-text">
+                  <strong>Expected Communication / Invoice</strong>
+                  <small>Anticipated payroll, purchase order, or billing notice.</small>
+                </span>
+              </label>
+              <label class="aegis-fb-radio-opt">
+                <input type="radio" name="aegis-fb-reason" value="verified_content">
+                <span class="aegis-fb-radio-text">
+                  <strong>Verified Links & Attachments</strong>
+                  <small>Hyperlinks and files were independently checked and safe.</small>
+                </span>
+              </label>
+              <label class="aegis-fb-radio-opt">
+                <input type="radio" name="aegis-fb-reason" value="other">
+                <span class="aegis-fb-radio-text">
+                  <strong>Other False Alarm</strong>
+                  <small>General benign email incorrectly flagged.</small>
+                </span>
+              </label>
+            </div>
+
+            <div class="aegis-fb-field">
+              <label class="aegis-fb-label" for="aegis-fb-notes">Additional Context (Optional):</label>
+              <textarea class="aegis-fb-textarea" id="aegis-fb-notes" placeholder="e.g. Regular monthly newsletter or known sub-contractor domain..." rows="2"></textarea>
+            </div>
+
+            <div class="aegis-fb-whitelist-check">
+              <label class="aegis-fb-checkbox-opt">
+                <input type="checkbox" id="aegis-fb-add-whitelist" checked>
+                <span class="aegis-fb-check-text">
+                  <strong>Always trust this sender</strong> (Add to SME Whitelist)
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="aegis-fb-footer">
+            <button class="aegis-fb-btn-cancel" id="aegis-fb-cancel-btn">Cancel</button>
+            <button class="aegis-fb-btn-submit" id="aegis-fb-submit-btn">
+              <i class="fas fa-check-circle"></i> Confirm &amp; Mark as Safe
+            </button>
+          </div>
+        </div>
+      </div>
     `;
 
     document.body.appendChild(root);
@@ -297,7 +380,7 @@
   }
 
   // ============================================================
-  // DOM Element References â€” resolved after injection
+  // DOM Element References — resolved after injection
   // ============================================================
 
   /**
@@ -358,6 +441,16 @@
     get famZoomReset()     { return document.getElementById('aegis-zoom-reset-btn'); },
     get famZoomLevel()     { return document.getElementById('aegis-zoom-level'); },
     get famBody()          { return document.querySelector('.aegis-overlay-root .aegis-fam-body'); },
+    // False Positive Feedback Modal (PR-05)
+    get fbModal()          { return document.getElementById('aegis-fb-modal'); },
+    get fbBackdrop()       { return document.getElementById('aegis-fb-backdrop'); },
+    get fbCloseBtn()       { return document.getElementById('aegis-fb-close-btn'); },
+    get fbCancelBtn()      { return document.getElementById('aegis-fb-cancel-btn'); },
+    get fbSubmitBtn()      { return document.getElementById('aegis-fb-submit-btn'); },
+    get fbSender()         { return document.getElementById('aegis-fb-sender'); },
+    get fbSubject()        { return document.getElementById('aegis-fb-subject'); },
+    get fbNotes()          { return document.getElementById('aegis-fb-notes'); },
+    get fbAddWhitelist()   { return document.getElementById('aegis-fb-add-whitelist'); },
   };
 
   // ---------------------------------------------------------------------------
@@ -823,7 +916,182 @@
         }
       }
     } catch (e) {}
-    setFamZoom(saved);
+  // ---------------------------------------------------------------------------
+  // False-Positive Feedback Loop & Local Detection Logging (PR-04/PR-05)
+  // ---------------------------------------------------------------------------
+  const DETECTION_LOG_KEY = 'aegis_detection_log';
+  const FEEDBACK_LOG_KEY = 'aegis_feedback_log';
+
+  function logDetectionResult(emailCtx, analysis) {
+    if (!emailCtx || !analysis) return;
+    const emailHash = analysis.emailHash || emailCtx.emailHash || '';
+    if (!emailHash) return;
+
+    const entry = {
+      emailHash: emailHash,
+      score: typeof analysis.score === 'number' ? analysis.score : 0,
+      riskLevel: analysis.riskLevel || 'Safe',
+      sender: emailCtx.senderEmail || '[SENDER]',
+      subject: emailCtx.subject || '[SUBJECT]',
+      source: analysis._source || 'local',
+      analyzedAt: new Date().toISOString(),
+      userOverride: !!analysis._userOverride,
+    };
+
+    if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get([DETECTION_LOG_KEY], (res) => {
+        let list = (res && res[DETECTION_LOG_KEY]) || [];
+        const existingIdx = list.findIndex(e => e.emailHash === emailHash);
+        if (existingIdx !== -1) {
+          list[existingIdx] = Object.assign({}, list[existingIdx], entry);
+        } else {
+          list.unshift(entry);
+        }
+        if (list.length > 100) list = list.slice(0, 100);
+        chrome.storage.local.set({ [DETECTION_LOG_KEY]: list });
+      });
+    }
+
+    if (isExtensionContextValid() && chrome.runtime && chrome.runtime.sendMessage) {
+      try {
+        chrome.runtime.sendMessage({
+          action: 'AEGIS_LOG_RESULT',
+          payload: entry
+        });
+      } catch (_) {}
+    }
+  }
+
+  function openFeedbackModal() {
+    if (!currentEmailContext) return;
+    if (el.fbSender)  el.fbSender.textContent = currentEmailContext.senderEmail || '—';
+    if (el.fbSubject) el.fbSubject.textContent = currentEmailContext.subject || '(No subject)';
+    if (el.fbNotes)   el.fbNotes.value = '';
+    const firstRadio = document.querySelector('input[name="aegis-fb-reason"][value="trusted_partner"]');
+    if (firstRadio) firstRadio.checked = true;
+    if (el.fbAddWhitelist) el.fbAddWhitelist.checked = true;
+    if (el.fbModal) el.fbModal.style.display = 'flex';
+  }
+
+  function closeFeedbackModal() {
+    if (el.fbModal) el.fbModal.style.display = 'none';
+  }
+
+  function submitFeedbackModal() {
+    if (!currentEmailContext) return;
+
+    const selectedRadio = document.querySelector('input[name="aegis-fb-reason"]:checked');
+    const reason = selectedRadio ? selectedRadio.value : 'trusted_partner';
+    const notes = (el.fbNotes?.value || '').trim();
+    const addToWhitelist = el.fbAddWhitelist ? el.fbAddWhitelist.checked : false;
+    const emailHash = currentEmailContext._lastAnalysis?.emailHash || currentEmailContext.emailHash || '';
+
+    const fbPayload = {
+      emailHash: emailHash,
+      userVerdict: 'safe',
+      reason: reason,
+      notes: notes,
+      sender: currentEmailContext.senderEmail || '',
+      subject: currentEmailContext.subject || '',
+      reportedAt: new Date().toISOString(),
+    };
+
+    // 1. Update detection log and feedback log in local storage
+    if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get([DETECTION_LOG_KEY, FEEDBACK_LOG_KEY], (res) => {
+        let detList = (res && res[DETECTION_LOG_KEY]) || [];
+        const matchIdx = detList.findIndex(e => e.emailHash === emailHash);
+        if (matchIdx !== -1) {
+          detList[matchIdx].userOverride = true;
+          detList[matchIdx].riskLevel = 'Safe';
+          detList[matchIdx].score = 10;
+          detList[matchIdx].feedbackReason = reason;
+        } else {
+          detList.unshift({
+            emailHash: emailHash,
+            score: 10,
+            riskLevel: 'Safe',
+            sender: currentEmailContext.senderEmail || '',
+            subject: currentEmailContext.subject || '(No subject)',
+            source: 'user_override',
+            analyzedAt: new Date().toISOString(),
+            userOverride: true,
+            feedbackReason: reason,
+          });
+        }
+        if (detList.length > 100) detList = detList.slice(0, 100);
+
+        let fbList = (res && res[FEEDBACK_LOG_KEY]) || [];
+        fbList.unshift(fbPayload);
+        if (fbList.length > 100) fbList = fbList.slice(0, 100);
+
+        chrome.storage.local.set({
+          [DETECTION_LOG_KEY]: detList,
+          [FEEDBACK_LOG_KEY]: fbList
+        });
+      });
+    }
+
+    // 2. Add to Whitelist if requested
+    if (addToWhitelist && currentEmailContext.senderEmail) {
+      if (typeof window.AegisWhitelist !== 'undefined' && typeof window.AegisWhitelist.addWhitelistEntry === 'function') {
+        window.AegisWhitelist.addWhitelistEntry({
+          email: currentEmailContext.senderEmail,
+          displayName: currentEmailContext.senderName || currentEmailContext.senderEmail,
+          role: 'Trusted Partner',
+          department: 'Whitelisted Senders',
+          notes: `Whitelisted via False Positive Feedback (${reason})`
+        }).catch((err) => console.warn(`${LOG_PREFIX} Whitelist add error:`, err));
+      }
+    }
+
+    // 3. Dispatch to background bridge
+    if (isExtensionContextValid() && chrome.runtime && chrome.runtime.sendMessage) {
+      try {
+        chrome.runtime.sendMessage({
+          action: 'AEGIS_SUBMIT_FEEDBACK',
+          payload: fbPayload
+        });
+      } catch (_) {}
+    }
+
+    // 4. Update the active analysis in-place
+    const updatedAnalysis = Object.assign({}, currentEmailContext._lastAnalysis, {
+      score: 10,
+      riskLevel: 'Safe',
+      riskClass: 'threat-safe',
+      desc: 'Marked as safe by user override (False Positive reported).',
+      _userOverride: true,
+      xai: `[USER OVERRIDE: SAFE] Email reported as benign (${reason}). Aegis has adjusted the threat score and updated your detection telemetry.`
+    });
+    if (updatedAnalysis.layers) {
+      updatedAnalysis.layers.behavior = {
+        text: 'Layer 3: Behavioral Analysis',
+        detail: 'User Verified Benign (Override)',
+        icon: 'fa-check-circle'
+      };
+    }
+    currentEmailContext._lastAnalysis = updatedAnalysis;
+
+    // 5. Update UI
+    populateAnalysis(updatedAnalysis);
+    if (el.fam && el.fam.classList.contains('open')) {
+      openFullAnalysisModal(currentEmailContext, updatedAnalysis);
+    }
+
+    // 6. Close feedback modal
+    closeFeedbackModal();
+
+    if (el.reportBtn) {
+      const orig = el.reportBtn.innerHTML;
+      el.reportBtn.innerHTML = '<i class="fas fa-check"></i> Safe (Reported)';
+      setTimeout(() => { if (el.reportBtn) el.reportBtn.innerHTML = orig; }, 3000);
+    }
+    if (el.famReportBtn) {
+      const orig = el.famReportBtn.innerHTML;
+      el.famReportBtn.innerHTML = '<i class="fas fa-check"></i> Safe (Reported)';
+      setTimeout(() => { if (el.famReportBtn) el.famReportBtn.innerHTML = orig; }, 3000);
+    }
   }
 
   function attachEventListeners() {
@@ -869,8 +1137,9 @@
         populateAnalysis(analysis);
         showResults();
         currentEmailContext._lastAnalysis = analysis;
+        logDetectionResult(currentEmailContext, analysis);
 
-        // Async score fold-in initiation (Â§3.1 step 83-92, Milestone 2.5)
+        // Async score fold-in initiation (§3.1 step 83-92, Milestone 2.5)
         if (analysis && analysis.vt_status === 'pending') {
           const emailHash = analysis.emailHash || currentEmailContext.emailHash;
           startVTPolling(emailHash, analysis);
@@ -1007,9 +1276,7 @@
     });
 
     el.reportBtn.addEventListener('click', function () {
-      const orig = this.innerHTML;
-      this.innerHTML = '<i class="fas fa-check"></i> Reported!';
-      setTimeout(() => { this.innerHTML = orig; }, 2000);
+      openFeedbackModal();
     });
 
     el.famWhitelistBtn.addEventListener('click', function () {
@@ -1036,10 +1303,14 @@
     });
 
     el.famReportBtn.addEventListener('click', function () {
-      const orig = this.innerHTML;
-      this.innerHTML = '<i class="fas fa-check"></i> Reported!';
-      setTimeout(() => { this.innerHTML = orig; closeFullAnalysisModal(); }, 1800);
+      openFeedbackModal();
     });
+
+    // Feedback Modal Controls (PR-05)
+    if (el.fbCloseBtn)  el.fbCloseBtn.addEventListener('click', closeFeedbackModal);
+    if (el.fbCancelBtn) el.fbCancelBtn.addEventListener('click', closeFeedbackModal);
+    if (el.fbBackdrop)  el.fbBackdrop.addEventListener('click', closeFeedbackModal);
+    if (el.fbSubmitBtn) el.fbSubmitBtn.addEventListener('click', submitFeedbackModal);
 
     console.log(`${LOG_PREFIX} Event listeners attached.`);
   }
