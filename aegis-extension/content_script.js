@@ -402,27 +402,69 @@
     return Math.min(linear, 24 - linear);
   }
 
+  var SUSPICIOUS_BEHAVIORAL_EXTENSIONS = new Set([
+    'zip', 'rar', '7z', 'tar', 'gz', 'iso', 'img',
+    'exe', 'scr', 'vbs', 'bat', 'cmd', 'js', 'wsf', 'ps1', 'hta', 'html', 'htm'
+  ]);
+
+  function extractExtension(filename) {
+    if (!filename || typeof filename !== 'string') return '';
+    var parts = filename.toLowerCase().trim().split('.');
+    return parts.length > 1 ? parts.pop() : '';
+  }
+
   /**
-   * Records a sender interaction in the behavioral baseline store.
-   * Appends current hour to hoursSeen ring (capped at 50 entries).
+   * Records a sender interaction in the behavioral baseline store (§6.4, PR-03).
+   * Persists interaction count, hours ring, days ring, and known attachment extensions.
+   * All data strictly preserved in client-side storage per RA 10173.
    *
    * @param {string} senderEmail
-   * @param {number} [hourOfDay] defaults to current local hour
+   * @param {number} [hourOfDay] defaults to current local hour (0-23)
+   * @param {number} [dayOfWeek] defaults to current local day (0-6)
+   * @param {Array<string>} [attachmentNames] list of attachment filenames
    * @returns {Promise<void>}
    */
-  function updateBehavioralBaseline(senderEmail, hourOfDay) {
+  function updateBehavioralBaseline(senderEmail, hourOfDay, dayOfWeek, attachmentNames) {
     if (!senderEmail) return Promise.resolve();
     var hour = (hourOfDay !== undefined && hourOfDay !== null) ? Math.floor(hourOfDay) % 24 : new Date().getHours();
+    var day = (dayOfWeek !== undefined && dayOfWeek !== null) ? Math.floor(dayOfWeek) % 7 : new Date().getDay();
+    var attachList = Array.isArray(attachmentNames) ? attachmentNames : [];
+
     return behavioralStorage.get().then(function (store) {
       var key = senderEmail.toLowerCase().trim();
-      var rec = store[key] || { interactionCount: 0, hoursSeen: [], lastSeen: 0 };
+      var rec = store[key] || {
+        interactionCount: 0,
+        hoursSeen: [],
+        daysSeen: [],
+        knownExtensions: [],
+        hasSentAttachments: false,
+        lastSeen: 0
+      };
+
       rec.interactionCount += 1;
+      if (!Array.isArray(rec.hoursSeen)) rec.hoursSeen = [];
       rec.hoursSeen.push(hour);
       if (rec.hoursSeen.length > 50) rec.hoursSeen = rec.hoursSeen.slice(rec.hoursSeen.length - 50);
+
+      if (!Array.isArray(rec.daysSeen)) rec.daysSeen = [];
+      rec.daysSeen.push(day);
+      if (rec.daysSeen.length > 50) rec.daysSeen = rec.daysSeen.slice(rec.daysSeen.length - 50);
+
+      if (!Array.isArray(rec.knownExtensions)) rec.knownExtensions = [];
+      if (attachList.length > 0) {
+        rec.hasSentAttachments = true;
+        attachList.forEach(function (att) {
+          var ext = extractExtension(att);
+          if (ext && rec.knownExtensions.indexOf(ext) === -1) {
+            rec.knownExtensions.push(ext);
+          }
+        });
+      }
+
       rec.lastSeen = Date.now();
       store[key] = rec;
       return behavioralStorage.set(store).then(function () {
-        console.log(LOG_PREFIX + ' [Behavioral] Updated ' + key + ': count=' + rec.interactionCount + ' hour=' + hour);
+        console.log(LOG_PREFIX + ' [Behavioral] Updated ' + key + ': count=' + rec.interactionCount + ' hour=' + hour + ' day=' + day + ' exts=[' + rec.knownExtensions.join(',') + ']');
       });
     }).catch(function (err) {
       console.warn(LOG_PREFIX + ' [Behavioral] updateBehavioralBaseline error:', err);
@@ -430,36 +472,152 @@
   }
 
   /**
-   * Computes S_behavioral per §6.4 scoring table.
+   * Computes multi-factor Layer 3 behavioral score S_behavioral (§6.4, PR-03).
    *
-   * count === 0                    -> 25  (first_time_sender)
-   * count < 3                      -> 15  (unfamiliar_sender)
-   * 3 <= count < 5                 ->  5  (warming_up)
-   * count >= 5, minDist > 6h       -> 20  (off_hours_anomaly)
-   * count >= 5, minDist <= 6h      ->  0  (established_on_schedule)
+   * Scoring factors:
+   * 1. Novelty baseline:
+   *    count === 0                    -> 25  (first_time_sender)
+   *    count < 3                      -> 15  (unfamiliar_sender)
+   *    3 <= count < 5                 ->  5  (warming_up)
+   *    count >= 5                     ->  0  (established)
+   * 2. Off-hours timing anomaly:
+   *    count >= 5, minDist > 6h       -> +20 (off_hours_anomaly)
+   * 3. Day-of-week anomaly:
+   *    count >= 5, weekend transmission from weekday-only sender -> +10 (weekend_anomaly)
+   * 4. Attachment extension anomaly:
+   *    count >= 3, unexpected archive/script extension -> +15 (novel_attachment_anomaly)
    *
    * @param {string} senderEmail
    * @param {number} [hourOfDay] defaults to current local hour
-   * @returns {Promise<{score:number, reason:string, interactionCount:number, minCircularDistanceH?:number}>}
+   * @param {number} [dayOfWeek] defaults to current local day
+   * @param {Array<string>} [attachmentNames] attachments in current email
+   * @returns {Promise<Object>} Behavioral score, primary reason, telemetry metadata
    */
-  function scoreBehavioral(senderEmail, hourOfDay) {
-    var DEFAULT = { score: 15, reason: 'unknown_sender', interactionCount: 0 };
+  function scoreBehavioral(senderEmail, hourOfDay, dayOfWeek, attachmentNames) {
+    var DEFAULT = {
+      score: 15,
+      reason: 'unknown_sender',
+      reasons: ['unknown_sender'],
+      interactionCount: 0,
+      minCircularDistanceH: null,
+      dayOfWeek: null,
+      isWeekend: false,
+      hasNovelAttachment: false,
+      novelExtensions: []
+    };
     if (!senderEmail) return Promise.resolve(DEFAULT);
+
     var hour = (hourOfDay !== undefined && hourOfDay !== null) ? Math.floor(hourOfDay) % 24 : new Date().getHours();
+    var day = (dayOfWeek !== undefined && dayOfWeek !== null) ? Math.floor(dayOfWeek) % 7 : new Date().getDay();
+    var isWeekend = (day === 0 || day === 6);
+    var attachList = Array.isArray(attachmentNames) ? attachmentNames : [];
+    var currentExtensions = attachList.map(extractExtension).filter(Boolean);
+
     return behavioralStorage.get().then(function (store) {
       var key = senderEmail.toLowerCase().trim();
       var rec = store[key];
-      if (!rec || rec.interactionCount === 0) return { score: 25, reason: 'first_time_sender', interactionCount: 0 };
-      var count = rec.interactionCount;
-      var hoursSeen = rec.hoursSeen || [];
-      if (count < 3) return { score: 15, reason: 'unfamiliar_sender', interactionCount: count };
-      if (count < BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS) return { score: 5, reason: 'warming_up', interactionCount: count };
-      var dists = hoursSeen.map(function (h) { return circularHourDistance(hour, h); });
-      var minDist = dists.length > 0 ? Math.min.apply(null, dists) : BEHAVIORAL_OFF_HOURS_THRESHOLD_H + 1;
-      if (minDist > BEHAVIORAL_OFF_HOURS_THRESHOLD_H) {
-        return { score: 20, reason: 'off_hours_anomaly', interactionCount: count, minCircularDistanceH: Math.round(minDist * 10) / 10 };
+
+      // 1. Novelty Scoring
+      if (!rec || rec.interactionCount === 0) {
+        return {
+          score: 25,
+          reason: 'first_time_sender',
+          reasons: ['first_time_sender'],
+          interactionCount: 0,
+          minCircularDistanceH: null,
+          dayOfWeek: day,
+          isWeekend: isWeekend,
+          hasNovelAttachment: false,
+          novelExtensions: []
+        };
       }
-      return { score: 0, reason: 'established_on_schedule', interactionCount: count, minCircularDistanceH: Math.round(minDist * 10) / 10 };
+
+      var count = rec.interactionCount;
+      var hoursSeen = Array.isArray(rec.hoursSeen) ? rec.hoursSeen : [];
+      var daysSeen = Array.isArray(rec.daysSeen) ? rec.daysSeen : [];
+      var knownExts = Array.isArray(rec.knownExtensions) ? rec.knownExtensions : [];
+
+      if (count < 3) {
+        return {
+          score: 15,
+          reason: 'unfamiliar_sender',
+          reasons: ['unfamiliar_sender'],
+          interactionCount: count,
+          minCircularDistanceH: null,
+          dayOfWeek: day,
+          isWeekend: isWeekend,
+          hasNovelAttachment: false,
+          novelExtensions: []
+        };
+      }
+
+      var noveltyBase = 0;
+      var reasons = [];
+
+      if (count < BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS) {
+        noveltyBase = 5;
+        reasons.push('warming_up');
+      } else {
+        reasons.push('established_sender');
+      }
+
+      var penalty = 0;
+
+      // 2. Off-Hours Timing Anomaly (Circular Hour Distance)
+      var minDist = null;
+      if (count >= BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS && hoursSeen.length > 0) {
+        var dists = hoursSeen.map(function (h) { return circularHourDistance(hour, h); });
+        minDist = Math.min.apply(null, dists);
+        if (minDist > BEHAVIORAL_OFF_HOURS_THRESHOLD_H) {
+          penalty += 20;
+          reasons.push('off_hours_anomaly');
+        }
+      }
+
+      // 3. Day-of-Week Anomaly (Weekday routine vs Weekend transmission)
+      var weekendAnomaly = false;
+      if (count >= BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS && isWeekend && daysSeen.length >= 5) {
+        var hasPriorWeekend = daysSeen.some(function (d) { return d === 0 || d === 6; });
+        if (!hasPriorWeekend) {
+          penalty += 10;
+          weekendAnomaly = true;
+          reasons.push('weekend_anomaly');
+        }
+      }
+
+      // 4. Attachment Extension Novelty
+      var novelExtensions = [];
+      if (count >= 3 && currentExtensions.length > 0) {
+        currentExtensions.forEach(function (ext) {
+          if (SUSPICIOUS_BEHAVIORAL_EXTENSIONS.has(ext) && knownExts.indexOf(ext) === -1) {
+            novelExtensions.push(ext);
+          }
+        });
+        if (novelExtensions.length > 0) {
+          penalty += 15;
+          reasons.push('novel_attachment_anomaly');
+        }
+      }
+
+      var totalScore = Math.min(100, noveltyBase + penalty);
+      var primaryReason = reasons.length > 1 && reasons[0] === 'established_sender' ? reasons[1] : (reasons[0] || 'established_on_schedule');
+
+      if (totalScore === 0 && reasons.indexOf('established_on_schedule') === -1) {
+        primaryReason = 'established_on_schedule';
+        reasons = ['established_on_schedule'];
+      }
+
+      return {
+        score: totalScore,
+        reason: primaryReason,
+        reasons: reasons,
+        interactionCount: count,
+        minCircularDistanceH: minDist !== null ? Math.round(minDist * 10) / 10 : null,
+        dayOfWeek: day,
+        isWeekend: isWeekend,
+        hasNovelAttachment: novelExtensions.length > 0,
+        novelExtensions: novelExtensions
+      };
     }).catch(function (err) {
       console.warn(LOG_PREFIX + ' [Behavioral] scoreBehavioral error:', err);
       return DEFAULT;
@@ -524,7 +682,9 @@
       }
 
       var currentHour = new Date().getHours();
+      var currentDay = new Date().getDay();
       var senderKey = sanitizedPayload.senderEmail || emailContext.senderEmail;
+      var currentAttachments = sanitizedPayload.attachments || [];
 
       // Evaluate Whitelist & Dual-Trigger Revocation (§7.1)
       var authStatus = {
@@ -538,14 +698,16 @@
       // Score BEFORE recording to avoid self-bias (§6.4)
       whitelistPromise.then(function (whitelistResult) {
         sanitizedPayload._whitelist = whitelistResult;
-        return scoreBehavioral(senderKey, currentHour);
+        return scoreBehavioral(senderKey, currentHour, currentDay, currentAttachments);
       }).then(function (behavioralResult) {
-        return updateBehavioralBaseline(senderKey, currentHour).then(function () {
+        return updateBehavioralBaseline(senderKey, currentHour, currentDay, currentAttachments).then(function () {
           return behavioralResult;
         });
       }).then(function (behavioralResult) {
         console.log(LOG_PREFIX + ' [Behavioral] Layer 3 score for ' + senderKey + ':', behavioralResult);
         sanitizedPayload._behavioral = behavioralResult;
+        sanitizedPayload.behavioralScore = behavioralResult.score;
+        sanitizedPayload.behavioral_meta = behavioralResult;
         window.dispatchEvent(new CustomEvent('aegis:email-extracted', { detail: sanitizedPayload }));
       }).catch(function (err) {
         // If the extension context was invalidated (hot-reload), stop cleanly
@@ -740,7 +902,15 @@
       extractSender: extractSender,
       extractLinks: extractLinks,
       extractAttachments: extractAttachments,
-      SELECTORS: SELECTORS
+      SELECTORS: SELECTORS,
+      updateBehavioralBaseline: updateBehavioralBaseline,
+      scoreBehavioral: scoreBehavioral,
+      circularHourDistance: circularHourDistance,
+      clearBehavioralBaseline: clearBehavioralBaseline,
+      getBehavioralStore: getBehavioralStore,
+      BEHAVIORAL_STORAGE_KEY: BEHAVIORAL_STORAGE_KEY,
+      BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS: BEHAVIORAL_MIN_INTERACTIONS_FOR_OFFHOURS,
+      BEHAVIORAL_OFF_HOURS_THRESHOLD_H: BEHAVIORAL_OFF_HOURS_THRESHOLD_H
     };
   }
 
