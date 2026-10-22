@@ -22,7 +22,7 @@ os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from modules.link_scanner import load_vt_seed_cache
+from modules.link_scanner import load_vt_seed_cache, load_vt_file_seed_cache
 from modules.nlp_classifier import warm_up_nlp
 from routes.analyze import router as analyze_router
 from routes.health import router as health_router
@@ -96,6 +96,7 @@ async def lifespan(app: FastAPI):
     logger.info("[Aegis] Render backend: %s", RENDER_BACKEND_URL)
     warm_up_nlp()
     load_vt_seed_cache()
+    load_vt_file_seed_cache()
     yield
 
 

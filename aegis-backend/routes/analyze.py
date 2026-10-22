@@ -27,10 +27,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from modules.link_scanner import (
     MAX_LINKS_PER_EMAIL,
+    are_attachment_hashes_cached,
     are_urls_cached,
     get_vt_analysis,
+    is_valid_sha256,
     normalize_url,
+    scan_email_attachment_hashes,
     scan_email_links,
+    scan_single_file_hash,
 )
 from modules.meta_classifier import (
     build_layers_status,
@@ -73,6 +77,7 @@ class EmailPayload(BaseModel):
     hasAttachment: Optional[bool] = Field(default=False, description="Whether attachments are present")
     attachments: Optional[List[str]] = Field(default_factory=list, description="Attachment filenames")
     attachmentCount: Optional[int] = Field(default=0, description="Total attachment count")
+    attachmentHashes: Optional[List[str]] = Field(default_factory=list, description="Cryptographic SHA-256 hashes of email attachments (PR-09)")
     timestamp: Optional[str] = Field(default="", description="Email received timestamp")
     spfPass: Optional[bool] = Field(default=None, description="SPF authentication status")
     dkimPass: Optional[bool] = Field(default=None, description="DKIM authentication status")
@@ -343,6 +348,21 @@ def evaluate_heuristics(payload: EmailPayload) -> Dict[str, Any]:
                 "severity": "warn",
             })
 
+    # 5. Attachment VirusTotal Hash reputation check (PR-09)
+    from modules.link_scanner import _vt_file_cache
+    for file_hash in payload.attachmentHashes or []:
+        norm_h = file_hash.strip().lower()
+        if norm_h in _vt_file_cache:
+            rec = _vt_file_cache[norm_h]
+            if rec.get("malicious"):
+                score += 55
+                threat_name = rec.get("threat_name", "Known Malware")
+                flags.append({
+                    "title": "Malicious Attachment Hash Detected",
+                    "evidence": f"Attachment hash '{norm_h[:16]}...' identified as known malware ({threat_name}) by VirusTotal",
+                    "severity": "critical",
+                })
+
     heuristic_score = min(100, score)
     return {
         "score": heuristic_score,
@@ -512,15 +532,17 @@ async def _execute_background_vt_scan(
     urls: List[str],
     email_hash: str,
     base_state: Dict[str, Any],
+    attachment_hashes: Optional[List[str]] = None,
 ) -> None:
     """
     Executes in the background via FastAPI BackgroundTasks.
-    Runs rate-paced VirusTotal URL scan and synthesizes the updated composite score.
+    Runs rate-paced VirusTotal URL and attachment hash scans, synthesizing updated composite score (PR-09).
     """
     logger.info(
-        "[Aegis Analysis] Background scan started for email_hash=%s (%d links)",
+        "[Aegis Analysis] Background scan started for email_hash=%s (%d links, %d attachment hashes)",
         email_hash[:8],
         len(urls),
+        len(attachment_hashes or []),
     )
     start_time = time.time()
 
@@ -529,12 +551,27 @@ async def _execute_background_vt_scan(
         vt_result = await scan_email_links(urls, email_hash=email_hash)
         s_vt = int(vt_result.get("vt_score", 0))
 
-        # Re-evaluate flags: add malicious link flag if found
+        # Scan attachment hashes if present (PR-09)
+        attach_findings = None
+        if attachment_hashes:
+            attach_findings = await scan_email_attachment_hashes(attachment_hashes)
+            vt_result["attachment_findings"] = attach_findings
+            if attach_findings.get("has_malicious_attachment"):
+                s_vt = max(s_vt, 75)
+
+        # Re-evaluate flags: add malicious link/attachment flags if found
         flags = list(base_state["flags"])
-        if s_vt > 0:
+        if s_vt > 0 and vt_result.get("malicious_count", 0) > 0:
             flags.append({
                 "title": "Malicious Hyperlink Detected",
                 "evidence": f"VirusTotal flagged {vt_result.get('malicious_count', 1)} link destination(s)",
+                "severity": "critical",
+            })
+        if attach_findings and attach_findings.get("has_malicious_attachment"):
+            mal_att_count = attach_findings.get("malicious_count", 1)
+            flags.append({
+                "title": "Malicious Attachment Hash Detected",
+                "evidence": f"VirusTotal flagged {mal_att_count} malicious attachment file signature(s)",
                 "severity": "critical",
             })
 
@@ -600,8 +637,8 @@ async def analyze_email(
     Primary email analysis endpoint (§3.1 step 73-84).
 
     Executes Layers 1-3 synchronously (< 350ms).
-    If links are uncached, returns vt_status="pending" and kicks off a
-    background task to scan them under the 15.0s rate pacing lock.
+    If links or attachment hashes are uncached, returns vt_status="pending" and kicks off a
+    background task to scan them under the 15.0s rate pacing lock (PR-09).
     """
     start_time = time.time()
     email_hash = compute_email_hash(payload)
@@ -613,8 +650,13 @@ async def analyze_email(
         cached_result["_cacheHit"] = True
         return cached_result
 
-    # 2. Extract hyperlinks
+    # 2. Extract hyperlinks and attachment hashes (PR-09)
     urls = extract_url_strings(payload.links or [])
+    attachment_hashes = [
+        h.strip().lower()
+        for h in (payload.attachmentHashes or [])
+        if is_valid_sha256(h)
+    ]
 
     # 3. Synchronous evaluation of Layer 1 (Heuristics + Ensemble ML blend — PR-01)
     heuristics = evaluate_layer1(payload, urls)
@@ -629,25 +671,41 @@ async def analyze_email(
     )
     s_behavioral = evaluate_behavioral(payload)
 
-    # 5. Check Layer 4 Links status
-    if not urls:
-        # No links: instant completion
+    # 5. Check Layer 4 Links & Attachment Hashes status (PR-09)
+    has_uncached_urls = bool(urls and not are_urls_cached(urls))
+    has_uncached_attachments = bool(attachment_hashes and not are_attachment_hashes_cached(attachment_hashes))
+
+    if not urls and not attachment_hashes:
+        # No links or attachments: instant completion
         vt_status = "completed"
         s_vt = 0
-        vt_result = {"status": "no_links", "vt_score": 0}
-    elif are_urls_cached(urls):
-        # All candidate links pre-warmed in cache: instant completion (0ms)
+        vt_result = {"status": "no_targets", "vt_score": 0}
+    elif not has_uncached_urls and not has_uncached_attachments:
+        # All candidate items pre-warmed in cache: instant completion (0ms)
         vt_result = await scan_email_links(urls, email_hash=email_hash)
         s_vt = int(vt_result.get("vt_score", 0))
+
+        if attachment_hashes:
+            attach_findings = await scan_email_attachment_hashes(attachment_hashes)
+            vt_result["attachment_findings"] = attach_findings
+            if attach_findings.get("has_malicious_attachment"):
+                s_vt = max(s_vt, 75)
+                if not any("Malicious Attachment" in f.get("title", "") for f in flags):
+                    flags.append({
+                        "title": "Malicious Attachment Hash Detected",
+                        "evidence": f"VirusTotal flagged {attach_findings.get('malicious_count', 1)} malicious attachment file signature(s)",
+                        "severity": "critical",
+                    })
+
         vt_status = "completed"
-        if s_vt > 0:
+        if s_vt > 0 and vt_result.get("malicious_count", 0) > 0:
             flags.append({
                 "title": "Malicious Hyperlink Detected",
                 "evidence": f"VirusTotal flagged {vt_result.get('malicious_count', 1)} link destination(s)",
                 "severity": "critical",
             })
     else:
-        # Links are uncached: dispatch background task and return pending status
+        # Targets are uncached: dispatch background task and return pending status
         vt_status = "pending"
         s_vt = 0
         vt_result = None
@@ -692,6 +750,7 @@ async def analyze_email(
             urls=urls,
             email_hash=email_hash,
             base_state=base_state,
+            attachment_hashes=attachment_hashes,
         )
 
     return analysis_response
@@ -734,6 +793,22 @@ async def get_vt_status(email_hash: str) -> Dict[str, Any]:
         status_code=404,
         detail=f"No scan job found for email_hash: {clean_hash}",
     )
+
+
+@router.get("/vt-file-status/{file_hash}")
+async def get_vt_file_status(file_hash: str) -> Dict[str, Any]:
+    """
+    Direct file hash reputation lookup against VirusTotal (PR-09).
+    Validates SHA-256 formatting and queries/checks local file seed cache.
+    """
+    clean_h = (file_hash or "").strip().lower()
+    if not is_valid_sha256(clean_h):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid SHA-256 file hash format: {file_hash}",
+        )
+    result = await scan_single_file_hash(clean_h)
+    return result
 
 
 # ---------------------------------------------------------------------------

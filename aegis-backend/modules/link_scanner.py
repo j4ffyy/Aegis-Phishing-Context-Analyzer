@@ -45,9 +45,12 @@ VT_REQUEST_TIMEOUT: float = 10.0
 VT_SEED_CACHE_PATH: Path = (
     Path(__file__).parent.parent / "data" / "vt_seed_cache.json"
 )
+VT_FILE_SEED_CACHE_PATH: Path = (
+    Path(__file__).parent.parent / "data" / "vt_file_seed_cache.json"
+)
 
 # ---------------------------------------------------------------------------
-# Dual Cache Structures & Concurrency Controls
+# Dual / Triple Cache Structures & Concurrency Controls (PR-09)
 # ---------------------------------------------------------------------------
 
 # Cache 1: URL String -> Raw / Processed Reputation Record
@@ -55,6 +58,9 @@ _vt_url_cache: Dict[str, Dict[str, Any]] = {}
 
 # Cache 2: Email SHA-256 Hash -> Composite Email Analysis Result
 _vt_analysis_cache: Dict[str, Dict[str, Any]] = {}
+
+# Cache 3: SHA-256 File Hash -> Processed File Reputation Record (PR-09)
+_vt_file_cache: Dict[str, Dict[str, Any]] = {}
 
 # Concurrency & Pacing Controls
 _pacing_lock: asyncio.Lock = asyncio.Lock()
@@ -87,6 +93,14 @@ def normalize_url(url: str) -> str:
         return f"{scheme}://{netloc}{path}{query}"
     except Exception:
         return url.strip()
+
+
+def is_valid_sha256(h: str) -> bool:
+    """Validates whether string is a 64-character hexadecimal SHA-256 hash (PR-09)."""
+    if not h or not isinstance(h, str):
+        return False
+    h = h.strip()
+    return len(h) == 64 and all(c in "0123456789abcdefABCDEF" for c in h)
 
 
 def url_to_vt_id(url: str) -> str:
@@ -155,6 +169,57 @@ def get_vt_analysis(email_hash: str) -> Optional[Dict[str, Any]]:
     return _vt_analysis_cache.get(email_hash)
 
 
+def load_vt_file_seed_cache(custom_path: Optional[Path] = None) -> None:
+    """
+    Load pre-warmed VirusTotal file hash scan results from the seed cache file (PR-09).
+    Provides instant lookup responses for known test malware/benign signatures.
+    """
+    global _vt_file_cache
+    target_path = custom_path or VT_FILE_SEED_CACHE_PATH
+    if target_path.exists():
+        try:
+            with open(target_path, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    _vt_file_cache.update(loaded)
+                    logger.info(
+                        "[Aegis] VT file seed cache loaded: %d entries from %s",
+                        len(_vt_file_cache),
+                        target_path.name,
+                    )
+                else:
+                    logger.warning("[Aegis] File seed cache root is not a dictionary")
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("[Aegis] Failed to load VT file seed cache: %s", exc)
+    else:
+        logger.info("[Aegis] VT file seed cache file not found at %s", target_path)
+
+
+def save_vt_file_seed_cache(custom_path: Optional[Path] = None) -> bool:
+    """Persists current file hash cache entries to the seed cache JSON file (PR-09)."""
+    target_path = custom_path or VT_FILE_SEED_CACHE_PATH
+    try:
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(target_path, "w", encoding="utf-8") as f:
+            json.dump(_vt_file_cache, f, indent=2)
+        return True
+    except OSError as exc:
+        logger.error("[Aegis] Failed to save VT file seed cache: %s", exc)
+        return False
+
+
+def get_vt_file_cache_size() -> int:
+    """Returns the number of entries currently in the VT file hash cache (PR-09)."""
+    return len(_vt_file_cache)
+
+
+def are_attachment_hashes_cached(hashes: List[str]) -> bool:
+    """Checks if all candidate attachment hashes are cached in memory (PR-09)."""
+    if not hashes:
+        return True
+    return all(h.strip().lower() in _vt_file_cache for h in hashes if is_valid_sha256(h))
+
+
 def are_urls_cached(urls: List[str]) -> bool:
     """
     Checks if all candidate URLs (up to MAX_LINKS_PER_EMAIL)
@@ -174,10 +239,11 @@ def are_urls_cached(urls: List[str]) -> bool:
 
 
 def clear_vt_cache() -> None:
-    """Clears both in-memory caches and resets pacing timers (for testing)."""
-    global _vt_url_cache, _vt_analysis_cache, _last_request_timestamp
+    """Clears all in-memory caches and resets pacing timers (for testing)."""
+    global _vt_url_cache, _vt_analysis_cache, _vt_file_cache, _last_request_timestamp
     _vt_url_cache.clear()
     _vt_analysis_cache.clear()
+    _vt_file_cache.clear()
     _last_request_timestamp = 0.0
 
 
@@ -491,3 +557,230 @@ async def scan_email_links(
         _vt_analysis_cache[email_hash] = composite_result
 
     return composite_result
+
+
+# ---------------------------------------------------------------------------
+# Attachment File Hash Reputation Querying (PR-09)
+# ---------------------------------------------------------------------------
+
+async def scan_single_file_hash(
+    file_hash: str,
+    client: Optional[httpx.AsyncClient] = None,
+) -> Dict[str, Any]:
+    """
+    Scans a single file SHA-256 hash against VirusTotal v3 (/api/v3/files/{hash})
+    with caching and rate pacing (PR-09).
+
+    Returns:
+        Dict with keys: hash, malicious, positives, total, status, cached, threat_name, type_description.
+    """
+    norm_hash = (file_hash or "").strip().lower()
+    if not is_valid_sha256(norm_hash):
+        return {
+            "hash": file_hash,
+            "malicious": False,
+            "positives": 0,
+            "total": 0,
+            "status": "invalid_hash",
+            "cached": False,
+            "threat_name": "None",
+            "type_description": "Unknown",
+        }
+
+    # 1. In-memory file cache check (0ms response)
+    if norm_hash in _vt_file_cache:
+        cached = _vt_file_cache[norm_hash]
+        is_mal = bool(cached.get("malicious", False))
+        positives = int(cached.get("positives", 1 if is_mal else 0))
+        total = int(cached.get("total", 75))
+        status = str(cached.get("status", "malicious" if is_mal else "clean"))
+        threat_name = str(cached.get("threat_name", "Malware.Signature" if is_mal else "None"))
+        type_desc = str(cached.get("type_description", "Binary File"))
+        return {
+            "hash": norm_hash,
+            "malicious": is_mal,
+            "positives": positives,
+            "total": total,
+            "status": status,
+            "threat_name": threat_name,
+            "type_description": type_desc,
+            "cached": True,
+        }
+
+    # 2. API Key availability check
+    api_key = get_vt_api_key()
+    if not api_key:
+        logger.warning(
+            "[Aegis LinkScanner] VT_API_KEY absent or placeholder; degrading file hash query gracefully."
+        )
+        return {
+            "hash": norm_hash,
+            "malicious": False,
+            "positives": 0,
+            "total": 0,
+            "status": "no_api_key",
+            "cached": False,
+            "threat_name": "None",
+            "type_description": "Unknown",
+        }
+
+    # 3. Network query with rate pacing
+    http_client = client
+    should_close_client = False
+    if http_client is None:
+        http_client = httpx.AsyncClient(timeout=VT_REQUEST_TIMEOUT)
+        should_close_client = True
+
+    try:
+        async with _pacing_lock:
+            await _pace_request()
+            request_url = f"{VT_API_BASE_URL}/files/{norm_hash}"
+            headers = {
+                "x-apikey": api_key,
+                "Accept": "application/json",
+            }
+            logger.info("[Aegis LinkScanner] Querying VT v3 API for file hash: %s", norm_hash[:16])
+            response = await http_client.get(request_url, headers=headers)
+            status_code = response.status_code
+
+        if status_code == 200:
+            payload = response.json()
+            data = payload.get("data", {})
+            attributes = data.get("attributes", {})
+            last_stats = attributes.get("last_analysis_stats", {})
+
+            malicious_count = int(last_stats.get("malicious", 0))
+            suspicious_count = int(last_stats.get("suspicious", 0))
+            harmless_count = int(last_stats.get("harmless", 0))
+            undetected_count = int(last_stats.get("undetected", 0))
+
+            total_engines = malicious_count + suspicious_count + harmless_count + undetected_count or 75
+            is_mal = (malicious_count >= 1) or (suspicious_count >= 2)
+            positives = malicious_count + suspicious_count
+
+            # Extract suggested threat label
+            threat_label = "None"
+            pop_threat = attributes.get("popular_threat_classification", {})
+            if pop_threat.get("suggested_threat_label"):
+                threat_label = pop_threat.get("suggested_threat_label")
+            elif is_mal:
+                threat_label = "Known.Malware.Payload"
+
+            type_desc = attributes.get("type_description", attributes.get("meaningful_name", "Attachment File"))
+
+            record = {
+                "hash": norm_hash,
+                "malicious": is_mal,
+                "positives": positives,
+                "total": total_engines,
+                "status": "malicious" if is_mal else "clean",
+                "threat_name": threat_label,
+                "type_description": type_desc,
+            }
+            _vt_file_cache[norm_hash] = record
+            return {**record, "cached": False}
+
+        elif status_code == 404:
+            # File hash not in VirusTotal database — clean/unseen
+            record = {
+                "hash": norm_hash,
+                "malicious": False,
+                "positives": 0,
+                "total": 0,
+                "status": "clean_or_unrated",
+                "threat_name": "None",
+                "type_description": "Unrated File",
+            }
+            _vt_file_cache[norm_hash] = record
+            return {**record, "cached": False}
+
+        elif status_code == 429:
+            logger.warning("[Aegis LinkScanner] VirusTotal API quota exceeded (HTTP 429) for file hash")
+            return {
+                "hash": norm_hash,
+                "malicious": False,
+                "positives": 0,
+                "total": 0,
+                "status": "quota_exceeded",
+                "cached": False,
+                "threat_name": "None",
+                "type_description": "Unknown",
+            }
+
+        elif status_code in (401, 403):
+            logger.warning("[Aegis LinkScanner] VirusTotal API authorization failed (HTTP %d)", status_code)
+            return {
+                "hash": norm_hash,
+                "malicious": False,
+                "positives": 0,
+                "total": 0,
+                "status": "unauthorized",
+                "cached": False,
+                "threat_name": "None",
+                "type_description": "Unknown",
+            }
+
+        else:
+            return {
+                "hash": norm_hash,
+                "malicious": False,
+                "positives": 0,
+                "total": 0,
+                "status": f"http_error_{status_code}",
+                "cached": False,
+                "threat_name": "None",
+                "type_description": "Unknown",
+            }
+
+    except (httpx.TimeoutException, httpx.RequestError) as exc:
+        logger.warning("[Aegis LinkScanner] Network error querying VT for file %s: %s", norm_hash[:16], exc)
+        return {
+            "hash": norm_hash,
+            "malicious": False,
+            "positives": 0,
+            "total": 0,
+            "status": "network_error",
+            "cached": False,
+            "threat_name": "None",
+            "type_description": "Unknown",
+        }
+    finally:
+        if should_close_client and http_client is not None:
+            await http_client.aclose()
+
+
+async def scan_email_attachment_hashes(
+    hashes: List[str],
+    client: Optional[httpx.AsyncClient] = None,
+) -> Dict[str, Any]:
+    """
+    Analyzes attachment cryptographic SHA-256 hashes against VirusTotal (PR-09).
+    Scans at most 2 attachments per email context.
+    """
+    if not hashes:
+        return {
+            "status": "no_attachments",
+            "scanned_count": 0,
+            "malicious_count": 0,
+            "has_malicious_attachment": False,
+            "findings": [],
+        }
+
+    valid_hashes = [h.strip().lower() for h in hashes if is_valid_sha256(h)]
+    scanned_targets = valid_hashes[:MAX_LINKS_PER_EMAIL]
+
+    findings = []
+    malicious_count = 0
+    for target in scanned_targets:
+        res = await scan_single_file_hash(target, client=client)
+        findings.append(res)
+        if res.get("malicious"):
+            malicious_count += 1
+
+    return {
+        "status": "completed",
+        "scanned_count": len(findings),
+        "malicious_count": malicious_count,
+        "has_malicious_attachment": malicious_count > 0,
+        "findings": findings,
+    }

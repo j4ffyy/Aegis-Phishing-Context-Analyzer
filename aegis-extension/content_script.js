@@ -146,11 +146,30 @@
   function extractAttachments(root) {
     var res = queryAllFirstWorking(SELECTORS.attachments, root);
     var names = [];
+    var hashes = [];
     res.elements.forEach(function (el) {
       var n = (el.textContent || el.getAttribute('aria-label') || '').trim();
       if (n) names.push(n);
+
+      // Extract SHA-256 hash if present on element or test fixture (PR-09)
+      var h = el.getAttribute('data-aegis-hash') || el.getAttribute('data-hash') || el.getAttribute('data-sha256');
+      if (h && /^[0-9a-fA-F]{64}$/.test(h.trim())) {
+        hashes.push(h.trim().toLowerCase());
+      }
     });
-    return { count: names.length, names: names, selectorUsed: res.selector };
+
+    // Also check root for container-level test fixture hashes (PR-09)
+    var rootHashes = root && root.getAttribute && root.getAttribute('data-aegis-attachment-hashes');
+    if (rootHashes) {
+      rootHashes.split(',').forEach(function (item) {
+        var cleanH = item.trim().toLowerCase();
+        if (/^[0-9a-fA-F]{64}$/.test(cleanH) && hashes.indexOf(cleanH) === -1) {
+          hashes.push(cleanH);
+        }
+      });
+    }
+
+    return { count: names.length, names: names, hashes: hashes, selectorUsed: res.selector };
   }
 
   function extractTimestamp(root) {
@@ -313,6 +332,7 @@
       links: links,
       attachments: attachments.names,
       attachmentCount: attachments.count,
+      attachmentHashes: attachments.hashes,
       timestamp: tsData.timestamp,
       spfPass: authData.spfPass,
       dkimPass: authData.dkimPass,
