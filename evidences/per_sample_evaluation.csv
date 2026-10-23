@@ -1,0 +1,101 @@
+id,label,label_name,senderEmail,subject,score,pred_label,pred_name,result,elapsed_ms,auth_mode
+24,1,Phishing,helpdesk@microsoft-account-reset.click,Lazada: Your order is on hold - confirm payment details,51,1,Phishing,CORRECT,2160.99,synthetic
+37,1,Phishing,sss-notification@sss-gov-ph.click,URGENT: Your GCash account has been suspended,53,1,Phishing,CORRECT,59.74,synthetic
+59,0,Legitimate,gcash@gcash.com,Globe: Your October 2026 statement is available,14,0,Safe,CORRECT,62.08,synthetic
+83,0,Legitimate,billing@lazada.com.ph,Receipt: GCash transfer to Juan dela Cruz,14,0,Safe,CORRECT,62.07,synthetic
+89,0,Legitimate,newsletter@aegis-security.ph,Re: Budget approval for Q4 marketing campaign,14,0,Safe,CORRECT,55.83,synthetic
+33,1,Phishing,sss-notification@sss-gov-ph.click,Your Shopee account has been locked - verify now,51,1,Phishing,CORRECT,66.8,synthetic
+63,0,Legitimate,sss@sss.gov.ph,Shopee Order Confirmation - Order #SHP-2026-12345,14,0,Safe,CORRECT,62.78,synthetic
+44,1,Phishing,noreply@bpi-secure-login.xyz,Babala: Na-lock ang iyong BDO account - mag-login na,50,1,Phishing,CORRECT,63.51,synthetic
+78,0,Legitimate,billing@lazada.com.ph,Welcome to the Aegis SME Security Newsletter,14,0,Safe,CORRECT,59.89,synthetic
+9,1,Phishing,security@metrobank-ph.gq,Microsoft Account: Unusual sign-in activity detected,45,1,Phishing,CORRECT,62.6,synthetic
+53,0,Legitimate,contributions@philhealth.gov.ph,Team lunch - please confirm attendance,14,0,Safe,CORRECT,67.48,synthetic
+95,0,Legitimate,billing@globe.com.ph,Re: Budget approval for Q4 marketing campaign,14,0,Safe,CORRECT,61.64,synthetic
+90,0,Legitimate,gcash@gcash.com,Receipt: GCash transfer to Juan dela Cruz,14,0,Safe,CORRECT,69.76,synthetic
+15,1,Phishing,security@metrobank-ph.gq,Microsoft Account: Unusual sign-in activity detected,53,1,Phishing,CORRECT,63.86,synthetic
+88,0,Legitimate,projectlead@consultancy.ph,Re: Budget approval for Q4 marketing campaign,14,0,Safe,CORRECT,64.77,synthetic
+68,0,Legitimate,orders@shopee.ph,FWD: MMDC academic calendar update,14,0,Safe,CORRECT,67.6,synthetic
+0,1,Phishing,finance@acme-enterprise.xyz,Final Notice: Your account will be deactivated in 24 hours,38,0,Safe,ERROR,72.88,synthetic
+86,0,Legitimate,projectlead@consultancy.ph,SSS PRN for Q4 2026 - Payment Reference,14,0,Safe,CORRECT,67.27,synthetic
+38,1,Phishing,support@bdo-reset-now.loan,RCBC Online Banking: Account verification required,53,1,Phishing,CORRECT,72.1,synthetic
+8,1,Phishing,noreply@bpi-secure-login.xyz,SSS: Important notice regarding your contribution records,50,1,Phishing,CORRECT,74.1,synthetic
+51,0,Legitimate,sss@sss.gov.ph,Your monthly Lazada invoice is ready,14,0,Safe,CORRECT,75.66,synthetic
+94,0,Legitimate,billing@globe.com.ph,Welcome to the Aegis SME Security Newsletter,14,0,Safe,CORRECT,74.85,synthetic
+93,0,Legitimate,projectlead@consultancy.ph,Globe: Your October 2026 statement is available,14,0,Safe,CORRECT,77.85,synthetic
+96,0,Legitimate,billing@meralco.com.ph,Your OTP for BDO Online Banking,14,0,Safe,CORRECT,67.61,synthetic
+40,1,Phishing,alerts@paypal-verify.top,IMPORTANT: Update your BDO Online Banking credentials now,59,1,Phishing,CORRECT,68.15,synthetic
+57,0,Legitimate,projectlead@consultancy.ph,Your monthly Lazada invoice is ready,14,0,Safe,CORRECT,68.65,synthetic
+67,0,Legitimate,billing@meralco.com.ph,FWD: MMDC academic calendar update,14,0,Safe,CORRECT,78.59,synthetic
+10,1,Phishing,noreply@bpi-secure-login.xyz,Google: Security alert for your connected account,45,1,Phishing,CORRECT,79.47,synthetic
+43,1,Phishing,ceo.office@globalcorp-ph.com,PhilHealth: Update your member information immediately,42,0,Safe,ERROR,91.21,synthetic
+23,1,Phishing,support@bdo-reset-now.loan,Lazada: Your order is on hold - confirm payment details,59,1,Phishing,CORRECT,86.54,synthetic
+35,1,Phishing,security@metrobank-ph.gq,Metrobank: Suspicious transaction detected on your account,53,1,Phishing,CORRECT,75.63,synthetic
+27,1,Phishing,alerts@maya-security.click,IMPORTANT: Update your BDO Online Banking credentials now,53,1,Phishing,CORRECT,91.43,synthetic
+6,1,Phishing,promo@shopee-ph-promo.tk,Lazada: Your order is on hold - confirm payment details,39,0,Safe,ERROR,65.3,synthetic
+2,1,Phishing,helpdesk@microsoft-account-reset.click,Kailangan mong i-update ang iyong Maya account ngayon,53,1,Phishing,CORRECT,143.81,synthetic
+36,1,Phishing,security@gcash-verify.top,Babala: Na-lock ang iyong BDO account - mag-login na,53,1,Phishing,CORRECT,68.79,synthetic
+11,1,Phishing,promo@shopee-ph-promo.tk,Kailangan mong i-update ang iyong Maya account ngayon,53,1,Phishing,CORRECT,65.07,synthetic
+92,0,Legitimate,billing@lazada.com.ph,FWD: MMDC academic calendar update,14,0,Safe,CORRECT,67.47,synthetic
+7,1,Phishing,admin@rcbc-online.tk,Amazon: Your account has been compromised - act now,53,1,Phishing,CORRECT,60.04,synthetic
+56,0,Legitimate,billing@globe.com.ph,Team lunch - please confirm attendance,14,0,Safe,CORRECT,64.34,synthetic
+66,0,Legitimate,sss@sss.gov.ph,Your Meralco bill for September 2026,14,0,Safe,CORRECT,73.6,synthetic
+99,0,Legitimate,registrar@mmdc.edu.ph,Receipt: GCash transfer to Juan dela Cruz,14,0,Safe,CORRECT,70.98,synthetic
+49,1,Phishing,security@amazon-account-verify.xyz,URGENT: I-verify ang iyong GCash account agad na,53,1,Phishing,CORRECT,84.76,synthetic
+32,1,Phishing,finance@acme-enterprise.xyz,Google: Security alert for your connected account,42,0,Safe,ERROR,83.33,synthetic
+41,1,Phishing,promo@shopee-ph-promo.tk,Lazada: Your order is on hold - confirm payment details,45,1,Phishing,CORRECT,89.96,synthetic
+64,0,Legitimate,newsletter@aegis-security.ph,Globe: Your October 2026 statement is available,14,0,Safe,CORRECT,118.83,synthetic
+97,0,Legitimate,registrar@mmdc.edu.ph,Meeting agenda for tomorrow's sync,14,0,Safe,CORRECT,101.99,synthetic
+65,0,Legitimate,contributions@philhealth.gov.ph,Your PhilHealth contribution receipt for October 2026,14,0,Safe,CORRECT,75.61,synthetic
+17,1,Phishing,finance@acme-enterprise.xyz,Your Shopee account has been locked - verify now,33,0,Safe,ERROR,72.29,synthetic
+21,1,Phishing,sss-notification@sss-gov-ph.click,Security Alert: Unauthorized login detected on your Maya account,53,1,Phishing,CORRECT,64.89,synthetic
+25,1,Phishing,support@bdo-reset-now.loan,PayPal: Your account access has been limited,53,1,Phishing,CORRECT,76.45,synthetic
+62,0,Legitimate,billing@meralco.com.ph,Receipt: GCash transfer to Juan dela Cruz,14,0,Safe,CORRECT,63.79,synthetic
+72,0,Legitimate,noreply@bdo.com.ph,Project update: Phase 2 deliverables,31,0,Safe,CORRECT,67.96,synthetic
+1,1,Phishing,finance@acme-enterprise.xyz,RCBC Online Banking: Account verification required,42,0,Safe,ERROR,62.29,synthetic
+54,0,Legitimate,finance@legitcorp.com.ph,FWD: MMDC academic calendar update,14,0,Safe,CORRECT,64.38,synthetic
+14,1,Phishing,admin@rcbc-online.tk,Final Notice: Your account will be deactivated in 24 hours,53,1,Phishing,CORRECT,65.91,synthetic
+50,0,Legitimate,mreyes@businesspartner.com.ph,Welcome to the Aegis SME Security Newsletter,14,0,Safe,CORRECT,68.01,synthetic
+61,0,Legitimate,billing@globe.com.ph,Re: Budget approval for Q4 marketing campaign,14,0,Safe,CORRECT,65.58,synthetic
+80,0,Legitimate,jdelacruz@company.com.ph,Re: Budget approval for Q4 marketing campaign,14,0,Safe,CORRECT,70.69,synthetic
+73,0,Legitimate,orders@shopee.ph,Receipt: GCash transfer to Juan dela Cruz,14,0,Safe,CORRECT,75.86,synthetic
+29,1,Phishing,promo@shopee-ph-promo.tk,Lazada: Your order is on hold - confirm payment details,47,1,Phishing,CORRECT,75.42,synthetic
+58,0,Legitimate,jdelacruz@company.com.ph,Your PhilHealth contribution receipt for October 2026,14,0,Safe,CORRECT,72.42,synthetic
+82,0,Legitimate,mreyes@businesspartner.com.ph,SSS PRN for Q4 2026 - Payment Reference,14,0,Safe,CORRECT,71.16,synthetic
+12,1,Phishing,noreply@bpi-secure-login.xyz,Metrobank: Suspicious transaction detected on your account,51,1,Phishing,CORRECT,63.67,synthetic
+28,1,Phishing,noreply@shopee-promo.icu,Security Alert: Unauthorized login detected on your Maya account,53,1,Phishing,CORRECT,71.36,synthetic
+60,0,Legitimate,projectlead@consultancy.ph,Globe: Your October 2026 statement is available,14,0,Safe,CORRECT,61.3,synthetic
+98,0,Legitimate,projectlead@consultancy.ph,FWD: MMDC academic calendar update,14,0,Safe,CORRECT,68.87,synthetic
+48,1,Phishing,support@bdo-reset-now.loan,Security Alert: Unauthorized login detected on your Maya account,51,1,Phishing,CORRECT,72.47,synthetic
+84,0,Legitimate,hr@mmdc.edu.ph,Shopee Order Confirmation - Order #SHP-2026-12345,14,0,Safe,CORRECT,64.72,synthetic
+77,0,Legitimate,mreyes@businesspartner.com.ph,Re: Budget approval for Q4 marketing campaign,14,0,Safe,CORRECT,69.11,synthetic
+34,1,Phishing,ceo.office@globalcorp-ph.com,PhilHealth: Update your member information immediately,46,1,Phishing,CORRECT,67.35,synthetic
+85,0,Legitimate,hr@mmdc.edu.ph,Welcome to the Aegis SME Security Newsletter,14,0,Safe,CORRECT,64.61,synthetic
+75,0,Legitimate,mreyes@businesspartner.com.ph,Receipt: GCash transfer to Juan dela Cruz,14,0,Safe,CORRECT,70.8,synthetic
+42,1,Phishing,finance@acme-enterprise.xyz,Kailangan mong i-update ang iyong Maya account ngayon,40,0,Safe,ERROR,68.89,synthetic
+76,0,Legitimate,mreyes@businesspartner.com.ph,Follow-up: Contract renewal discussion,14,0,Safe,CORRECT,64.19,synthetic
+3,1,Phishing,support@bdo-reset-now.loan,URGENT: Your GCash account has been suspended,53,1,Phishing,CORRECT,60.12,synthetic
+81,0,Legitimate,newsletter@aegis-security.ph,Welcome to the Aegis SME Security Newsletter,14,0,Safe,CORRECT,63.13,synthetic
+22,1,Phishing,sss-notification@sss-gov-ph.click,URGENT: I-verify ang iyong GCash account agad na,53,1,Phishing,CORRECT,63.66,synthetic
+20,1,Phishing,security@metrobank-ph.gq,Action Required: Verify your BPI account immediately,50,1,Phishing,CORRECT,65.35,synthetic
+30,1,Phishing,sss-notification@sss-gov-ph.click,Final Notice: Your account will be deactivated in 24 hours,59,1,Phishing,CORRECT,70.48,synthetic
+19,1,Phishing,billing@lazada-confirm.top,SSS: Important notice regarding your contribution records,45,1,Phishing,CORRECT,71.22,synthetic
+79,0,Legitimate,jdelacruz@company.com.ph,Team lunch - please confirm attendance,14,0,Safe,CORRECT,69.36,synthetic
+52,0,Legitimate,gcash@gcash.com,Your monthly Lazada invoice is ready,14,0,Safe,CORRECT,60.17,synthetic
+71,0,Legitimate,projectlead@consultancy.ph,Follow-up: Contract renewal discussion,14,0,Safe,CORRECT,62.65,synthetic
+87,0,Legitimate,finance@legitcorp.com.ph,Follow-up: Contract renewal discussion,14,0,Safe,CORRECT,65.91,synthetic
+13,1,Phishing,admin@rcbc-online.tk,RCBC Online Banking: Account verification required,45,1,Phishing,CORRECT,62.4,synthetic
+31,1,Phishing,admin@rcbc-online.tk,SSS: Important notice regarding your contribution records,50,1,Phishing,CORRECT,69.0,synthetic
+26,1,Phishing,billing@lazada-confirm.top,URGENT: I-verify ang iyong GCash account agad na,53,1,Phishing,CORRECT,88.66,synthetic
+45,1,Phishing,security@gcash-verify.top,Security Alert: Unauthorized login detected on your Maya account,59,1,Phishing,CORRECT,105.79,synthetic
+91,0,Legitimate,jdelacruz@company.com.ph,Shopee Order Confirmation - Order #SHP-2026-12345,14,0,Safe,CORRECT,79.7,synthetic
+46,1,Phishing,security@gcash-verify.top,I-confirm ang iyong Shopee order para maiwasan ang pagkansela,53,1,Phishing,CORRECT,64.52,synthetic
+39,1,Phishing,noreply@bpi-secure-login.xyz,URGENT: I-verify ang iyong GCash account agad na,59,1,Phishing,CORRECT,70.72,synthetic
+5,1,Phishing,support@bdo-reset-now.loan,Kailangan mong i-update ang iyong Maya account ngayon,53,1,Phishing,CORRECT,69.01,synthetic
+16,1,Phishing,sss-notification@sss-gov-ph.click,Lazada: Your order is on hold - confirm payment details,51,1,Phishing,CORRECT,64.26,synthetic
+55,0,Legitimate,noreply@bdo.com.ph,Re: Budget approval for Q4 marketing campaign,31,0,Safe,CORRECT,61.25,synthetic
+18,1,Phishing,admin@rcbc-online.tk,Google: Security alert for your connected account,56,1,Phishing,CORRECT,66.24,synthetic
+70,0,Legitimate,hr@mmdc.edu.ph,Your OTP for BDO Online Banking,14,0,Safe,CORRECT,65.73,synthetic
+74,0,Legitimate,billing@globe.com.ph,Receipt: GCash transfer to Juan dela Cruz,14,0,Safe,CORRECT,61.3,synthetic
+47,1,Phishing,noreply@bpi-secure-login.xyz,Action Required: Verify your BPI account immediately,53,1,Phishing,CORRECT,59.66,synthetic
+4,1,Phishing,security@amazon-account-verify.xyz,SSS: Kailangan mong i-verify ang iyong impormasyon agad,53,1,Phishing,CORRECT,66.71,synthetic
+69,0,Legitimate,mreyes@businesspartner.com.ph,Your monthly Lazada invoice is ready,14,0,Safe,CORRECT,68.14,synthetic

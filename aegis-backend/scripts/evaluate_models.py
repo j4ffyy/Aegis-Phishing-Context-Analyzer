@@ -83,7 +83,7 @@ BASELINES = {
 # Offline local evaluation (no live API — uses backend modules directly)
 # ---------------------------------------------------------------------------
 
-def _local_evaluate_sample(row: Dict[str, Any]) -> Tuple[int, float]:
+def _local_evaluate_sample(row: Dict[str, Any], neutral_auth: bool = False) -> Tuple[int, float]:
     """
     Runs a single sample through Layers 1-3 locally (no network call).
     Returns (predicted_label, score, elapsed_ms).
@@ -118,10 +118,14 @@ def _local_evaluate_sample(row: Dict[str, Any]) -> Tuple[int, float]:
     except Exception:
         attachments = []
 
-    spf_raw  = row.get("spfPass", "True")
-    dkim_raw = row.get("dkimPass", "True")
-    spf_pass  = spf_raw  if isinstance(spf_raw,  bool) else str(spf_raw).lower()  == "true"
-    dkim_pass = dkim_raw if isinstance(dkim_raw, bool) else str(dkim_raw).lower() == "true"
+    if neutral_auth:
+        spf_pass = True
+        dkim_pass = True
+    else:
+        spf_raw  = row.get("spfPass", "True")
+        dkim_raw = row.get("dkimPass", "True")
+        spf_pass  = spf_raw  if isinstance(spf_raw,  bool) else str(spf_raw).lower()  == "true"
+        dkim_pass = dkim_raw if isinstance(dkim_raw, bool) else str(dkim_raw).lower() == "true"
 
     payload = EmailPayload(
         senderEmail     = row.get("senderEmail", ""),
@@ -152,7 +156,7 @@ def _local_evaluate_sample(row: Dict[str, Any]) -> Tuple[int, float]:
     return score, elapsed_ms
 
 
-def _api_evaluate_sample(row: Dict[str, Any], base_url: str) -> Tuple[int, float]:
+def _api_evaluate_sample(row: Dict[str, Any], base_url: str, neutral_auth: bool = False) -> Tuple[int, float]:
     """Calls the live /api/v1/analyze endpoint for a single sample."""
     import urllib.request
     import json as _json
@@ -169,8 +173,14 @@ def _api_evaluate_sample(row: Dict[str, Any], base_url: str) -> Tuple[int, float
     except Exception:
         attachments = []
 
-    spf_raw  = row.get("spfPass", "True")
-    dkim_raw = row.get("dkimPass", "True")
+    if neutral_auth:
+        spf_val = True
+        dkim_val = True
+    else:
+        spf_raw  = row.get("spfPass", "True")
+        dkim_raw = row.get("dkimPass", "True")
+        spf_val = str(spf_raw).lower() == "true"
+        dkim_val = str(dkim_raw).lower() == "true"
 
     payload_dict = {
         "senderEmail":     row.get("senderEmail", ""),
@@ -180,8 +190,8 @@ def _api_evaluate_sample(row: Dict[str, Any], base_url: str) -> Tuple[int, float
         "attachments":     attachments,
         "hasAttachment":   bool(attachments),
         "attachmentCount": len(attachments),
-        "spfPass":         str(spf_raw).lower() == "true",
-        "dkimPass":        str(dkim_raw).lower() == "true",
+        "spfPass":         spf_val,
+        "dkimPass":        dkim_val,
     }
 
     req_body = _json.dumps(payload_dict).encode("utf-8")
@@ -340,6 +350,14 @@ def main():
         "--output-dir", type=str, default=str(RESULTS_DIR),
         help="Directory for evaluation output files (default: results/)"
     )
+    parser.add_argument(
+        "--neutral-auth", action="store_true",
+        help="Force neutral authentication flags (spfPass=True, dkimPass=True) to eliminate synthetic auth label leakage"
+    )
+    parser.add_argument(
+        "--export-samples", type=str, default="",
+        help="Path to export per-sample results CSV (default: <output-dir>/per_sample_evaluation.csv)"
+    )
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset)
@@ -359,26 +377,42 @@ def main():
             rows.append(row)
 
     logger.info("Loaded %d samples from %s", len(rows), dataset_path)
-    mode = "OFFLINE (local pipeline, VT skipped)" if args.offline else f"LIVE API ({args.backend_url})"
+    auth_label = "NEUTRAL AUTH (spfPass=True, dkimPass=True)" if args.neutral_auth else "SYNTHETIC AUTH (from dataset)"
+    mode = ("OFFLINE (local pipeline, VT skipped)" if args.offline else f"LIVE API ({args.backend_url})") + f" | {auth_label}"
     logger.info("Evaluation mode: %s", mode)
 
     true_labels: List[int] = []
     pred_labels: List[int] = []
     latencies:   List[float] = []
+    sample_records: List[Dict[str, Any]] = []
     errors = 0
 
     for i, row in enumerate(rows):
         true_label = int(row.get("label", 0))
         try:
             if args.offline:
-                score, elapsed = _local_evaluate_sample(row)
+                score, elapsed = _local_evaluate_sample(row, neutral_auth=args.neutral_auth)
             else:
-                score, elapsed = _api_evaluate_sample(row, args.backend_url)
+                score, elapsed = _api_evaluate_sample(row, args.backend_url, neutral_auth=args.neutral_auth)
 
             pred_label = 1 if score >= PHISHING_SCORE_THRESHOLD else 0
             true_labels.append(true_label)
             pred_labels.append(pred_label)
             latencies.append(elapsed)
+
+            sample_records.append({
+                "id": row.get("id", i),
+                "label": true_label,
+                "label_name": row.get("label_name", "Phishing" if true_label else "Legitimate"),
+                "senderEmail": row.get("senderEmail", ""),
+                "subject": row.get("subject", ""),
+                "score": score,
+                "pred_label": pred_label,
+                "pred_name": "Phishing" if pred_label else "Safe",
+                "result": "CORRECT" if pred_label == true_label else "ERROR",
+                "elapsed_ms": round(elapsed, 2),
+                "auth_mode": "neutral" if args.neutral_auth else "synthetic",
+            })
 
             if (i + 1) % 20 == 0:
                 correct_so_far = sum(t == p for t, p in zip(true_labels, pred_labels))
@@ -405,6 +439,7 @@ def main():
     # Compute metrics
     metrics = compute_metrics(true_labels, pred_labels, latencies)
     metrics["evaluation_mode"] = "offline" if args.offline else "live_api"
+    metrics["auth_mode"]       = "neutral" if args.neutral_auth else "synthetic"
     metrics["backend_url"]     = args.backend_url if not args.offline else "N/A"
     metrics["dataset_path"]    = str(dataset_path)
     metrics["errors_skipped"]  = errors
@@ -414,9 +449,10 @@ def main():
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    report_json = output_dir / "evaluation_report.json"
-    report_txt  = output_dir / "evaluation_report.txt"
-    matrix_txt  = output_dir / "confusion_matrix.txt"
+    report_json = output_dir / ("evaluation_report_neutral.json" if args.neutral_auth else "evaluation_report.json")
+    report_txt  = output_dir / ("evaluation_report_neutral.txt" if args.neutral_auth else "evaluation_report.txt")
+    matrix_txt  = output_dir / ("confusion_matrix_neutral.txt" if args.neutral_auth else "confusion_matrix.txt")
+    export_csv  = Path(args.export_samples) if args.export_samples else (output_dir / ("per_sample_evaluation_neutral.csv" if args.neutral_auth else "per_sample_evaluation.csv"))
 
     with open(report_json, "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
@@ -430,6 +466,14 @@ def main():
     )
     with open(matrix_txt, "w", encoding="utf-8") as f:
         f.write(matrix_str)
+
+    if sample_records:
+        fieldnames = ["id", "label", "label_name", "senderEmail", "subject", "score", "pred_label", "pred_name", "result", "elapsed_ms", "auth_mode"]
+        with open(export_csv, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(sample_records)
+        logger.info("Per-sample CSV written to: %s", export_csv)
 
     # Print to console
     print("\n" + report_str)

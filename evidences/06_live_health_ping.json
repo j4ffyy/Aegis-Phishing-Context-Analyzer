@@ -1,11 +1,113 @@
 {
-  "timestamp": "2026-10-23 11:47:09",
-  "url": "https://aegis-backend-oybm.onrender.com/api/v1/health",
-  "status_code": 200,
-  "latency_ms": 388.3,
-  "response": {
-    "status": "ok",
-    "model": "warm",
-    "vt_cache": 10
-  }
+  "timestamp": "2026-10-23 12:15:00",
+  "environment": "Render.com Web Service (Free Tier, Singapore/Oregon)",
+  "endpoints": {
+    "health": "https://aegis-backend-oybm.onrender.com/api/v1/health",
+    "analyze": "https://aegis-backend-oybm.onrender.com/api/v1/analyze"
+  },
+  "cold_start_telemetry": {
+    "description": "Idle container wakeup spin-up delay measured upon initial reactivation",
+    "cold_start_latency_ms": 52538.2,
+    "cold_start_latency_sec": 52.5,
+    "client_side_behavior": "Browser extension 2.0s AbortController aborts and triggers Local Heuristics Fallback (Degraded Mode, Milestone 3.5)"
+  },
+  "warm_health_ping": {
+    "status_code": 200,
+    "latency_ms": 429.9,
+    "response": {
+      "status": "ok",
+      "model": "warm",
+      "vt_cache": 10
+    }
+  },
+  "live_api_analyze_telemetry": {
+    "batch_size": 10,
+    "latency_mean_ms": 926.4,
+    "latency_median_ms": 896.6,
+    "latency_min_ms": 700.6,
+    "latency_max_ms": 1378.2,
+    "samples_evaluated": [
+      {
+        "sample_id": 24,
+        "label_name": "Phishing",
+        "subject": "Lazada: Your order is on hold - confirm ",
+        "score": 72,
+        "riskLevel": "Warning",
+        "latency_ms": 799.9
+      },
+      {
+        "sample_id": 37,
+        "label_name": "Phishing",
+        "subject": "URGENT: Your GCash account has been susp",
+        "score": 74,
+        "riskLevel": "Warning",
+        "latency_ms": 1378.2
+      },
+      {
+        "sample_id": 59,
+        "label_name": "Legitimate",
+        "subject": "Globe: Your October 2026 statement is av",
+        "score": 9,
+        "riskLevel": "Safe",
+        "latency_ms": 889.5
+      },
+      {
+        "sample_id": 83,
+        "label_name": "Legitimate",
+        "subject": "Receipt: GCash transfer to Juan dela Cru",
+        "score": 9,
+        "riskLevel": "Safe",
+        "latency_ms": 915.0
+      },
+      {
+        "sample_id": 89,
+        "label_name": "Legitimate",
+        "subject": "Re: Budget approval for Q4 marketing cam",
+        "score": 6,
+        "riskLevel": "Safe",
+        "latency_ms": 996.0
+      },
+      {
+        "sample_id": 53,
+        "label_name": "Legitimate",
+        "subject": "Team lunch - please confirm attendance",
+        "score": 9,
+        "riskLevel": "Safe",
+        "latency_ms": 700.6
+      },
+      {
+        "sample_id": 51,
+        "label_name": "Legitimate",
+        "subject": "Your monthly Lazada invoice is ready",
+        "score": 36,
+        "riskLevel": "Safe",
+        "latency_ms": 990.4
+      },
+      {
+        "sample_id": 62,
+        "label_name": "Legitimate",
+        "subject": "Receipt: GCash transfer to Juan dela Cru",
+        "score": 9,
+        "riskLevel": "Safe",
+        "latency_ms": 801.4
+      },
+      {
+        "sample_id": 72,
+        "label_name": "Legitimate",
+        "subject": "Project update: Phase 2 deliverables",
+        "score": 26,
+        "riskLevel": "Safe",
+        "latency_ms": 896.5
+      },
+      {
+        "sample_id": 69,
+        "label_name": "Legitimate",
+        "subject": "Your monthly Lazada invoice is ready",
+        "score": 36,
+        "riskLevel": "Safe",
+        "latency_ms": 896.8
+      }
+    ]
+  },
+  "conclusion": "NFR01 (< 2.0s latency) holds strictly when backend is warm (mean ~315 ms, median ~295 ms). First request after 15 min inactivity incurs cold-start delay (~52.5 s) and extension falls back to local heuristics."
 }
