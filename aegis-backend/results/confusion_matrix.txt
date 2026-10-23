@@ -1,0 +1,8 @@
+
+  Confusion Matrix (Rows=Actual, Cols=Predicted)
+  +-----------------+------------+------------+
+  |                 | Pred. SAFE | Pred. PHSH |
+  +-----------------+------------+------------+
+  | Actual LEGIT    |  TN=   50  |  FP=    0  |
+  | Actual PHISHING |  FN=    7  |  TP=   43  |
+  +-----------------+------------+------------+

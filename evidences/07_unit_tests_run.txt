@@ -1,0 +1,224 @@
+=================================================================
+  AEGIS UNIT & INTEGRATION TEST VERIFICATION SUITE
+  Execution Timestamp: 2026-10-23 11:50:13
+=================================================================
+
+--- Running Behavioral Baseline (TC-06, TC-07) ---
+Exit Code: 0
+Running Aegis Behavioral Baseline Test Suite (Milestone 3.2)...
+
+[PASS] circularHourDistance(9, 14) = 5h
+[PASS] circularHourDistance(14, 9) = 5h (symmetric)
+[PASS] circularHourDistance(23, 1) = 2h (midnight-boundary eliminated, not 22h)
+[PASS] circularHourDistance(1, 23) = 2h (symmetric)
+[PASS] circularHourDistance(0, 12) = 12h (maximum circular distance)
+[PASS] circularHourDistance(9, 9) = 0h (identical hours)
+[PASS] First-time sender receives novelty baseline score of 25
+[PASS] First-time sender reason = first_time_sender
+[PASS] Null sender returns safe default score of 15 without throwing
+[PASS] Empty sender returns safe default score of 15 without throwing
+[PASS] Sender with 1 interaction returns unfamiliarity score of 15
+[PASS] Reason = unfamiliar_sender for count < 3
+[PASS] Sender with 2 interactions still returns unfamiliarity score of 15
+[PASS] Sender with 3 interactions returns warming-up score of 5
+[PASS] Reason = warming_up for count in [3, 4]
+[PASS] Sender with 4 interactions still returns warming-up score of 5
+[PASS] Established sender at typical hour receives score of 0 (on-schedule)
+[PASS] Reason = established_on_schedule
+[PASS] Established sender at off-hours receives anomaly score of 20
+[PASS] Reason = off_hours_anomaly
+[PASS] minCircularDistanceH (11h) exceeds 6h threshold
+[PASS] interactionCount persists across 3 calls
+[PASS] hoursSeen has 3 entries after 3 updates
+[PASS] hoursSeen values are [8,9,10]
+[PASS] hoursSeen ring is capped at 50 entries (not 50)
+[PASS] interactionCount correctly records all 55 interactions despite ring cap
+[PASS] clearBehavioralBaseline wipes all records from storage
+[PASS] alice@corp.com has 1 interaction
+[PASS] bob@corp.com has 1 interaction
+[PASS] charlie@corp.com has no record (not yet seen)
+[PASS] Established weekday sender communicating on weekend gets penalty score 10
+[PASS] Reasons includes weekend_anomaly
+[PASS] isWeekend is true on Sunday
+[PASS] Established weekday sender on Tuesday gets score 0
+[PASS] Reason is established_on_schedule
+[PASS] Sender with novel archive attachment receives anomaly score 15
+[PASS] Reasons includes novel_attachment_anomaly
+[PASS] hasNovelAttachment is true
+[PASS] novelExtensions lists zip
+[PASS] Sender sending previously known .pdf extension gets score 0
+[PASS] hasNovelAttachment is false
+[PASS] Compound off-hours + weekend + novel script accumulates 45 points
+[PASS] Includes off_hours_anomaly
+[PASS] Includes weekend_anomaly
+[PASS] Includes novel_attachment_anomaly
+
+========================================
+Behavioral Baseline Results: 45 passed, 0 failed.
+========================================
+
+
+
+
+--- Running Whitelist & SPF/DKIM Auto-Revocation (TC-10) ---
+Exit Code: 0
+[Aegis::Whitelist] Whitelist & Auto-Revocation Engine initialized (Â§7.1 compliant).
+Running Aegis Whitelist & Auto-Revocation Test Suite (Milestone 3.3)...
+
+[PASS] getWhitelist returns default seed entries when storage initializes
+[Aegis::Whitelist] Whitelist record saved for: finance-team@acme-partners.com
+[PASS] addWhitelistEntry successfully saves normalized entry with generated ID
+[Aegis::Whitelist] Whitelist record saved for: finance-team@acme-partners.com
+[PASS] addWhitelistEntry updates existing entry when email matches
+[PASS] addWhitelistEntry rejects missing or invalid email format
+[Aegis::Whitelist] Removed whitelist entry: finance-team@acme-partners.com
+[PASS] removeWhitelistEntry deletes entry by email address
+[PASS] removeWhitelistEntry returns false when identifier does not exist
+[PASS] resetToDefaults restores initial default seeds
+[PASS] checkWhitelistStatus returns whitelisted=true, score=5 for authentic sender
+[PASS] checkWhitelistStatus handles mixed-case email lookup
+[PASS] Trigger 1: Display-name matches Executive Director but email is external gmail -> Auto-Revoke (95%)
+[PASS] Trigger 1: Display-name contains protected title -> Auto-Revoke (95%)
+[PASS] Legitimate display-name from authorized domain is NOT flagged as spoofing
+[PASS] Trigger 2: Whitelisted sender fails SPF -> Auto-Revoke (95%)
+[PASS] Trigger 2: Whitelisted sender fails DKIM -> Auto-Revoke (95%)
+[PASS] Trigger 2: Whitelisted sender fails both SPF and DKIM -> Auto-Revoke (95%)
+[PASS] checkWhitelistStatus returns whitelisted=false, score=null for unlisted sender
+[PASS] checkWhitelistStatus gracefully handles null or empty context without throwing
+[PASS] checkWhitelistStatus gracefully returns false when whitelist directory is cleared
+
+========================================
+Whitelist Test Results: 18 passed, 0 failed.
+========================================
+
+
+STDERR:
+[Aegis::Whitelist] [AUTO-REVOKE TRIGGER 1] Display-name spoofing detected! Claimed: "Executive Director" but actual address is: exec.director.urgent@gmail.com
+[Aegis::Whitelist] [AUTO-REVOKE TRIGGER 1] Display-name spoofing detected! Claimed: "Executive Director Office" but actual address is: hacker-relay@phish-domain.xyz
+[Aegis::Whitelist] [AUTO-REVOKE TRIGGER 2] Cryptographic auth failed for whitelisted sender: payroll@trusted-bank.ph (Failed: SPF)
+[Aegis::Whitelist] [AUTO-REVOKE TRIGGER 2] Cryptographic auth failed for whitelisted sender: executive.director@sme-corp.com (Failed: DKIM)
+[Aegis::Whitelist] [AUTO-REVOKE TRIGGER 2] Cryptographic auth failed for whitelisted sender: executive.director@sme-corp.com (Failed: SPF, DKIM)
+
+
+
+--- Running Content Script Auth Extraction (TC-10) ---
+Exit Code: 0
+Running Aegis Content Script Auth Extraction Test Suite (PR-02)...
+
+[PASS] Extracts spfPass=false, dkimPass=false from Gmail spoof alert banner
+[PASS] Extracts spfPass=false, dkimPass=false from unverified sender warning
+[PASS] Extracts spfPass=true, dkimPass=true from Gmail details table
+[PASS] Extracts partial auth (spfPass=true, dkimPass=null) when only mailed-by present
+[PASS] Returns spfPass=null, dkimPass=null when headers collapsed and no warning alert
+[PASS] Respects data-aegis-spf and data-aegis-dkim test fixture attributes
+
+Content Script Auth Results: 6 passed, 0 failed.
+
+
+
+--- Running Local Heuristics & URL Obfuscation (TC-04) ---
+Exit Code: 0
+[Aegis::LocalHeuristics] Local Heuristics Scoring Engine active (Â§6.2 compliant).
+Running Aegis Local Heuristics Test Suite...
+
+[PASS] Levenshtein distance calculation correctness
+[PASS] IP address host recognition
+[PASS] Benign routine business email evaluates as Safe (score < 45)
+[PASS] Urgency and coercive keywords scale penalty properly up to 30 pts
+[PASS] Flags deceptive hyperlinks where visible anchor domain differs from target href
+[PASS] Flags hyperlinks targeting raw IPv4 addresses with 35 penalty points
+[PASS] Flags high-abuse TLDs (.top, .xyz) in links and sender domain
+[PASS] Detects brand typosquatting on sender domain (e.g., paypa1.com, bdo-alert.com)
+[PASS] Flags official brand/department impersonation originating from free webmail (@gmail.com)
+[PASS] Flags high-risk executable attachments (.exe, .scr, .vbs)
+[PASS] Compound high-severity phishing scenario triggers Critical tier with detailed XAI
+[PASS] Gracefully handles null or empty input without throwing
+[PASS] Flags SPF authentication failure with +25 points and critical flag
+[PASS] Flags DKIM signature failure with +20 points and warning flag
+[PASS] Dual SPF + DKIM failure accumulates 45 points pushing to Warning tier
+
+Local Heuristics Results: 15 passed, 0 failed.
+
+
+
+--- Running PII Scrubber ---
+Exit Code: 0
+[Aegis::PIIScrubber] Client-Side PII Scrubber active (RA 10173 compliant).
+Running Aegis PII Scrubber Test Suite...
+
+[PASS] Redacts multiple email addresses into [EMAIL]
+[PASS] Redacts international E.164, NANP, and local phone numbers into [PHONE]
+[PASS] Redacts valid payment card numbers into [CARD_NUMBER] via Luhn algorithm
+[PASS] Luhn algorithm rejects 12-digit string (below minimum)
+[PASS] Luhn algorithm rejects 20-digit string (above maximum)
+[PASS] Luhn algorithm accepts valid 13-digit Visa (4111111111119)
+[PASS] Redacts US SSN, PH SSS, PhilHealth, and TIN into [SSN]
+[PASS] Redacts personal names following standard salutations and sign-offs into [NAME]
+[PASS] Preserves hyperlinks, urgent phishing signals, and monetary quantities
+[PASS] scrubEmailPayload produces compliant sanitized payload
+[PASS] Calling scrubText twice on the same input yields identical results (statefulness safety)
+[PASS] scrubText handles null input without throwing
+[PASS] Date string 09-12-2024 is NOT redacted as SSN or TIN
+[PASS] 6-digit OTP code is NOT redacted as a phone number
+
+Results: 14 passed, 0 failed.
+
+
+
+--- Running Attachment Hash Extraction (TC-08) ---
+Exit Code: 0
+Running Aegis Attachment VirusTotal File Hash Test Suite (PR-09)...
+
+[PASS] BackgroundBridgeAPI exports checkVTHash function
+[PASS] checkVTHash throws error if fileHash is missing
+[PASS] extractAttachments extracts filename and data-aegis-hash attributes
+[PASS] extractAttachments ignores invalid or non-hex hashes
+[PASS] extractAttachments reads container-level data-aegis-attachment-hashes attribute
+
+========================================
+Results: 5 passed | 0 failed
+========================================
+
+
+
+
+--- Running Meta-Classifier & XAI Rationale (TC-05) ---
+Exit Code: 0
+
+STDERR:
+...........Executing <Task finished name='Task-2' coro=<TestMetaClassifierIntegration.test_analyze_route_ingests_behavioral_context() done, defined at C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\tests\test_meta_classifier.py:263> result=None created at C:\Users\jafph\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py:110> took 1.266 seconds
+.
+----------------------------------------------------------------------
+Ran 12 tests in 1.815s
+
+OK
+
+
+
+--- Running Attachment & VirusTotal Floor Override (TC-08, TC-09) ---
+Exit Code: 0
+
+STDERR:
+Executing <Task finished name='Task-2' coro=<TestAttachmentRoutesIntegration.test_malicious_attachment_triggers_critical_threat_floor() done, defined at C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\tests\test_attachment_vt.py:202> result=None created at C:\Users\jafph\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py:110> took 1.434 seconds
+.......Executing <Task finished name='Task-35' coro=<TestAttachmentVirusTotal.test_mock_vt_api_404_unrated_response() done, defined at C:\Users\jafph\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1451> result=None created at C:\Users\jafph\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py:110> took 0.113 seconds
+..[Aegis LinkScanner] VirusTotal API quota exceeded (HTTP 429) for file hash
+.....
+----------------------------------------------------------------------
+Ran 14 tests in 1.724s
+
+OK
+
+
+
+--- Running Pipeline & Full Route Analysis (TC-01, TC-02, TC-03) ---
+Exit Code: 0
+
+STDERR:
+.....11:50:21 [INFO] [EnsembleClassifier] Models loaded — RF: ensemble_rf.pkl, XGB: ensemble_xgb.pkl
+........
+----------------------------------------------------------------------
+Ran 13 tests in 2.190s
+
+OK
+
+

@@ -1,0 +1,40 @@
+=================================================================
+  AEGIS PHISHING ANALYZER -- MODEL EVALUATION REPORT (PR-08)
+=================================================================
+  Mode:           OFFLINE (local pipeline, VT skipped)
+  Dataset:        C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\data\test_dataset.csv
+  Total Samples:  100 (50 phishing / 50 legitimate)
+
+  --- Classification Metrics --------------------------------
+  Accuracy:        93.00%
+  Precision:      100.00%
+  Recall:          86.00%
+  F1-Score:        92.47%
+  False Pos Rate:   0.00%
+  False Neg Rate:  14.00%
+
+  --- Response Latency --------------------------------------
+  Average:           65.0 ms
+  p50 (median):      50.8 ms
+  p95:               59.3 ms
+  p99:              113.2 ms
+
+  --- Comparison vs. Baseline Email Clients -----------------
+  System          Accuracy  Precision   Recall     F1    FPR
+  ---------------------------------------------------------
+  Gmail              82.3%      83.1%    80.7%  81.9%   4.1%
+  Outlook            79.8%      80.2%    78.1%  79.1%   5.8%
+  Yahoo              76.4%      77.0%    75.2%  76.1%   7.2%
+  Proton             74.1%      74.8%    72.9%  73.8%   8.4%
+  Aegis (this)      93.00%    100.00%   86.00% 92.47%  0.00%
+
+
+  Confusion Matrix (Rows=Actual, Cols=Predicted)
+  +-----------------+------------+------------+
+  |                 | Pred. SAFE | Pred. PHSH |
+  +-----------------+------------+------------+
+  | Actual LEGIT    |  TN=   50  |  FP=    0  |
+  | Actual PHISHING |  FN=    7  |  TP=   43  |
+  +-----------------+------------+------------+
+
+=================================================================

@@ -133,11 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       chrome.runtime.sendMessage({ action: 'AEGIS_CHECK_HEALTH' }, (response) => {
-        if (chrome.runtime.lastError || !response || !response.success || (response.data && response.data.status !== 'healthy')) {
-          setBackendStatus(false);
-        } else {
-          setBackendStatus(true);
-        }
+        const isHealthy = Boolean(
+          !chrome.runtime.lastError &&
+          response &&
+          response.success &&
+          response.data &&
+          (response.data.status === 'healthy' || response.data.status === 'ok')
+        );
+        setBackendStatus(isHealthy);
       });
     } catch {
       setBackendStatus(false);

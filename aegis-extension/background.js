@@ -393,28 +393,6 @@ async function dispatchEmailAnalysis(emailPayload) {
   }
 }
 
-/**
- * Probes the backend health endpoint.
- * @returns {Promise<object>}
- */
-async function checkBackendHealth() {
-  const backendBaseUrl = await getBackendUrl();
-  const targetUrl = `${backendBaseUrl.replace(/\/+$/, '')}/api/v1/health`;
-
-  try {
-    const response = await fetchWithTimeout(targetUrl, { method: 'GET' }, 2000);
-    if (!response.ok) {
-      return { online: false, status: response.status, error: response.statusText };
-    }
-    const data = await response.json();
-    return { online: true, ...data };
-  } catch (err) {
-    return {
-      online: false,
-      error: err.name === 'AbortError' ? 'Probe timed out (2.0s)' : err.message
-    };
-  }
-}
 
 /**
  * Probes the backend /api/v1/health endpoint to verify ML server connectivity (PR-10).

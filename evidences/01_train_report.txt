@@ -1,0 +1,55 @@
+Aegis Ensemble ML Training Report
+============================================================
+
+Dataset size: 1000 samples (500 phishing / 500 legitimate)
+Train/Test split: 800 / 200
+
+--- Random Forest ---
+Test F1: 1.0000
+5-Fold CV F1: 1.0000 ± 0.0000
+
+Classification Report (RF):
+              precision    recall  f1-score   support
+
+  Legitimate       1.00      1.00      1.00       100
+    Phishing       1.00      1.00      1.00       100
+
+    accuracy                           1.00       200
+   macro avg       1.00      1.00      1.00       200
+weighted avg       1.00      1.00      1.00       200
+
+
+Confusion Matrix (RF):
+[[100   0]
+ [  0 100]]
+
+--- XGBoost ---
+Test F1: 1.0000
+5-Fold CV F1: 1.0000 ± 0.0000
+
+Classification Report (XGB):
+              precision    recall  f1-score   support
+
+  Legitimate       1.00      1.00      1.00       100
+    Phishing       1.00      1.00      1.00       100
+
+    accuracy                           1.00       200
+   macro avg       1.00      1.00      1.00       200
+weighted avg       1.00      1.00      1.00       200
+
+
+Confusion Matrix (XGB):
+[[100   0]
+ [  0 100]]
+
+Feature Importance (RF — top 10):
+   1. urgency_keyword_count          0.2941
+   2. subdomain_depth_max            0.2346
+   3. suspicious_tld                 0.1249
+   4. max_url_length                 0.1057
+   5. has_typosquatting              0.0527
+   6. spf_fail                       0.0518
+   7. ip_url_present                 0.0477
+   8. url_count                      0.0374
+   9. body_length                    0.0239
+  10. has_dangerous_ext              0.0168

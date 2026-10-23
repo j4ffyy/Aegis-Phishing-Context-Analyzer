@@ -89,7 +89,7 @@ $$R_{\text{final}} = \min\left(100, \text{round}\left(w_1 S_{\text{heuristic}} +
 | Layer | Component | Weight ($w_i$) | Analytical Focus |
 | :---: | :--- | :---: | :--- |
 | **L1** | **Heuristic & Spoofing** | **25%** | Domain typosquatting (Levenshtein), deceptive hyperlinks, IP hosts, suspicious TLDs, and executable/archive attachments. |
-| **L2** | **DistilBERT NLP Intent** | **45%** | Fine-tuned transformer executed via ONNX Runtime (<150 MB RSS) evaluating semantic urgency, financial coercion, and intent. |
+| **L2** | **DistilBERT NLP Intent** | **45%** | Pre-trained transformer (`lemonade-sdk/phishing-email-detection-distilbert-ONNX`, Apache-2.0) executed via ONNX Runtime (<150 MB RSS) evaluating semantic urgency, financial coercion, and intent. |
 | **L3** | **Behavioral Baseline** | **15%** | Sender familiarity frequency and circadian timing anomalies using circular clock distance: $d_H(h_1, h_2) = \min(\|h_1 - h_2\|, 24 - \|h_1 - h_2\|)$. |
 | **L4** | **VirusTotal Intelligence** | **15%** | Rate-paced URL reputation scanner with an asynchronous 15.0s pacing lock, dual cache keyspaces, and offline seed lookup. |
 

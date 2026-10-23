@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-10-23 11:47:09",
+  "url": "https://aegis-backend-oybm.onrender.com/api/v1/health",
+  "status_code": 200,
+  "latency_ms": 388.3,
+  "response": {
+    "status": "ok",
+    "model": "warm",
+    "vt_cache": 10
+  }
+}
