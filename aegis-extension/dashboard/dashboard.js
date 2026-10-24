@@ -187,92 +187,130 @@ function buildDailyBuckets(entries) {
   return buckets;
 }
 
+function getNiceYAxis(maxVal) {
+  if (maxVal <= 0) return { max: 4, ticks: [4, 3, 2, 1, 0] };
+  if (maxVal <= 3) return { max: 4, ticks: [4, 3, 2, 1, 0] };
+  if (maxVal <= 7) return { max: 8, ticks: [8, 6, 4, 2, 0] };
+  if (maxVal <= 9) return { max: 10, ticks: [10, 8, 6, 4, 2, 0] };
+  if (maxVal <= 14) return { max: 16, ticks: [16, 12, 8, 4, 0] };
+  if (maxVal <= 18) return { max: 20, ticks: [20, 15, 10, 5, 0] };
+  if (maxVal <= 35) return { max: 40, ticks: [40, 30, 20, 10, 0] };
+  if (maxVal <= 50) return { max: 50, ticks: [50, 40, 30, 20, 10, 0] };
+  const step = Math.ceil(maxVal / 4);
+  const niceMax = step * 4;
+  const ticks = [niceMax, step * 3, step * 2, step, 0];
+  return { max: niceMax, ticks };
+}
+
 function renderBarChart(entries) {
-  const canvas = qs('bar-chart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
+  let container = qs('bar-chart');
+  if (!container) return;
+
+  // Upgrade canvas to div if needed
+  if (container.tagName === 'CANVAS') {
+    const div = document.createElement('div');
+    div.id = 'bar-chart';
+    div.className = 'aegis-bar-chart';
+    div.setAttribute('aria-label', '7-day detection activity bar chart');
+    container.parentNode.replaceChild(div, container);
+    container = div;
+  }
 
   const buckets = buildDailyBuckets(entries);
   const days = Object.keys(buckets);
-  const maxVal = Math.max(1, ...days.map(d => {
-    const b = buckets[d];
-    return b.Critical + b.Warning + b.Safe;
-  }));
+  const maxVal = Math.max(1, ...days.map(d => Math.max(buckets[d].Critical, buckets[d].Warning, buckets[d].Safe)));
+  const { max: niceMax, ticks } = getNiceYAxis(maxVal);
 
-  const padL = 28, padR = 16, padT = 10, padB = 36;
-  const chartW = W - padL - padR;
-  const chartH = H - padT - padB;
-  const groupW = chartW / days.length;
-  const barW = Math.min(groupW * 0.22, 18);
-  const gap  = barW * 0.4;
+  const tiers = [
+    { key: 'Critical', label: 'Critical', colorClass: 'aegis-bar--critical' },
+    { key: 'Warning',  label: 'Warning',  colorClass: 'aegis-bar--warning'  },
+    { key: 'Safe',     label: 'Safe',     colorClass: 'aegis-bar--safe'     },
+  ];
 
-  const colors = {
-    Critical: '#d93025',
-    Warning:  '#b06000',
-    Safe:     '#188038'
-  };
+  // Gridlines HTML
+  const gridHtml = ticks.map(t => {
+    const pct = (t / niceMax) * 100;
+    const isBase = t === 0;
+    return `<div class="aegis-gridline ${isBase ? 'aegis-gridline--base' : ''}" style="bottom: ${pct}%;"></div>`;
+  }).join('');
 
-  // Gridlines
-  ctx.strokeStyle = '#e8eaed';
-  ctx.lineWidth = 1;
-  const gridLines = 4;
-  for (let i = 0; i <= gridLines; i++) {
-    const y = padT + (chartH / gridLines) * i;
-    ctx.beginPath();
-    ctx.moveTo(padL, y);
-    ctx.lineTo(padL + chartW, y);
-    ctx.stroke();
-  }
+  // Y-axis ticks HTML
+  const yAxisHtml = ticks.map(t => `<div class="aegis-chart-y-tick">${t}</div>`).join('');
 
-  // Draw bars
-  days.forEach((day, di) => {
-    const groupX = padL + di * groupW + groupW / 2;
-    const tiers = ['Critical', 'Warning', 'Safe'];
-    const totalW = tiers.length * barW + (tiers.length - 1) * gap;
-    let bx = groupX - totalW / 2;
+  // Days columns HTML
+  const daysHtml = days.map((day, di) => {
+    const dateObj = new Date(day + 'T00:00:00');
+    const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+    const monthDay = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fullWeekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+    const b = buckets[day];
+    const dayTotal = b.Critical + b.Warning + b.Safe;
 
-    tiers.forEach(tier => {
-      const count = buckets[day][tier];
-      const barH = (count / maxVal) * chartH;
-      const by = padT + chartH - barH;
+    let alignClass = '';
+    if (di <= 1) alignClass = 'align-left';
+    else if (di >= 5) alignClass = 'align-right';
 
-      ctx.fillStyle = colors[tier];
-      ctx.globalAlpha = count === 0 ? 0.12 : 0.9;
-      const r = Math.min(3, barW / 2);
-      ctx.beginPath();
-      ctx.moveTo(bx + r, by);
-      ctx.lineTo(bx + barW - r, by);
-      ctx.quadraticCurveTo(bx + barW, by, bx + barW, by + r);
-      ctx.lineTo(bx + barW, padT + chartH);
-      ctx.lineTo(bx, padT + chartH);
-      ctx.lineTo(bx, by + r);
-      ctx.quadraticCurveTo(bx, by, bx + r, by);
-      ctx.closePath();
-      ctx.fill();
-      ctx.globalAlpha = 1;
+    const barsHtml = tiers.map(t => {
+      const count = b[t.key] || 0;
+      if (count === 0) {
+        return `<div class="aegis-bar-slot"><div class="aegis-bar aegis-bar--zero" title="${t.label}: 0"></div></div>`;
+      }
+      const pct = Math.min(100, Math.max(8, (count / niceMax) * 100));
+      const valClass = pct > 25 ? 'aegis-bar-val--inside' : 'aegis-bar-val--floating';
+      return `<div class="aegis-bar-slot">
+        <div class="aegis-bar ${t.colorClass}" style="height: ${pct}%;" title="${t.label}: ${count}">
+          <span class="aegis-bar-val ${valClass}">${count}</span>
+        </div>
+      </div>`;
+    }).join('');
 
-      bx += barW + gap;
-    });
+    return `
+      <div class="aegis-day-col ${alignClass}" data-date="${day}">
+        <div class="aegis-day-tooltip">
+          <div class="aegis-tooltip-title">${fullWeekday.toUpperCase()}, ${monthDay.toUpperCase()}</div>
+          <div class="aegis-tooltip-row">
+            <span><span class="aegis-tooltip-dot aegis-tooltip-dot--red"></span> Critical</span>
+            <strong>${b.Critical}</strong>
+          </div>
+          <div class="aegis-tooltip-row">
+            <span><span class="aegis-tooltip-dot aegis-tooltip-dot--amber"></span> Warning</span>
+            <strong>${b.Warning}</strong>
+          </div>
+          <div class="aegis-tooltip-row">
+            <span><span class="aegis-tooltip-dot aegis-tooltip-dot--green"></span> Safe</span>
+            <strong>${b.Safe}</strong>
+          </div>
+          <div class="aegis-tooltip-total">
+            <span>TOTAL</span>
+            <strong>${dayTotal}</strong>
+          </div>
+        </div>
+        <div class="aegis-bars-group">
+          ${barsHtml}
+        </div>
+        <div class="aegis-x-label">
+          <span class="aegis-day-name">${weekday}</span>
+          <span class="aegis-day-date">${monthDay}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 
-    // Day label
-    ctx.fillStyle = '#5f6368';
-    ctx.font = '700 10px Roboto, sans-serif';
-    ctx.textAlign = 'center';
-    const label = new Date(day + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' });
-    ctx.fillText(label, groupX, H - 10);
-  });
-
-  // Y-axis labels
-  ctx.fillStyle = '#5f6368';
-  ctx.font = '700 9px Roboto, sans-serif';
-  ctx.textAlign = 'right';
-  for (let i = 0; i <= gridLines; i++) {
-    const val = Math.round((maxVal / gridLines) * (gridLines - i));
-    const y   = padT + (chartH / gridLines) * i;
-    ctx.fillText(val, padL - 4, y + 3);
-  }
+  container.innerHTML = `
+    <div class="aegis-chart-viewport">
+      <div class="aegis-chart-y-axis">
+        ${yAxisHtml}
+      </div>
+      <div class="aegis-chart-stage">
+        <div class="aegis-chart-gridlines">
+          ${gridHtml}
+        </div>
+        <div class="aegis-chart-columns">
+          ${daysHtml}
+        </div>
+      </div>
+    </div>
+  `;
 
   // Badge
   const total7 = days.reduce((sum, d) => sum + buckets[d].Critical + buckets[d].Warning + buckets[d].Safe, 0);

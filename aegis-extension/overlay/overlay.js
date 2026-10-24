@@ -957,7 +957,13 @@
 
   function logDetectionResult(emailCtx, analysis) {
     if (!emailCtx || !analysis) return;
-    const emailHash = analysis.emailHash || emailCtx.emailHash || '';
+    const emailHash = analysis.emailHash
+      || emailCtx.emailHash
+      // Fallback: stable dedup key from sender + subject when backend hasn't provided a hash
+      // (offline/fallback path — btoa is always available in extension contexts)
+      || btoa(encodeURIComponent(
+          `${emailCtx.senderEmail || ''}|${emailCtx.subject || ''}`
+        )).slice(0, 40);
     if (!emailHash) return;
 
     const entry = {
