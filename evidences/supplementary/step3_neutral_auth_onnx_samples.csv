@@ -1,0 +1,101 @@
+id,label,label_name,subject,score,pred_label,pred_name,result,elapsed_ms,s_layer1,s_nlp,s_pure,p_phish,model_warm,auth_mode,commit_hash
+24,1,Phishing,Lazada: Your order is on hold - confirm payment details,72,1,Phishing,CORRECT,110.94,62,96,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+37,1,Phishing,URGENT: Your GCash account has been suspended,67,1,Phishing,CORRECT,122.87,38,100,60,0.9997,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+59,0,Legitimate,Globe: Your October 2026 statement is available,9,0,Safe,CORRECT,117.96,4,10,10,0.0033,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+83,0,Legitimate,Receipt: GCash transfer to Juan dela Cruz,9,0,Safe,CORRECT,131.64,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+89,0,Legitimate,Re: Budget approval for Q4 marketing campaign,6,0,Safe,CORRECT,149.37,4,5,5,0.4568,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+33,1,Phishing,Your Shopee account has been locked - verify now,72,1,Phishing,CORRECT,125.6,62,96,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+63,0,Legitimate,Shopee Order Confirmation - Order #SHP-2026-12345,9,0,Safe,CORRECT,117.8,4,10,10,0.0008,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+44,1,Phishing,Babala: Na-lock ang iyong BDO account - mag-login na,63,1,Phishing,CORRECT,121.43,33,96,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+78,0,Legitimate,Welcome to the Aegis SME Security Newsletter,9,0,Safe,CORRECT,120.74,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+9,1,Phishing,Microsoft Account: Unusual sign-in activity detected,58,1,Phishing,CORRECT,115.59,29,88,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+53,0,Legitimate,Team lunch - please confirm attendance,9,0,Safe,CORRECT,106.19,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+95,0,Legitimate,Re: Budget approval for Q4 marketing campaign,9,0,Safe,CORRECT,122.72,4,10,10,0.0013,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+90,0,Legitimate,Receipt: GCash transfer to Juan dela Cruz,9,0,Safe,CORRECT,118.27,4,10,10,0.0005,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+15,1,Phishing,Microsoft Account: Unusual sign-in activity detected,67,1,Phishing,CORRECT,138.65,38,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+88,0,Legitimate,Re: Budget approval for Q4 marketing campaign,8,0,Safe,CORRECT,115.56,4,8,8,0.1679,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+68,0,Legitimate,FWD: MMDC academic calendar update,9,0,Safe,CORRECT,129.04,4,10,10,0.0354,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+0,1,Phishing,Final Notice: Your account will be deactivated in 24 hours,51,1,Phishing,CORRECT,151.02,21,80,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+86,0,Legitimate,SSS PRN for Q4 2026 - Payment Reference,9,0,Safe,CORRECT,118.56,4,10,10,0.0036,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+38,1,Phishing,RCBC Online Banking: Account verification required,68,1,Phishing,CORRECT,126.54,41,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+8,1,Phishing,SSS: Important notice regarding your contribution records,63,1,Phishing,CORRECT,150.17,33,96,60,0.9989,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+51,0,Legitimate,Your monthly Lazada invoice is ready,36,0,Safe,CORRECT,141.43,4,60,60,0.9986,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+94,0,Legitimate,Welcome to the Aegis SME Security Newsletter,9,0,Safe,CORRECT,110.16,4,10,10,0.0008,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+93,0,Legitimate,Globe: Your October 2026 statement is available,9,0,Safe,CORRECT,118.32,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+96,0,Legitimate,Your OTP for BDO Online Banking,9,0,Safe,CORRECT,133.69,4,10,10,0.0032,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+40,1,Phishing,IMPORTANT: Update your BDO Online Banking credentials now,74,1,Phishing,CORRECT,143.49,63,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+57,0,Legitimate,Your monthly Lazada invoice is ready,36,0,Safe,CORRECT,119.71,4,60,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+67,0,Legitimate,FWD: MMDC academic calendar update,9,0,Safe,CORRECT,106.96,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+10,1,Phishing,Google: Security alert for your connected account,58,1,Phishing,CORRECT,129.47,29,88,60,0.9959,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+43,1,Phishing,PhilHealth: Update your member information immediately,61,1,Phishing,CORRECT,144.49,56,80,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+23,1,Phishing,Lazada: Your order is on hold - confirm payment details,80,1,Phishing,CORRECT,123.32,84,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+35,1,Phishing,Metrobank: Suspicious transaction detected on your account,74,1,Phishing,CORRECT,115.8,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+27,1,Phishing,IMPORTANT: Update your BDO Online Banking credentials now,74,1,Phishing,CORRECT,156.29,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+6,1,Phishing,Lazada: Your order is on hold - confirm payment details,52,1,Phishing,CORRECT,160.01,24,80,60,0.9994,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+2,1,Phishing,Kailangan mong i-update ang iyong Maya account ngayon,68,1,Phishing,CORRECT,136.37,41,100,60,0.9987,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+36,1,Phishing,Babala: Na-lock ang iyong BDO account - mag-login na,74,1,Phishing,CORRECT,142.51,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+11,1,Phishing,Kailangan mong i-update ang iyong Maya account ngayon,74,1,Phishing,CORRECT,126.57,62,100,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+92,0,Legitimate,FWD: MMDC academic calendar update,9,0,Safe,CORRECT,121.41,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+7,1,Phishing,Amazon: Your account has been compromised - act now,68,1,Phishing,CORRECT,172.74,41,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+56,0,Legitimate,Team lunch - please confirm attendance,9,0,Safe,CORRECT,159.9,4,10,10,0.0002,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+66,0,Legitimate,Your Meralco bill for September 2026,9,0,Safe,CORRECT,132.03,4,10,10,0.0019,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+99,0,Legitimate,Receipt: GCash transfer to Juan dela Cruz,9,0,Safe,CORRECT,112.27,4,10,10,0.0005,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+49,1,Phishing,URGENT: I-verify ang iyong GCash account agad na,74,1,Phishing,CORRECT,159.91,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+32,1,Phishing,Google: Security alert for your connected account,64,1,Phishing,CORRECT,143.18,63,80,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+41,1,Phishing,Lazada: Your order is on hold - confirm payment details,58,1,Phishing,CORRECT,148.12,29,88,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+64,0,Legitimate,Globe: Your October 2026 statement is available,9,0,Safe,CORRECT,118.47,4,10,10,0.0001,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+97,0,Legitimate,Meeting agenda for tomorrow's sync,9,0,Safe,CORRECT,128.44,4,10,10,0.0028,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+65,0,Legitimate,Your PhilHealth contribution receipt for October 2026,29,0,Safe,CORRECT,126.49,4,48,48,0.8053,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+17,1,Phishing,Your Shopee account has been locked - verify now,46,1,Phishing,CORRECT,132.38,12,76,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+21,1,Phishing,Security Alert: Unauthorized login detected on your Maya account,67,1,Phishing,CORRECT,143.83,38,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+25,1,Phishing,PayPal: Your account access has been limited,74,1,Phishing,CORRECT,159.2,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+62,0,Legitimate,Receipt: GCash transfer to Juan dela Cruz,9,0,Safe,CORRECT,103.47,4,10,10,0.0005,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+72,0,Legitimate,Project update: Phase 2 deliverables,26,0,Safe,CORRECT,122.56,25,30,10,0.0006,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+1,1,Phishing,RCBC Online Banking: Account verification required,64,1,Phishing,CORRECT,119.57,63,80,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+54,0,Legitimate,FWD: MMDC academic calendar update,36,0,Safe,CORRECT,127.99,4,60,60,0.9996,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+14,1,Phishing,Final Notice: Your account will be deactivated in 24 hours,74,1,Phishing,CORRECT,144.34,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+50,0,Legitimate,Welcome to the Aegis SME Security Newsletter,9,0,Safe,CORRECT,106.46,4,10,10,0.0008,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+61,0,Legitimate,Re: Budget approval for Q4 marketing campaign,9,0,Safe,CORRECT,116.62,4,10,10,0.0001,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+80,0,Legitimate,Re: Budget approval for Q4 marketing campaign,9,0,Safe,CORRECT,120.81,4,10,10,0.0038,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+73,0,Legitimate,Receipt: GCash transfer to Juan dela Cruz,9,0,Safe,CORRECT,124.47,4,10,10,0.0003,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+29,1,Phishing,Lazada: Your order is on hold - confirm payment details,68,1,Phishing,CORRECT,138.28,63,88,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+58,0,Legitimate,Your PhilHealth contribution receipt for October 2026,9,0,Safe,CORRECT,115.42,4,10,10,0.0008,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+82,0,Legitimate,SSS PRN for Q4 2026 - Payment Reference,9,0,Safe,CORRECT,126.23,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+12,1,Phishing,Metrobank: Suspicious transaction detected on your account,72,1,Phishing,CORRECT,110.44,62,96,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+28,1,Phishing,Security Alert: Unauthorized login detected on your Maya account,74,1,Phishing,CORRECT,141.29,62,100,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+60,0,Legitimate,Globe: Your October 2026 statement is available,9,0,Safe,CORRECT,127.08,4,10,10,0.0066,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+98,0,Legitimate,FWD: MMDC academic calendar update,9,0,Safe,CORRECT,131.24,4,10,10,0.0001,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+48,1,Phishing,Security Alert: Unauthorized login detected on your Maya account,72,1,Phishing,CORRECT,135.19,62,96,60,0.9974,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+84,0,Legitimate,Shopee Order Confirmation - Order #SHP-2026-12345,36,0,Safe,CORRECT,120.86,4,60,60,0.9958,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+77,0,Legitimate,Re: Budget approval for Q4 marketing campaign,9,0,Safe,CORRECT,114.27,4,10,10,0.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+34,1,Phishing,PhilHealth: Update your member information immediately,66,1,Phishing,CORRECT,125.09,77,76,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+85,0,Legitimate,Welcome to the Aegis SME Security Newsletter,36,0,Safe,CORRECT,134.88,4,60,60,0.9995,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+75,0,Legitimate,Receipt: GCash transfer to Juan dela Cruz,9,0,Safe,CORRECT,143.71,4,10,10,0.0005,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+42,1,Phishing,Kailangan mong i-update ang iyong Maya account ngayon,60,1,Phishing,CORRECT,163.61,57,76,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+76,0,Legitimate,Follow-up: Contract renewal discussion,36,0,Safe,CORRECT,120.42,4,60,60,0.9992,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+3,1,Phishing,URGENT: Your GCash account has been suspended,74,1,Phishing,CORRECT,121.07,62,100,60,0.9997,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+81,0,Legitimate,Welcome to the Aegis SME Security Newsletter,9,0,Safe,CORRECT,130.53,4,10,10,0.0295,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+22,1,Phishing,URGENT: I-verify ang iyong GCash account agad na,68,1,Phishing,CORRECT,171.66,41,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+20,1,Phishing,Action Required: Verify your BPI account immediately,63,1,Phishing,CORRECT,129.04,33,96,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+30,1,Phishing,Final Notice: Your account will be deactivated in 24 hours,74,1,Phishing,CORRECT,149.11,63,100,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+19,1,Phishing,SSS: Important notice regarding your contribution records,58,1,Phishing,CORRECT,108.02,29,88,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+79,0,Legitimate,Team lunch - please confirm attendance,35,0,Safe,CORRECT,126.98,4,58,58,0.9679,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+52,0,Legitimate,Your monthly Lazada invoice is ready,36,0,Safe,CORRECT,133.67,4,60,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+71,0,Legitimate,Follow-up: Contract renewal discussion,9,0,Safe,CORRECT,112.69,4,10,10,0.0006,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+87,0,Legitimate,Follow-up: Contract renewal discussion,9,0,Safe,CORRECT,135.3,4,10,10,0.0004,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+13,1,Phishing,RCBC Online Banking: Account verification required,58,1,Phishing,CORRECT,126.7,29,88,60,0.9997,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+31,1,Phishing,SSS: Important notice regarding your contribution records,63,1,Phishing,CORRECT,122.46,33,96,60,0.9989,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+26,1,Phishing,URGENT: I-verify ang iyong GCash account agad na,68,1,Phishing,CORRECT,133.72,41,100,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+45,1,Phishing,Security Alert: Unauthorized login detected on your Maya account,74,1,Phishing,CORRECT,165.11,63,100,60,0.9998,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+91,0,Legitimate,Shopee Order Confirmation - Order #SHP-2026-12345,9,0,Safe,CORRECT,142.17,4,10,10,0.0012,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+46,1,Phishing,I-confirm ang iyong Shopee order para maiwasan ang pagkansela,74,1,Phishing,CORRECT,138.56,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+39,1,Phishing,URGENT: I-verify ang iyong GCash account agad na,74,1,Phishing,CORRECT,128.15,63,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+5,1,Phishing,Kailangan mong i-update ang iyong Maya account ngayon,74,1,Phishing,CORRECT,143.8,62,100,60,0.9999,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+16,1,Phishing,Lazada: Your order is on hold - confirm payment details,72,1,Phishing,CORRECT,116.25,62,96,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+55,0,Legitimate,Re: Budget approval for Q4 marketing campaign,23,0,Safe,CORRECT,134.82,25,25,5,0.4568,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+18,1,Phishing,Google: Security alert for your connected account,69,1,Phishing,CORRECT,130.81,54,96,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+70,0,Legitimate,Your OTP for BDO Online Banking,9,0,Safe,CORRECT,113.66,4,10,10,0.0003,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+74,0,Legitimate,Receipt: GCash transfer to Juan dela Cruz,9,0,Safe,CORRECT,121.82,4,10,10,0.0002,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+47,1,Phishing,Action Required: Verify your BPI account immediately,68,1,Phishing,CORRECT,124.63,41,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+4,1,Phishing,SSS: Kailangan mong i-verify ang iyong impormasyon agad,74,1,Phishing,CORRECT,153.79,62,100,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c
+69,0,Legitimate,Your monthly Lazada invoice is ready,36,0,Safe,CORRECT,117.19,4,60,60,1.0,True,neutral,8c42233da6027148ccf0f735d7217b991d18bc3c

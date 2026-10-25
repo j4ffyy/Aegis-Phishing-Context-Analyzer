@@ -1,0 +1,51 @@
+id,original_subject,cleaned_subject,subject_regex_hits,body_regex_hits,p_phish,s_heuristic,s_ensemble,s_layer1,s_nlp,composite,pred,commit_hash
+24,Lazada: Your order is on hold - confirm payment details,Lazada: Your order is on hold - confirm payment details,,urgent|wire transfer,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+37,URGENT: Your GCash account has been suspended,: Your GCash account has been suspended,urgent,immediate|within 48 hours,0.999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+33,Your Shopee account has been locked - verify now,Your Shopee account has been locked -,verify now,verify now,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+44,Babala: Na-lock ang iyong BDO account - mag-login na,Babala: Na-lock ang iyong BDO account - na,mag-login,verify your identity,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+9,Microsoft Account: Unusual sign-in activity detected,Microsoft Account: Unusual sign-in activity detected,,click here,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+15,Microsoft Account: Unusual sign-in activity detected,Microsoft Account: Unusual sign-in activity detected,,click here|immediately|unauthorized login,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+0,Final Notice: Your account will be deactivated in 24 hours,: Your account will be deactivated in 24 hours,final notice,click here|suspicious activity|verify your identity|within 24 hours,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+38,RCBC Online Banking: Account verification required,RCBC Online Banking: Account,verification required,click here|suspicious activity|verify your identity|within 24 hours,0.9998,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+8,SSS: Important notice regarding your contribution records,SSS: Important notice regarding your contribution records,,immediate|within 48 hours,0.9965,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+40,IMPORTANT: Update your BDO Online Banking credentials now,IMPORTANT: Update your BDO Online Banking credentials now,,failure to comply|immediately|remit payment|wire transfer,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+10,Google: Security alert for your connected account,Google: Security alert for your connected account,,verify now,0.9806,0,10,4,59,35,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+43,PhilHealth: Update your member information immediately,PhilHealth: Update your member information,immediately,agad|i-click,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+23,Lazada: Your order is on hold - confirm payment details,Lazada: Your order is on hold - confirm payment details,,click here|immediately|unauthorized login,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+35,Metrobank: Suspicious transaction detected on your account,Metrobank: Suspicious transaction detected on your account,,click here|immediately|unauthorized login,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+27,IMPORTANT: Update your BDO Online Banking credentials now,IMPORTANT: Update your BDO Online Banking credentials now,,failure to comply|immediately|remit payment|wire transfer,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+6,Lazada: Your order is on hold - confirm payment details,Lazada: Your order is on hold - confirm payment details,,,0.9994,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+2,Kailangan mong i-update ang iyong Maya account ngayon,mong ang iyong Maya account ngayon,i-update|kailangan,immediate|within 48 hours,0.9998,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+36,Babala: Na-lock ang iyong BDO account - mag-login na,Babala: Na-lock ang iyong BDO account - na,mag-login,libreng regalo|napili kayo,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+11,Kailangan mong i-update ang iyong Maya account ngayon,mong ang iyong Maya account ngayon,i-update|kailangan,expires today|final notice|immediately,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+7,Amazon: Your account has been compromised - act now,Amazon: Your account has been compromised - act now,,agad|huwag ibigay|i-verify|kailangan|mag-login,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+49,URGENT: I-verify ang iyong GCash account agad na,: ang iyong GCash account,agad na|i-verify|urgent,suspicious activity|verify your identity,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+32,Google: Security alert for your connected account,Google: Security alert for your connected account,,click here|suspicious activity|verify your identity|within 24 hours,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+41,Lazada: Your order is on hold - confirm payment details,Lazada: Your order is on hold - confirm payment details,,verify now,0.9998,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+17,Your Shopee account has been locked - verify now,Your Shopee account has been locked -,verify now,verify now,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+21,Security Alert: Unauthorized login detected on your Maya account,Security Alert: detected on your Maya account,unauthorized login,suspicious activity|verify your identity,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+25,PayPal: Your account access has been limited,PayPal: Your account access has been limited,,agad|huwag ibigay|i-verify|kailangan|mag-login,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+1,RCBC Online Banking: Account verification required,RCBC Online Banking: Account,verification required,click here|immediately|unauthorized login,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+14,Final Notice: Your account will be deactivated in 24 hours,: Your account will be deactivated in 24 hours,final notice,agad|i-click,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+29,Lazada: Your order is on hold - confirm payment details,Lazada: Your order is on hold - confirm payment details,,verify now,0.9998,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+12,Metrobank: Suspicious transaction detected on your account,Metrobank: Suspicious transaction detected on your account,,urgent|wire transfer,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+28,Security Alert: Unauthorized login detected on your Maya account,Security Alert: detected on your Maya account,unauthorized login,agad|i-click,0.9998,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+48,Security Alert: Unauthorized login detected on your Maya account,Security Alert: detected on your Maya account,unauthorized login,verify now,0.9937,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+34,PhilHealth: Update your member information immediately,PhilHealth: Update your member information,immediately,click here,0.9997,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+42,Kailangan mong i-update ang iyong Maya account ngayon,mong ang iyong Maya account ngayon,i-update|kailangan,,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+3,URGENT: Your GCash account has been suspended,: Your GCash account has been suspended,urgent,immediate|within 48 hours,0.999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+22,URGENT: I-verify ang iyong GCash account agad na,: ang iyong GCash account,agad na|i-verify|urgent,agad|i-click,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+20,Action Required: Verify your BPI account immediately,: Verify your BPI account,action required|immediately,,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+30,Final Notice: Your account will be deactivated in 24 hours,: Your account will be deactivated in 24 hours,final notice,failure to comply|immediately|remit payment|wire transfer,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+19,SSS: Important notice regarding your contribution records,SSS: Important notice regarding your contribution records,,click here,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+13,RCBC Online Banking: Account verification required,RCBC Online Banking: Account,verification required,,0.9997,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+31,SSS: Important notice regarding your contribution records,SSS: Important notice regarding your contribution records,,immediate|within 48 hours,0.9965,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+26,URGENT: I-verify ang iyong GCash account agad na,: ang iyong GCash account,agad na|i-verify|urgent,immediate|within 48 hours,0.9998,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+45,Security Alert: Unauthorized login detected on your Maya account,Security Alert: detected on your Maya account,unauthorized login,agad|huwag ibigay|i-verify|kailangan|mag-login,0.9998,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+46,I-confirm ang iyong Shopee order para maiwasan ang pagkansela,ang iyong Shopee order para maiwasan ang pagkansela,i-confirm,suspicious activity|verify your identity,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+39,URGENT: I-verify ang iyong GCash account agad na,: ang iyong GCash account,agad na|i-verify|urgent,click here,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+5,Kailangan mong i-update ang iyong Maya account ngayon,mong ang iyong Maya account ngayon,i-update|kailangan,agad|i-click,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+16,Lazada: Your order is on hold - confirm payment details,Lazada: Your order is on hold - confirm payment details,,urgent|wire transfer,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+18,Google: Security alert for your connected account,Google: Security alert for your connected account,,agad|i-click,0.9999,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+47,Action Required: Verify your BPI account immediately,: Verify your BPI account,action required|immediately,suspicious activity|verify your identity,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
+4,SSS: Kailangan mong i-verify ang iyong impormasyon agad,SSS: mong ang iyong impormasyon,agad|i-verify|kailangan,click here|suspicious activity|verify your identity|within 24 hours,1.0,0,10,4,60,36,0,8c42233da6027148ccf0f735d7217b991d18bc3c
