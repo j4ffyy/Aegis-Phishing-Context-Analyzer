@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Aegis: AI-Powered Phishing Context Analyzer
  * Component: Overlay Controller
  */
@@ -119,7 +119,7 @@
             <h4>Multi-Layered Defense Status</h4>
             <ul class="aegis-layers-list" id="aegis-layers-list">
               <li id="aegis-layer-sanitization"><i class="fas fa-minus-circle aegis-icon-skip"></i> Pre-processing: HTML Sanitization</li>
-              <li id="aegis-layer-auth"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 1: Auth (SPF/DKIM/DMARC)</li>
+              <li id="aegis-layer-auth"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 1: Auth (SPF/DKIM)</li>
               <li id="aegis-layer-attach"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 2: Attachment Check</li>
               <li id="aegis-layer-behavior"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 3: Behavioral Analysis</li>
               <li id="aegis-layer-nlp"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 4: Deep NLP Context</li>
@@ -553,7 +553,7 @@
       desc,
       layers: {
         sanitization: { text: 'Pre-filter: Sanitization', detail: 'HTML Stripped â€” Plain Text Only', icon: 'fa-check-circle' },
-        auth:         { text: 'Layer 1: Auth (SPF/DKIM/DMARC)', detail: 'Pending â€” Auth headers not available client-side', icon: 'fa-minus-circle' },
+        auth:         { text: 'Layer 1: Auth (SPF/DKIM)', detail: 'Pending â€” Auth headers not available client-side', icon: 'fa-minus-circle' },
         attach:       { text: 'Layer 2: Attachment Intelligence', detail: attachDetail, icon: attachIcon },
         behavior:     { text: 'Layer 3: Behavioral Analysis', detail: 'Baseline: Pending sender history', icon: 'fa-minus-circle' },
         nlp:          { text: 'Layer 4: Deep NLP Context', detail: hasSuspiciousKeywords ? 'Urgency/Financial keywords detected' : 'Context appears normal', icon: hasSuspiciousKeywords ? 'fa-exclamation-triangle' : 'fa-check-circle' },
@@ -806,7 +806,7 @@
     el.famLayers.innerHTML = '';
     const layerMap = [
       { key: 'sanitization', label: 'Pre-processing: HTML Sanitization' },
-      { key: 'auth',         label: 'Layer 1: Email Auth (SPF/DKIM/DMARC)' },
+      { key: 'auth',         label: 'Layer 1: Email Auth (SPF/DKIM)' },
       { key: 'attach',       label: 'Layer 2: Attachment Intelligence' },
       { key: 'behavior',     label: 'Layer 3: Behavioral Analysis' },
       { key: 'nlp',          label: 'Layer 4: Deep NLP Context' },
@@ -957,7 +957,13 @@
 
   function logDetectionResult(emailCtx, analysis) {
     if (!emailCtx || !analysis) return;
-    const emailHash = analysis.emailHash || emailCtx.emailHash || '';
+    const emailHash = analysis.emailHash
+      || emailCtx.emailHash
+      // Fallback: stable dedup key from sender + subject when backend hasn't provided a hash
+      // (offline/fallback path — btoa is always available in extension contexts)
+      || btoa(encodeURIComponent(
+          `${emailCtx.senderEmail || ''}|${emailCtx.subject || ''}`
+        )).slice(0, 40);
     if (!emailHash) return;
 
     const entry = {
