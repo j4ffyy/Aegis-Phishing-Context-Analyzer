@@ -8,3 +8,10 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T13:17Z  I-13  Done (fca8158)
+- Produced: E-36 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Grep audit of 57 source files confirmed: DMARC absent from extension and backend runtime (1 reference in docx script); 'High' absent from runtime tier logic; URL masking 0 matches; Gmail API 0 matches.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
