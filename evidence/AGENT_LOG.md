@@ -36,3 +36,14 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T14:25Z  I-01  Done (799f152)
+- Produced: E-14 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Fixed auth-state logic in `meta_classifier.py` and `routes/analyze.py`. When `spfPass` and `dkimPass` are both null (collapsed/indeterminate headers), Layer 1 displays neutral "Not verified: Authentication headers missing" (`fa-minus-circle`) in both the sidebar overlay and the Full Analysis Modal (`status-skip`, "Not verified"), preventing false "Pass" indicators without altering composite scoring or threshold floors. Verified across 13 unit/route tests in `test_auth_states.py` and 74 total backend tests.
+- Deviations from plan: none
+- Needs human: Capture live Gmail screenshots of the three auth states:
+  1. `evidence/E-14_spf-dkim-drawer-states/E-14_spf-dkim-drawer-states_state-pass_YYYYMMDD_human.png` (verified domain, e.g. legitimate signed email)
+  2. `evidence/E-14_spf-dkim-drawer-states/E-14_spf-dkim-drawer-states_state-fail_YYYYMMDD_human.png` (warning banner or failed SPF/DKIM)
+  3. `evidence/E-14_spf-dkim-drawer-states/E-14_spf-dkim-drawer-states_state-null_YYYYMMDD_human.png` (collapsed/unverified headers showing "Not verified")
+- Open questions: none
+
+

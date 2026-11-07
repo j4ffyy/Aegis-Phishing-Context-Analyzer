@@ -7,3 +7,4 @@ E-03_backend-payload/E-03_backend-payload_refs_20261107_85e8e3a.md,manual,,,,"Co
 E-04_request-body-logging/E-04_request-body-logging_refs_20261107_85e8e3a.md,manual,,,,"Code reference audit for data handling, logging, and in-memory stores (I-09)"
 E-28_in-memory-dict-check/E-28_in-memory-dict-check_refs_20261107_85e8e3a.md,manual,,,,"Code reference audit for data handling, logging, and in-memory stores (I-09)"
 E-19_scan-trigger-ratelimit/E-19_scan-trigger-ratelimit_refs_20261107_6a6ba94.md,manual,,,,Code reference audit for Gmail DOM MutationObserver debounce and VirusTotal rate pacing (I-10)
+E-14_spf-dkim-drawer-states/E-14_spf-dkim-drawer-states_test-output_20261107_799f152.txt,script,aegis-backend/tests/test_auth_states.py,python -m unittest aegis-backend/tests/test_auth_states.py -v,0919c5145ace8604eaceb6d8105e524ec40802ea6453e5310fb03add57906bd6,

@@ -1,0 +1,29 @@
+test_route_fail_auth_state (aegis-backend.tests.test_auth_states.TestAnalyzeRouteAuthIntegration.test_route_fail_auth_state)
+Email with failed SPF produces 'Failed'. ... Executing <Task finished name='Task-2' coro=<TestAnalyzeRouteAuthIntegration.test_route_fail_auth_state() done, defined at C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\tests\test_auth_states.py:258> result=None created at C:\Users\jafph\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py:110> took 1.579 seconds
+ok
+test_route_null_auth_state (aegis-backend.tests.test_auth_states.TestAnalyzeRouteAuthIntegration.test_route_null_auth_state)
+Email with no SPF/DKIM headers (collapsed/indeterminate) produces 'Not verified'. ... ok
+test_route_pass_auth_state (aegis-backend.tests.test_auth_states.TestAnalyzeRouteAuthIntegration.test_route_pass_auth_state)
+Email with verified SPF and DKIM produces 'Pass'. ... ok
+test_auth_state_fail_direct_boolean (aegis-backend.tests.test_auth_states.TestAuthStates.test_auth_state_fail_direct_boolean)
+When spf_pass=False or dkim_pass=False without flags, auth must show 'Failed'. ... ok
+test_auth_state_fail_flags (aegis-backend.tests.test_auth_states.TestAuthStates.test_auth_state_fail_flags)
+When SPF or DKIM fail flags exist, auth must show 'Failed' (fa-times-circle). ... ok
+test_auth_state_null_unverified (aegis-backend.tests.test_auth_states.TestAuthStates.test_auth_state_null_unverified)
+When SPF and DKIM are both None, auth must show 'Not verified' (fa-minus-circle). ... ok
+test_auth_state_pass_both (aegis-backend.tests.test_auth_states.TestAuthStates.test_auth_state_pass_both)
+When both SPF and DKIM pass, auth must show 'Pass' (fa-check-circle). ... ok
+test_auth_state_pass_partial_dkim_only (aegis-backend.tests.test_auth_states.TestAuthStates.test_auth_state_pass_partial_dkim_only)
+When only DKIM passes (SPF is None), auth shows 'Pass'. ... ok
+test_auth_state_pass_partial_spf_only (aegis-backend.tests.test_auth_states.TestAuthStates.test_auth_state_pass_partial_spf_only)
+When only SPF passes (DKIM is None), auth shows 'Pass'. ... ok
+test_auth_state_spoofing_flag_overrides (aegis-backend.tests.test_auth_states.TestAuthStates.test_auth_state_spoofing_flag_overrides)
+Domain spoofing flag takes precedence as a failure even if spf_pass was True. ... ok
+test_synthesize_assessment_fail_auth (aegis-backend.tests.test_auth_states.TestSynthesizeAssessmentAuthIntegration.test_synthesize_assessment_fail_auth) ... ok
+test_synthesize_assessment_null_auth (aegis-backend.tests.test_auth_states.TestSynthesizeAssessmentAuthIntegration.test_synthesize_assessment_null_auth) ... ok
+test_synthesize_assessment_pass_auth (aegis-backend.tests.test_auth_states.TestSynthesizeAssessmentAuthIntegration.test_synthesize_assessment_pass_auth) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 1.738s
+
+OK
