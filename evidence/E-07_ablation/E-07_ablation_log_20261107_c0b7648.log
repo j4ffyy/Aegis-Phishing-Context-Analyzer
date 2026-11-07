@@ -1,0 +1,12 @@
+================================================================================
+AEGIS 4-CONFIGURATION ABLATION LOG (E-07)
+Commit: c0b7648 | Timestamp: 2026-11-07T15:29:54.893918+00:00
+================================================================================
+[Config 1: Heuristics Only | Standard Text (Neutral Auth)] Recall=84.0% Prec=100.0% F1=91.3% FPR=0.0% AUC=0.9980
+[Config 1: Heuristics Only | Cue-Stripped Text (Neutral Auth)] Recall=74.0% Prec=100.0% F1=85.06% FPR=0.0% AUC=0.9964
+[Config 2: Heuristics + XGBoost/RF | Standard Text (Neutral Auth)] Recall=58.0% Prec=100.0% F1=73.42% FPR=0.0% AUC=0.9976
+[Config 2: Heuristics + XGBoost/RF | Cue-Stripped Text (Neutral Auth)] Recall=58.0% Prec=100.0% F1=73.42% FPR=0.0% AUC=0.9944
+[Config 3: Heuristics + DistilBERT | Standard Text (Neutral Auth)] Recall=100.0% Prec=100.0% F1=100.0% FPR=0.0% AUC=1.0000
+[Config 3: Heuristics + DistilBERT | Cue-Stripped Text (Neutral Auth)] Recall=100.0% Prec=100.0% F1=100.0% FPR=0.0% AUC=1.0000
+[Config 4: Full Pipeline | Standard Text (Neutral Auth)] Recall=100.0% Prec=100.0% F1=100.0% FPR=0.0% AUC=1.0000
+[Config 4: Full Pipeline | Cue-Stripped Text (Neutral Auth)] Recall=100.0% Prec=100.0% F1=100.0% FPR=0.0% AUC=1.0000

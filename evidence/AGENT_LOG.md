@@ -99,6 +99,51 @@
 - Needs human: Inter-rater agreement (Cohen's kappa) with second human reviewer on shared subset (E-33).
 - Open questions: none
 
+## 2026-11-07T15:35Z  I-03 / E-08  Done (c0b7648)
+- Produced: E-08 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Executed full-pipeline benchmark evaluation using active DistilBERT ONNX model across both Neutral Authentication (`spfPass=True`, `dkimPass=True`) and Synthetic Authentication modes:
+  - Neutral Auth: Accuracy 100.00% [95% Wilson CI: 96.3%, 100.0%], Precision 100.00%, Recall 100.00% [95% Wilson CI: 92.9%, 100.0%], F1 100.00%, FPR 0.00% [95% Wilson CI: 0.0%, 7.1%], ROC-AUC 1.0000. Median latency = 89.6 ms, p95 = 116.8 ms.
+  - Synthetic Auth: Accuracy 100.00%, Precision 100.00%, Recall 100.00%, F1 100.00%, FPR 0.00%, ROC-AUC 1.0000.
+  - Crucial Architectural Finding: The historical benchmark recall of 86.0% (and 66.0% under neutral auth) was caused by DistilBERT ONNX never being loaded during the original evaluation script execution, causing all samples to route through the crude character-length fallback ($S_{base}=20$ or $10$). When the DistilBERT ONNX model is verified loaded and warm, its semantic classifier achieves perfect discrimination on this 100-sample corpus ($P_{phish} > 0.99$ for phishing, $S_{nlp} \ge 76$; $P_{phish} < 0.05$ for legitimate, $S_{nlp} \le 10$).
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:36Z  I-04 / E-07  Done (c0b7648)
+- Produced: E-07 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Executed 4-configuration ablation study under Neutral Authentication on both Standard and Urgency-Cue-Stripped text:
+  1. Config 1 (Heuristics Only): Standard Text Recall = 84.0%, Precision = 100.0%, F1 = 91.30%, FPR = 0.0%, AUC = 0.9980. Cue-Stripped Text Recall = 74.0%, Precision = 100.0%, F1 = 85.06%, FPR = 0.0%, AUC = 0.9964. (Demonstrates that rule-based heuristics suffer a 10% recall drop when explicit urgency keywords are scrubbed).
+  2. Config 2 (Heuristics + XGBoost/RF): Standard Text Recall = 58.0%, Precision = 100.0%, F1 = 73.42%, FPR = 0.0%, AUC = 0.9976. Cue-Stripped Text Recall = 58.0%, Precision = 100.0%, F1 = 73.42%, FPR = 0.0%, AUC = 0.9944. (Ensemble tabular model without NLP under-predicts when auth cues are neutralized).
+  3. Config 3 (Heuristics + DistilBERT): Standard Text Recall = 100.0%, Precision = 100.0%, F1 = 100.0%, FPR = 0.0%, AUC = 1.0000. Cue-Stripped Text Recall = 100.0%, Precision = 100.0%, F1 = 100.0%, FPR = 0.0%, AUC = 1.0000. (Confirms DistilBERT semantic analysis is robust against urgency keyword stripping).
+  4. Config 4 (Full Multi-Layer Pipeline): Standard Text Recall = 100.0%, Precision = 100.0%, F1 = 100.0%, FPR = 0.0%, AUC = 1.0000. Cue-Stripped Text Recall = 100.0%, Precision = 100.0%, F1 = 100.0%, FPR = 0.0%, AUC = 1.0000.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:37Z  I-05 / E-24  Done (c0b7648)
+- Produced: E-24 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Executed empirical threshold sensitivity sweep across cutoffs [35, 45, 50, 55, 65, 75, 85]:
+  - Threshold 35: Recall = 100.00%, Precision = 84.75%, FPR = 18.00% (TP=50, FP=9) -> Substantial false alarm penalty on benign transactional emails.
+  - Threshold 45 (Current Production Safe/Warning Boundary): Recall = 100.00%, Precision = 100.00%, F1 = 100.00%, FPR = 0.00% (TP=50, FP=0) -> Optimal operating point maximizing recall without false positives.
+  - Threshold 50: Recall = 98.00%, Precision = 100.00%, F1 = 98.99%, FPR = 0.00% (TP=49, FP=0).
+  - Threshold 55: Recall = 94.00%, Precision = 100.00%, F1 = 96.91%, FPR = 0.00% (TP=47, FP=0).
+  - Threshold 65: Recall = 68.00%, Precision = 100.00%, F1 = 80.95%, FPR = 0.00% (TP=34, FP=0).
+  - Threshold 75 (Current Production Warning/Critical Boundary): Recall = 2.00%, Precision = 100.00%, F1 = 3.92%, FPR = 0.00% (TP=1, FP=0) -> Confirms 75 functions strictly as a high-confidence critical tier reserved for multi-vector attacks.
+  - Threshold 85: Recall = 0.00%, Precision = 0.00%, F1 = 0.00%, FPR = 0.00% (TP=0, FP=0).
+  - Weight Sensitivity: Documented in E-24; production weights (0.25/0.45/0.15/0.15) remain frozen.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:38Z  I-03 / E-34  Done (c0b7648)
+- Produced: E-34 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Audited transactional / billing email false-positive susceptibility across 46 transactional emails (33 legitimate billing/invoice/order notices, 13 phishing lures disguised as bills/receipts):
+  - Standalone DistilBERT: 8 false positives out of 33 legitimate transactional emails (24.2% FPR). Semantic sub-tokens ('payment', 'order', 'statement', 'receipt', 'invoice') routinely trigger elevated phishing probabilities ($P_{phish} > 0.80$) even on genuine enterprise notices.
+  - Aegis Composite Pipeline: 0 false positives out of 33 legitimate transactional emails (0.0% FPR). The multi-layer synthesis successfully absorbs pure NLP over-predictions when sender authentication and domain baseline cues are nominal.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
 
 
 
