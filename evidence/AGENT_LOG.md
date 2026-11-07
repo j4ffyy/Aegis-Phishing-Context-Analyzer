@@ -158,6 +158,17 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T15:44Z  I-15 / E-23  Done (ac979d3)
+- Produced: E-23 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Audited and anonymized raw User Acceptance Testing (UAT) data from `Aegis-Phishing-Context-Analyzer (Responses).xlsx`. Formally recorded that the 6 participants represent exactly 3 distinct micro/small enterprises (1 owner + 1 staff per business): Mini Grocery, Dental Clinic/Gym, and Commercial Trading/Services. Computed quantitative usability metrics:
+  - Business Owners ($N=3$): Q1 Speed 4.33/5.0, Q2 Perceived Accuracy 4.33/5.0, Q3 XAI Comprehension 4.33/5.0, Q4 Workflow Non-Intrusiveness 4.33/5.0 (Composite Mean: 4.33 / 5.0, 86.7%).
+  - Operational Staff ($N=3$): Q1 Speed 5.00/5.0, Q2 Perceived Accuracy 5.00/5.0, Q3 XAI Comprehension 5.00/5.0, Q4 Workflow Non-Intrusiveness 5.00/5.0 (Composite Mean: 5.00 / 5.0, 100.0%).
+  - Combined Cohort ($N=6$): Composite Mean 4.67 / 5.0 (93.3%).
+  - Methodological Qualification: In accordance with defense verdict items 10 and 24, documented that $N=6$ across 3 small businesses cannot establish general SME deployment readiness or medium enterprise validation, and must be characterized as a preliminary qualitative usability pilot.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
 
 
 

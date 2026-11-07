@@ -30,3 +30,5 @@ E-34_transactional-fpr/E-34_transactional-fpr_report_20261107_c0b7648.txt,script
 E-34_transactional-fpr/E-34_transactional-fpr_summary_20261107_c0b7648.csv,script,tools/run_phase_c_evaluations.py,python tools/run_phase_c_evaluations.py --commit c0b7648,cab5c5308dcf3ba9ec2dbf89145f92cc7437bcad8738d3b8874ab8d5a066ba3a,
 E-05_placeholder-benchmark/E-05_placeholder-benchmark_20261023_8c42233.json,copy,,,,source=evidences/evaluation_report.json
 E-12_manuscript-figure-audit/E-12_manuscript-figure-audit_20261107_d801129.txt,script,tools/audit_manuscript_figures.py,python tools/audit_manuscript_figures.py --commit d801129,f40a3f0f652e241cc3e097f69996d36af8b38df5816d536b9262f932590ad044,
+E-23_uat-data/E-23_uat-data_anonymized_20261107_ac979d3.csv,script,tools/generate_e23_uat.py,python tools/generate_e23_uat.py --commit ac979d3,c1c5eff3eb69f4c152bfd97432569209d83d77ab45e381dbbf020b93e9ebdbfc,
+E-23_uat-data/E-23_uat-data_report_20261107_ac979d3.md,script,tools/generate_e23_uat.py,python tools/generate_e23_uat.py --commit ac979d3,c1c5eff3eb69f4c152bfd97432569209d83d77ab45e381dbbf020b93e9ebdbfc,
