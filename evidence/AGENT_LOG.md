@@ -151,6 +151,13 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T15:42Z  I-17 / E-12  Done (d801129)
+- Produced: E-12 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Grepped all manuscript documentation, prototypes, and guides for phantom performance metrics (97.5%, 96.0%, 93.8%, 0.955), legacy metrics, non-standard tier names ("High"), and disavowed integration claims (Gmail API, DMARC). Confirmed primary READMEs and demo emails are completely clean; flagged 4 residual historical mentions in `docs/` (`01-5_week_prototype_development_plan.md` lines 293/304 for DMARC stubs, `02-chapter_iv_and_appendices_package.md` lines 69/95 for 'High Risk') to be updated in the final documentation polish.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
 
 
 
