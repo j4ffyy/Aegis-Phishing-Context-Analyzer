@@ -10,3 +10,10 @@ E-19_scan-trigger-ratelimit/E-19_scan-trigger-ratelimit_refs_20261107_6a6ba94.md
 E-14_spf-dkim-drawer-states/E-14_spf-dkim-drawer-states_test-output_20261107_799f152.txt,script,aegis-backend/tests/test_auth_states.py,python -m unittest aegis-backend/tests/test_auth_states.py -v,0919c5145ace8604eaceb6d8105e524ec40802ea6453e5310fb03add57906bd6,
 
 E-17_post-defense-ui-commits/E-17_post-defense-ui-commits_20261107_a824a4e.txt,manual,,,,"Git log commit audit for post-defense UI features: Two-tier XAI panel, VirusTotal reasons in panel, and guided sensitivity presets (I-12, I-13)"
+E-10_scoring-formula-code/E-10_scoring-formula-code_refs_20261107_91e1e8d.md,manual,,,,Code reference and mathematical proof for 4-layer composite scoring formula and Flower Shop scenario (Row 11)
+E-11_auth-inference-code/E-11_auth-inference-code_refs_20261107_91e1e8d.md,manual,,,,"Code reference documenting DOM-only auth inference, extractAuthStatus(), and absence of DMARC (Row 11, Row 16)"
+E-09_flower-shop-probe/E-09_flower-shop-probe_output_20261106_na.txt,copy,,,,source=evidences/09_flower_shop_nlp_probe.txt
+E-09_flower-shop-probe/E-09_flower-shop-probe_script_20261106_na.py,copy,,,,source=aegis-backend/scripts/flower_shop_nlp_probe.py
+E-09_flower-shop-probe/E-09_flower-shop-probe_output_20261106_na.json,copy,,,,source=evidences/09_flower_shop_nlp_probe.json
+E-32_nfr04-sample-size/E-32_nfr04-sample-size_output_20261107_91e1e8d.txt,manual,,,,Wilson score confidence interval and minimum sample size calculation for NFR04 recall (I-03)
+E-32_nfr04-sample-size/E-32_nfr04-sample-size_script_20261107_91e1e8d.py,manual,,,,Python calculator source code for Wilson score sample size determination (I-03)

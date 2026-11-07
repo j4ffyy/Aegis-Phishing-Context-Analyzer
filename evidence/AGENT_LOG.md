@@ -64,6 +64,35 @@
 - Target Commit: `f86cf64ca69545bdb84955ac9be4189f374a9d45`
 - Status: Code frozen for Phase C evaluations. All Phase A setup items (A-0, manifest tooling) and Phase B fixes (I-01 auth display, I-02 model guard, I-07 model provenance, I-09 data audit, I-10 scan trigger audit, I-12 UI confirm/build & guided presets, I-13 string audit) completed and verified across 74 backend tests and 21 extension tests. No further code modifications permitted until evaluations conclude.
 
+## 2026-11-07T15:00Z  E-10  Done (91e1e8d)
+- Produced: E-10 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Generated code citations for 4-layer composite scoring formula and threat floors in `meta_classifier.py`; documented mathematical proof of the "Flower Shop" false-positive scenario (52% Warning tier) resolving Row 11.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:02Z  E-11  Done (91e1e8d)
+- Produced: E-11 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Documented line citations for DOM-only auth inference in `content_script.js` (`extractAuthStatus()`), verified complete absence of DMARC across codebase, and clarified DOM overlay architectural boundaries resolving Row 11 & Row 16.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:05Z  E-09  Done (91e1e8d)
+- Produced: E-09 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Ingested existing Flower Shop probe script, JSON output, and execution log confirming S_nlp = 60 and P_phish = 0.9998 on benign order inquiries.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:10Z  I-03 / E-32  Done (91e1e8d)
+- Produced: E-32 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Computed exact Wilson score 95% confidence intervals and minimum sample sizes for NFR04 (recall >= 90.0%). Demonstrated that N = 50 phishing samples yields a Wilson lower bound of only 73.81% at 86% recall and 52.19% at 66% neutral recall, mathematically proving NFR04 was not formally met. Minimum N = 127 is needed at 95% observed recall.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+
 
 
 

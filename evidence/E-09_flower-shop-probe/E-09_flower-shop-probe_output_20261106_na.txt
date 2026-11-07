@@ -1,0 +1,264 @@
+22:49:27 [INFO] =================================================================
+22:49:27 [INFO]   AEGIS — Flower Shop S_nlp Probe (Row 11 Matrix Verification)
+22:49:27 [INFO]   Run timestamp: 2026-11-06T14:49:27.421665+00:00
+22:49:27 [INFO] =================================================================
+22:49:27 [INFO] Loading DistilBERT ONNX model...
+22:49:30 [INFO] [Aegis NLP] DistilBERT ONNX session and tokenizer loaded successfully from phishing_distilbert
+22:49:30 [INFO] DistilBERT ONNX model loaded successfully. Live inference active.
+22:49:30 [INFO] -----------------------------------------------------------------
+22:49:30 [INFO] Case: flower_shop_typical
+22:49:30 [INFO]   Description : Flower Shop — first-time sender, no urgency cues (Row 11 scenario)
+22:49:30 [INFO]   Model warm  : True
+22:49:30 [INFO]   P_phish     : 0.9998
+22:49:30 [INFO]   S_base      : 59.99
+22:49:30 [INFO]   S_urgency   : 0
+22:49:30 [INFO]   S_bec       : 0
+22:49:30 [INFO]   S_nlp       : 60  ← verified value
+22:49:30 [INFO]   Pred label  : phishing_url_context
+22:49:30 [INFO]   Latency     : 64.1 ms
+22:49:30 [INFO] 
+22:49:30 [INFO] Case: flower_shop_spf_dkim_fail_no_urgency
+22:49:30 [INFO]   Description : Flower Shop — same email but SPF+DKIM fail flags present (S_h=45), still no urgency text
+22:49:30 [INFO]   Model warm  : True
+22:49:30 [INFO]   P_phish     : 0.9998
+22:49:30 [INFO]   S_base      : 59.99
+22:49:30 [INFO]   S_urgency   : 0
+22:49:30 [INFO]   S_bec       : 0
+22:49:30 [INFO]   S_nlp       : 60  ← verified value
+22:49:30 [INFO]   Pred label  : phishing_url_context
+22:49:30 [INFO]   Latency     : 60.2 ms
+22:49:30 [INFO] 
+22:49:30 [INFO] Case: phishing_full_urgency
+22:49:30 [INFO]   Description : High-urgency phishing — control case to confirm model fires correctly
+22:49:30 [INFO]   Model warm  : True
+22:49:30 [INFO]   P_phish     : 1.0000
+22:49:30 [INFO]   S_base      : 60.00
+22:49:30 [INFO]   S_urgency   : 20
+22:49:30 [INFO]   S_bec       : 0
+22:49:30 [INFO]   S_nlp       : 80  ← verified value
+22:49:30 [INFO]   Pred label  : phishing_url_context
+22:49:30 [INFO]   Latency     : 57.3 ms
+22:49:30 [INFO] 
+22:49:30 [INFO] Case: legitimate_business_email
+22:49:30 [INFO]   Description : Normal business email — control case (expected Safe)
+22:49:30 [INFO]   Model warm  : True
+22:49:30 [INFO]   P_phish     : 0.0027
+22:49:30 [INFO]   S_base      : 9.97
+22:49:30 [INFO]   S_urgency   : 0
+22:49:30 [INFO]   S_bec       : 0
+22:49:30 [INFO]   S_nlp       : 10  ← verified value
+22:49:30 [INFO]   Pred label  : legitimate_email
+22:49:30 [INFO]   Latency     : 47.5 ms
+22:49:30 [INFO] 
+22:49:30 [INFO] Case: empty_body
+22:49:30 [INFO]   Description : Empty body — tests the short-text branch of fallback (expected S_nlp=10 if model absent)
+22:49:30 [INFO]   Model warm  : True
+22:49:30 [INFO]   P_phish     : 0.9997
+22:49:30 [INFO]   S_base      : 59.98
+22:49:30 [INFO]   S_urgency   : 0
+22:49:30 [INFO]   S_bec       : 0
+22:49:30 [INFO]   S_nlp       : 60  ← verified value
+22:49:30 [INFO]   Pred label  : phishing_url_context
+22:49:30 [INFO]   Latency     : 6.0 ms
+22:49:30 [INFO] 
+22:49:30 [INFO] =================================================================
+22:49:30 [INFO]   Flower Shop R_final Recompute (Row 11) — Live S_nlp
+22:49:30 [INFO] =================================================================
+22:49:30 [INFO]   S_h   = 45  (SPF +25, DKIM +20)
+22:49:30 [INFO]   S_nlp = 60  (live DistilBERT)
+22:49:30 [INFO]   S_b   = 25  (first-time-sender, extension)
+22:49:30 [INFO]   S_vt  = 0  (no links, completed)
+22:49:30 [INFO]   R_raw = round(0.25×45 + 0.45×60 + 0.15×25 + 0.15×0) = 42
+22:49:30 [INFO]   Floor: s_heuristic=45 >= 40 → floor=52 applies
+22:49:30 [INFO]   R_final = max(42, 52) = 52
+22:49:30 [INFO]   Tier    = Warning (risk-warning)
+22:49:30 [INFO] =================================================================
+22:49:30 [INFO] Evidence written to:
+22:49:30 [INFO]   C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\evidences\09_flower_shop_nlp_probe.txt
+22:49:30 [INFO]   C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\evidences\09_flower_shop_nlp_probe.json
+22:55:00 [INFO] =================================================================
+22:55:00 [INFO]   AEGIS — Flower Shop S_nlp Probe (Row 11 Matrix Verification)
+22:55:00 [INFO]   Run timestamp: 2026-11-06T14:55:00.980856+00:00
+22:55:00 [INFO] =================================================================
+22:55:01 [INFO] Loading DistilBERT ONNX model...
+22:55:03 [INFO] [Aegis NLP] DistilBERT ONNX session and tokenizer loaded successfully from phishing_distilbert
+22:55:03 [INFO] DistilBERT ONNX model loaded successfully. Live inference active.
+22:55:03 [INFO] -----------------------------------------------------------------
+22:55:03 [INFO] Case: flower_shop_typical
+22:55:03 [INFO]   Description : Flower Shop — first-time sender, no urgency cues (Row 11 scenario)
+22:55:03 [INFO]   Model warm  : True
+22:55:03 [INFO]   P_phish     : 0.9998
+22:55:03 [INFO]   S_base      : 59.99
+22:55:03 [INFO]   S_urgency   : 0
+22:55:03 [INFO]   S_bec       : 0
+22:55:03 [INFO]   S_nlp       : 60  ← verified value
+22:55:03 [INFO]   Pred label  : phishing_url_context
+22:55:03 [INFO]   Latency     : 55.8 ms
+22:55:03 [INFO] 
+22:55:03 [INFO] Case: flower_shop_spf_dkim_fail_no_urgency
+22:55:03 [INFO]   Description : Flower Shop — same email but SPF+DKIM fail flags present (S_h=45), still no urgency text
+22:55:03 [INFO]   Model warm  : True
+22:55:03 [INFO]   P_phish     : 0.9998
+22:55:03 [INFO]   S_base      : 59.99
+22:55:03 [INFO]   S_urgency   : 0
+22:55:03 [INFO]   S_bec       : 0
+22:55:03 [INFO]   S_nlp       : 60  ← verified value
+22:55:03 [INFO]   Pred label  : phishing_url_context
+22:55:03 [INFO]   Latency     : 55.7 ms
+22:55:03 [INFO] 
+22:55:03 [INFO] Case: phishing_full_urgency
+22:55:03 [INFO]   Description : High-urgency phishing — control case to confirm model fires correctly
+22:55:03 [INFO]   Model warm  : True
+22:55:03 [INFO]   P_phish     : 1.0000
+22:55:03 [INFO]   S_base      : 60.00
+22:55:03 [INFO]   S_urgency   : 20
+22:55:03 [INFO]   S_bec       : 0
+22:55:03 [INFO]   S_nlp       : 80  ← verified value
+22:55:03 [INFO]   Pred label  : phishing_url_context
+22:55:03 [INFO]   Latency     : 55.5 ms
+22:55:03 [INFO] 
+22:55:03 [INFO] Case: legitimate_business_email
+22:55:03 [INFO]   Description : Normal business email — control case (expected Safe)
+22:55:03 [INFO]   Model warm  : True
+22:55:03 [INFO]   P_phish     : 0.0027
+22:55:03 [INFO]   S_base      : 9.97
+22:55:03 [INFO]   S_urgency   : 0
+22:55:03 [INFO]   S_bec       : 0
+22:55:03 [INFO]   S_nlp       : 10  ← verified value
+22:55:03 [INFO]   Pred label  : legitimate_email
+22:55:03 [INFO]   Latency     : 42.9 ms
+22:55:03 [INFO] 
+22:55:03 [INFO] Case: empty_body
+22:55:03 [INFO]   Description : Empty body — tests the short-text branch of fallback (expected S_nlp=10 if model absent)
+22:55:03 [INFO]   Model warm  : True
+22:55:03 [INFO]   P_phish     : 0.9997
+22:55:03 [INFO]   S_base      : 59.98
+22:55:03 [INFO]   S_urgency   : 0
+22:55:03 [INFO]   S_bec       : 0
+22:55:03 [INFO]   S_nlp       : 60  ← verified value
+22:55:03 [INFO]   Pred label  : phishing_url_context
+22:55:03 [INFO]   Latency     : 5.6 ms
+22:55:03 [INFO] 
+22:55:03 [INFO] =================================================================
+22:55:03 [INFO]   Flower Shop R_final Recompute (Row 11) — via synthesize_assessment()
+22:55:03 [INFO]   Floor logic executed inside meta_classifier.py, not by this script.
+22:55:03 [INFO] =================================================================
+22:55:03 [INFO]   Calling synthesize_assessment() with:
+22:55:03 [INFO]     s_heuristic = 45  (SPF +25, DKIM +20)
+22:55:03 [INFO]     s_nlp       = 60  (live DistilBERT)
+22:55:03 [INFO]     s_behavioral= 25  (first-time-sender, extension)
+22:55:03 [INFO]     s_vt        = 0  (no links, vt_status=completed)
+22:55:03 [INFO]     flags       = SPF Authentication Failure, DKIM Signature Invalid
+22:55:03 [INFO]     urls        = []  (no links)
+22:55:03 [INFO]     vt_status   = completed
+22:55:03 [INFO] [MetaClassifier] Elevating score 49 -> 52 due to combined attachment and urgency indicators
+22:55:03 [INFO] 
+22:55:03 [INFO]   synthesize_assessment() returned:
+22:55:03 [INFO]     score     = 52  ← R_final from real code
+22:55:03 [INFO]     riskLevel = Warning
+22:55:03 [INFO]     riskClass = risk-warning
+22:55:03 [INFO]     desc      = Suspicious characteristics detected. Exercise caution before opening links or attachments.
+22:55:03 [INFO] =================================================================
+22:55:03 [INFO]   Floor diagnosis: s_heuristic=45 >= 40 (independent trigger) → floor=52 applied
+22:55:03 [INFO] =================================================================
+22:55:03 [INFO] Evidence written to:
+22:55:03 [INFO]   C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\evidences\09_flower_shop_nlp_probe.txt
+22:55:03 [INFO]   C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\evidences\09_flower_shop_nlp_probe.json
+22:58:58 [INFO] =================================================================
+22:58:58 [INFO]   AEGIS — Flower Shop S_nlp Probe (Row 11 Matrix Verification)
+22:58:58 [INFO]   Run timestamp: 2026-11-06T14:58:58.635053+00:00
+22:58:58 [INFO] =================================================================
+22:58:58 [INFO] Loading DistilBERT ONNX model...
+22:59:01 [INFO] [Aegis NLP] DistilBERT ONNX session and tokenizer loaded successfully from phishing_distilbert
+22:59:01 [INFO] DistilBERT ONNX model loaded successfully. Live inference active.
+22:59:01 [INFO] -----------------------------------------------------------------
+22:59:01 [INFO] Case: flower_shop_typical
+22:59:01 [INFO]   Description : Flower Shop — first-time sender, no urgency cues (Row 11 scenario)
+22:59:01 [INFO]   Model warm  : True
+22:59:01 [INFO]   P_phish     : 0.9998
+22:59:01 [INFO]   S_base      : 59.99
+22:59:01 [INFO]   S_urgency   : 0
+22:59:01 [INFO]   S_bec       : 0
+22:59:01 [INFO]   S_nlp       : 60  ← verified value
+22:59:01 [INFO]   Pred label  : phishing_url_context
+22:59:01 [INFO]   Latency     : 58.8 ms
+22:59:01 [INFO] 
+22:59:01 [INFO] Case: flower_shop_spf_dkim_fail_no_urgency
+22:59:01 [INFO]   Description : Flower Shop — same email but SPF+DKIM fail flags present (S_h=45), still no urgency text
+22:59:01 [INFO]   Model warm  : True
+22:59:01 [INFO]   P_phish     : 0.9998
+22:59:01 [INFO]   S_base      : 59.99
+22:59:01 [INFO]   S_urgency   : 0
+22:59:01 [INFO]   S_bec       : 0
+22:59:01 [INFO]   S_nlp       : 60  ← verified value
+22:59:01 [INFO]   Pred label  : phishing_url_context
+22:59:01 [INFO]   Latency     : 57.5 ms
+22:59:01 [INFO] 
+22:59:01 [INFO] Case: phishing_full_urgency
+22:59:01 [INFO]   Description : High-urgency phishing — control case to confirm model fires correctly
+22:59:01 [INFO]   Model warm  : True
+22:59:01 [INFO]   P_phish     : 1.0000
+22:59:01 [INFO]   S_base      : 60.00
+22:59:01 [INFO]   S_urgency   : 20
+22:59:01 [INFO]   S_bec       : 0
+22:59:01 [INFO]   S_nlp       : 80  ← verified value
+22:59:01 [INFO]   Pred label  : phishing_url_context
+22:59:01 [INFO]   Latency     : 60.4 ms
+22:59:01 [INFO] 
+22:59:01 [INFO] Case: legitimate_business_email
+22:59:01 [INFO]   Description : Normal business email — control case (expected Safe)
+22:59:01 [INFO]   Model warm  : True
+22:59:01 [INFO]   P_phish     : 0.0027
+22:59:01 [INFO]   S_base      : 9.97
+22:59:01 [INFO]   S_urgency   : 0
+22:59:01 [INFO]   S_bec       : 0
+22:59:01 [INFO]   S_nlp       : 10  ← verified value
+22:59:01 [INFO]   Pred label  : legitimate_email
+22:59:01 [INFO]   Latency     : 57.1 ms
+22:59:01 [INFO] 
+22:59:01 [INFO] Case: empty_body
+22:59:01 [INFO]   Description : Empty body — tests the short-text branch of fallback (expected S_nlp=10 if model absent)
+22:59:01 [INFO]   Model warm  : True
+22:59:01 [INFO]   P_phish     : 0.9997
+22:59:01 [INFO]   S_base      : 59.98
+22:59:01 [INFO]   S_urgency   : 0
+22:59:01 [INFO]   S_bec       : 0
+22:59:01 [INFO]   S_nlp       : 60  ← verified value
+22:59:01 [INFO]   Pred label  : phishing_url_context
+22:59:01 [INFO]   Latency     : 6.3 ms
+22:59:01 [INFO] 
+22:59:01 [INFO] =================================================================
+22:59:01 [INFO]   Flower Shop R_final Recompute (Row 11) — via synthesize_assessment()
+22:59:01 [INFO]   Floor logic executed inside meta_classifier.py, not by this script.
+22:59:01 [INFO] =================================================================
+22:59:01 [INFO]   VT-path resolution (analyze.py vs synthesize_assessment()):
+22:59:01 [INFO]     vt_status passed    = 'completed'  (analyze.py L678-682)
+22:59:01 [INFO]     is_pending          = False  (vt_status == 'pending')
+22:59:01 [INFO]     has_vt_targets      = False  (no urls, no attachments, s_vt=0)
+22:59:01 [INFO]     vt_pending (actual) = True  (is_pending OR NOT has_vt_targets)
+22:59:01 [INFO]     → Preliminary normalization formula (÷0.85) is used.
+22:59:01 [INFO]     → analyze.py 'completed' label = response status only, not score path.
+22:59:01 [INFO]     → Live /analyze route hits the same branch. No conflict.
+22:59:01 [INFO] 
+22:59:01 [INFO]   Calling synthesize_assessment() with:
+22:59:01 [INFO]     s_heuristic = 45  (SPF +25, DKIM +20)
+22:59:01 [INFO]     s_nlp       = 60  (live DistilBERT)
+22:59:01 [INFO]     s_behavioral= 25  (first-time-sender, extension)
+22:59:01 [INFO]     s_vt        = 0  (no links, vt_status=completed)
+22:59:01 [INFO]     flags       = SPF Authentication Failure, DKIM Signature Invalid
+22:59:01 [INFO]     urls        = []  (no links)
+22:59:01 [INFO]     vt_status   = completed
+22:59:01 [INFO] [MetaClassifier] Elevating score 49 -> 52: s_heuristic=45 >= 40 threshold (high heuristic risk floor)
+22:59:01 [INFO] 
+22:59:01 [INFO]   synthesize_assessment() returned:
+22:59:01 [INFO]     R_preliminary (÷0.85 path) = 49
+22:59:01 [INFO]     score (R_final, post-floor) = 52  ← from real code
+22:59:01 [INFO]     riskLevel = Warning
+22:59:01 [INFO]     riskClass = risk-warning
+22:59:01 [INFO]     desc      = Suspicious characteristics detected. Exercise caution before opening links or attachments.
+22:59:01 [INFO] =================================================================
+22:59:01 [INFO]   Floor diagnosis: s_heuristic=45 >= 40 (independent trigger): R_preliminary=49 elevated to R_final=52 → Warning
+22:59:01 [INFO] =================================================================
+22:59:01 [INFO] Evidence written to:
+22:59:01 [INFO]   C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\evidences\09_flower_shop_nlp_probe.txt
+22:59:01 [INFO]   C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\evidences\09_flower_shop_nlp_probe.json
