@@ -15,3 +15,10 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T13:18Z  I-07  Done (320e9b3)
+- Produced: E-21 (files listed in EVIDENCE_INDEX.csv)
+- Findings: DistilBERT ONNX checkpoint documented: 6-layer 255.5 MB ONNX (SHA256: 361ebc80...), 4 classes, P_phish = P(1)+P(3), 20% FPR on isolated transactional emails, English vocabulary limits Tagalog/Taglish.
+- Deviations from plan: none
+- Needs human: Confirm pre-training corpus lineage if historical archives are accessible; otherwise limitation note stands.
+- Open questions: none
+
