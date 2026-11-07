@@ -38,3 +38,7 @@ E-33_inter-rater/E-33_inter-rater_report_20261107_a482063.md,manual,,,,Inter-rat
 E-25_citation-check/E-25_citation-check_sources_20261107_a482063.md,manual,,,,Academic primary source verification and citation audit
 E-31_repro-package/E-31_repro-package_readme_20261107_a482063.md,manual,,,,Independent reproduction package instructions prerequisites and execution commands
 E-31_repro-package/E-31_repro-package_hashes_20261107_a482063.txt,manual,,,,Cryptographic SHA-256 digest register for reproducible model assets and datasets
+E-32_nfr04-sample-size/E-32_nfr04-sample-size_v2output_20261107_24be0d0.txt,script,tools/calculate_nfr04_v2.py,python tools/calculate_nfr04_v2.py --commit 24be0d0 --e08-commit c0b7648,cca0a776e4c07b33ec0d81f9a22e0a0e03b92bcc3b1e2710092592a42d3c7852,
+E-32_nfr04-sample-size/E-32_nfr04-sample-size_v2script_20261107_24be0d0.py,script,tools/calculate_nfr04_v2.py,python tools/calculate_nfr04_v2.py --commit 24be0d0 --e08-commit c0b7648,cca0a776e4c07b33ec0d81f9a22e0a0e03b92bcc3b1e2710092592a42d3c7852,
+E-31_repro-package/E-31_repro-package_v2hashes_20261108_24be0d0.txt,manual,,,,Corrected model path from phishing_distilbert_onnx_4cls to phishing_distilbert; hash verified against actual model file
+E-31_repro-package/E-31_repro-package_v2readme_20261108_24be0d0.md,manual,,,,Corrected model path from phishing_distilbert_onnx_4cls to phishing_distilbert; hash verified against actual model file
