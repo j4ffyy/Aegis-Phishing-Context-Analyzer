@@ -1,0 +1,18 @@
+# Pyrefly configuration for Aegis Phishing Context Analyzer
+# Directs Pyrefly to use the project virtual environment so all
+# installed packages (fastapi, httpx, joblib, sklearn, xgboost, etc.)
+# are correctly resolved instead of the global Store Python.
+
+python_interpreter = "aegis-backend/.venv/Scripts/python.exe"
+
+# Search paths mirror pyrightconfig.json extraPaths
+search_path = ["aegis-backend"]
+
+# Disable pedantic dynamic typing warnings on scripts and evaluation runners
+disabled_rules = [
+  "unsupported-operation",
+  "bad-argument-type",
+  "bad-function-definition",
+  "missing-attribute",
+  "unknown-import"
+]
