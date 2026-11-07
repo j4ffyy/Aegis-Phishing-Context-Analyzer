@@ -74,6 +74,7 @@ wheels/
 
 # Temporary files & Logs
 *.log
+!evidence/**
 *.tmp
 *.temp
 tmp/

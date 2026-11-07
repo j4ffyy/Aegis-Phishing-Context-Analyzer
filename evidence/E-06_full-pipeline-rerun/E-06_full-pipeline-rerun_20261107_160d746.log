@@ -1,0 +1,57 @@
+21:13:32 [INFO] [Aegis NLP] DistilBERT ONNX session and tokenizer loaded successfully from phishing_distilbert
+21:13:32 [INFO] [Aegis NLP] Model warm-up successful. Ready for high-throughput inference.
+21:13:32 [INFO] Pre-flight guard passed: local model loaded (phishing_distilbert_onnx_4cls)
+21:13:32 [INFO] Loaded 100 samples from C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\data\test_dataset.csv
+21:13:32 [INFO] Evaluation mode: OFFLINE (local pipeline, VT skipped) | SYNTHETIC AUTH (from dataset)
+21:13:34 [INFO] [EnsembleClassifier] Models loaded — RF: ensemble_rf.pkl, XGB: ensemble_xgb.pkl
+21:13:36 [INFO] [20/100] score=71 pred=Phishing true=Phishing | acc_so_far=100.0% | lat=99.1ms
+21:13:38 [INFO] [40/100] score=9 pred=Legit true=Legit | acc_so_far=100.0% | lat=88.5ms
+21:13:40 [INFO] [60/100] score=68 pred=Phishing true=Phishing | acc_so_far=100.0% | lat=100.4ms
+21:13:41 [INFO] [80/100] score=66 pred=Phishing true=Phishing | acc_so_far=100.0% | lat=82.6ms
+21:13:44 [INFO] [100/100] score=36 pred=Legit true=Legit | acc_so_far=100.0% | lat=107.4ms
+21:13:44 [INFO] Per-sample CSV written to: C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\results\per_sample_evaluation.csv
+21:13:44 [INFO] Reports written to: C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\results
+21:13:44 [INFO]   evaluation_report.json
+21:13:44 [INFO]   evaluation_report.txt
+21:13:44 [INFO]   confusion_matrix.txt
+
+=================================================================
+  AEGIS PHISHING ANALYZER -- MODEL EVALUATION REPORT (PR-08)
+=================================================================
+  Mode:           OFFLINE (local pipeline, VT skipped) | SYNTHETIC AUTH (from dataset)
+  Dataset:        C:\Users\jafph\Desktop\Capstone 1 - Phishing Analyzer\Aegis-Phishing-Context-Analyzer\aegis-backend\data\test_dataset.csv
+  Total Samples:  100 (50 phishing / 50 legitimate)
+
+  --- Classification Metrics --------------------------------
+  Accuracy:       100.00%
+  Precision:      100.00%
+  Recall:         100.00%
+  F1-Score:       100.00%
+  False Pos Rate:   0.00%
+  False Neg Rate:   0.00%
+
+  --- Response Latency --------------------------------------
+  Average:          111.4 ms
+  p50 (median):      97.0 ms
+  p95:              115.2 ms
+  p99:              127.8 ms
+
+  --- Comparison vs. Baseline Email Clients -----------------
+  System          Accuracy  Precision   Recall     F1    FPR
+  ---------------------------------------------------------
+  Gmail              82.3%      83.1%    80.7%  81.9%   4.1%
+  Outlook            79.8%      80.2%    78.1%  79.1%   5.8%
+  Yahoo              76.4%      77.0%    75.2%  76.1%   7.2%
+  Proton             74.1%      74.8%    72.9%  73.8%   8.4%
+  Aegis (this)     100.00%    100.00%  100.00% 100.00%  0.00%
+
+
+  Confusion Matrix (Rows=Actual, Cols=Predicted)
+  +-----------------+------------+------------+
+  |                 | Pred. SAFE | Pred. PHSH |
+  +-----------------+------------+------------+
+  | Actual LEGIT    |  TN=   50  |  FP=    0  |
+  | Actual PHISHING |  FN=    0  |  TP=   50  |
+  +-----------------+------------+------------+
+
+=================================================================
