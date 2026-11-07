@@ -92,6 +92,14 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T15:15Z  I-06 / E-20  Done (91e1e8d)
+- Produced: E-20 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Generated granular per-email breakdown CSV and comprehensive report for the 100 test dataset samples. Audited brand distribution (BPI, BDO, GCash, Maya, Shopee, Lazada, SSS, PhilHealth), functional categories, and language breakdown (87% English, 13% Tagalog/Taglish). Confirmed synthetic label contamination: 100% of phishing samples carried synthetic SPF/DKIM=False, and 100% of legitimate samples carried SPF/DKIM=True.
+- Deviations from plan: none
+- Needs human: Inter-rater agreement (Cohen's kappa) with second human reviewer on shared subset (E-33).
+- Open questions: none
+
+
 
 
 

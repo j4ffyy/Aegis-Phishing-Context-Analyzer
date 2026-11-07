@@ -1,0 +1,101 @@
+id,label,label_name,senderEmail,subject,brand,language,category,links_count,attachment_count,attachment_names,spfPass,dkimPass
+24,1,Phishing,helpdesk@microsoft-account-reset.click,Lazada: Your order is on hold - confirm payment details,Lazada,English,BEC / Wire Transfer Coercion,1,1,Statement.docx.exe,False,False
+37,1,Phishing,sss-notification@sss-gov-ph.click,URGENT: Your GCash account has been suspended,BPI,English,Account Suspension / Security Panic,1,0,None,False,False
+59,0,Legitimate,gcash@gcash.com,Globe: Your October 2026 statement is available,GCash,English,Transactional / Billing Notification,0,0,None,True,True
+83,0,Legitimate,billing@lazada.com.ph,Receipt: GCash transfer to Juan dela Cruz,GCash,English,Transactional / Billing Notification,0,0,None,True,True
+89,0,Legitimate,newsletter@aegis-security.ph,Re: Budget approval for Q4 marketing campaign,GCash,English,Company Newsletter / Update,1,0,None,True,True
+33,1,Phishing,sss-notification@sss-gov-ph.click,Your Shopee account has been locked - verify now,Shopee,English,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+63,0,Legitimate,sss@sss.gov.ph,Shopee Order Confirmation - Order #SHP-2026-12345,Shopee,English,Transactional / Billing Notification,0,0,None,True,True
+44,1,Phishing,noreply@bpi-secure-login.xyz,Babala: Na-lock ang iyong BDO account - mag-login na,BPI,Tagalog/Taglish,Account Suspension / Security Panic,1,0,None,False,False
+78,0,Legitimate,billing@lazada.com.ph,Welcome to the Aegis SME Security Newsletter,Lazada,English,Transactional / Billing Notification,0,0,None,True,True
+9,1,Phishing,security@metrobank-ph.gq,Microsoft Account: Unusual sign-in activity detected,Shopee,English,Lottery / Reward Baiting,1,0,None,False,False
+53,0,Legitimate,contributions@philhealth.gov.ph,Team lunch - please confirm attendance,PhilHealth,English,General Business Inquiry,0,0,None,True,True
+95,0,Legitimate,billing@globe.com.ph,Re: Budget approval for Q4 marketing campaign,PhilHealth,English,Transactional / Billing Notification,1,0,None,True,True
+90,0,Legitimate,gcash@gcash.com,Receipt: GCash transfer to Juan dela Cruz,GCash,English,Transactional / Billing Notification,0,0,None,True,True
+15,1,Phishing,security@metrobank-ph.gq,Microsoft Account: Unusual sign-in activity detected,Maya,English,Credential Harvesting,1,0,None,False,False
+88,0,Legitimate,projectlead@consultancy.ph,Re: Budget approval for Q4 marketing campaign,Globe Telecom,English,Transactional / Billing Notification,1,0,None,True,True
+68,0,Legitimate,orders@shopee.ph,FWD: MMDC academic calendar update,Shopee,English,Routine Internal Communication,1,0,None,True,True
+0,1,Phishing,finance@acme-enterprise.xyz,Final Notice: Your account will be deactivated in 24 hours,GCash,English,Account Suspension / Security Panic,1,0,None,False,False
+86,0,Legitimate,projectlead@consultancy.ph,SSS PRN for Q4 2026 - Payment Reference,SSS,English,Transactional / Billing Notification,0,0,None,True,True
+38,1,Phishing,support@bdo-reset-now.loan,RCBC Online Banking: Account verification required,BDO,English,Account Suspension / Security Panic,1,0,None,False,False
+8,1,Phishing,noreply@bpi-secure-login.xyz,SSS: Important notice regarding your contribution records,BPI,English,Credential Harvesting,1,0,None,False,False
+51,0,Legitimate,sss@sss.gov.ph,Your monthly Lazada invoice is ready,Lazada,English,Transactional / Billing Notification,0,0,None,True,True
+94,0,Legitimate,billing@globe.com.ph,Welcome to the Aegis SME Security Newsletter,Globe Telecom,English,Transactional / Billing Notification,1,0,None,True,True
+93,0,Legitimate,projectlead@consultancy.ph,Globe: Your October 2026 statement is available,Globe Telecom,English,Transactional / Billing Notification,0,0,None,True,True
+96,0,Legitimate,billing@meralco.com.ph,Your OTP for BDO Online Banking,BDO,English,Transactional / Billing Notification,1,0,None,True,True
+40,1,Phishing,alerts@paypal-verify.top,IMPORTANT: Update your BDO Online Banking credentials now,BDO,English,BEC / Wire Transfer Coercion,1,0,None,False,False
+57,0,Legitimate,projectlead@consultancy.ph,Your monthly Lazada invoice is ready,Lazada,English,Transactional / Billing Notification,0,0,None,True,True
+67,0,Legitimate,billing@meralco.com.ph,FWD: MMDC academic calendar update,Other / General,English,Transactional / Billing Notification,0,0,None,True,True
+10,1,Phishing,noreply@bpi-secure-login.xyz,Google: Security alert for your connected account,BPI,English,Account Suspension / Security Panic,1,0,None,False,False
+43,1,Phishing,ceo.office@globalcorp-ph.com,PhilHealth: Update your member information immediately,BPI,Tagalog/Taglish,BEC / Wire Transfer Coercion,1,1,Invoice.pdf.zip,False,False
+23,1,Phishing,support@bdo-reset-now.loan,Lazada: Your order is on hold - confirm payment details,BDO,English,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+35,1,Phishing,security@metrobank-ph.gq,Metrobank: Suspicious transaction detected on your account,Maya,English,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+27,1,Phishing,alerts@maya-security.click,IMPORTANT: Update your BDO Online Banking credentials now,BDO,English,BEC / Wire Transfer Coercion,1,1,Statement.docx.exe,False,False
+6,1,Phishing,promo@shopee-ph-promo.tk,Lazada: Your order is on hold - confirm payment details,Shopee,English,Lottery / Reward Baiting,1,0,None,False,False
+2,1,Phishing,helpdesk@microsoft-account-reset.click,Kailangan mong i-update ang iyong Maya account ngayon,BPI,Tagalog/Taglish,Credential Harvesting,1,0,None,False,False
+36,1,Phishing,security@gcash-verify.top,Babala: Na-lock ang iyong BDO account - mag-login na,BDO,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Invoice.pdf.zip,False,False
+11,1,Phishing,promo@shopee-ph-promo.tk,Kailangan mong i-update ang iyong Maya account ngayon,BDO,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+92,0,Legitimate,billing@lazada.com.ph,FWD: MMDC academic calendar update,Lazada,English,Transactional / Billing Notification,0,0,None,True,True
+7,1,Phishing,admin@rcbc-online.tk,Amazon: Your account has been compromised - act now,GCash,Tagalog/Taglish,Credential Harvesting,1,0,None,False,False
+56,0,Legitimate,billing@globe.com.ph,Team lunch - please confirm attendance,Globe Telecom,English,Transactional / Billing Notification,1,0,None,True,True
+66,0,Legitimate,sss@sss.gov.ph,Your Meralco bill for September 2026,SSS,English,Transactional / Billing Notification,1,0,None,True,True
+99,0,Legitimate,registrar@mmdc.edu.ph,Receipt: GCash transfer to Juan dela Cruz,GCash,English,Transactional / Billing Notification,0,0,None,True,True
+49,1,Phishing,security@amazon-account-verify.xyz,URGENT: I-verify ang iyong GCash account agad na,GCash,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+32,1,Phishing,finance@acme-enterprise.xyz,Google: Security alert for your connected account,GCash,English,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+41,1,Phishing,promo@shopee-ph-promo.tk,Lazada: Your order is on hold - confirm payment details,Shopee,English,Account Suspension / Security Panic,1,0,None,False,False
+64,0,Legitimate,newsletter@aegis-security.ph,Globe: Your October 2026 statement is available,PhilHealth,English,Transactional / Billing Notification,1,0,None,True,True
+97,0,Legitimate,registrar@mmdc.edu.ph,Meeting agenda for tomorrow's sync,Shopee,English,Routine Internal Communication,0,0,None,True,True
+65,0,Legitimate,contributions@philhealth.gov.ph,Your PhilHealth contribution receipt for October 2026,BDO,English,Transactional / Billing Notification,1,0,None,True,True
+17,1,Phishing,finance@acme-enterprise.xyz,Your Shopee account has been locked - verify now,Shopee,English,Account Suspension / Security Panic,1,0,None,False,False
+21,1,Phishing,sss-notification@sss-gov-ph.click,Security Alert: Unauthorized login detected on your Maya account,Maya,English,Account Suspension / Security Panic,1,0,None,False,False
+25,1,Phishing,support@bdo-reset-now.loan,PayPal: Your account access has been limited,BDO,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+62,0,Legitimate,billing@meralco.com.ph,Receipt: GCash transfer to Juan dela Cruz,GCash,English,Transactional / Billing Notification,0,0,None,True,True
+72,0,Legitimate,noreply@bdo.com.ph,Project update: Phase 2 deliverables,BDO,English,Routine Internal Communication,0,0,None,True,True
+1,1,Phishing,finance@acme-enterprise.xyz,RCBC Online Banking: Account verification required,Maya,English,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+54,0,Legitimate,finance@legitcorp.com.ph,FWD: MMDC academic calendar update,BDO,English,Routine Internal Communication,0,0,None,True,True
+14,1,Phishing,admin@rcbc-online.tk,Final Notice: Your account will be deactivated in 24 hours,BPI,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+50,0,Legitimate,mreyes@businesspartner.com.ph,Welcome to the Aegis SME Security Newsletter,Aegis Internal,English,Company Newsletter / Update,0,0,None,True,True
+61,0,Legitimate,billing@globe.com.ph,Re: Budget approval for Q4 marketing campaign,Globe Telecom,English,Transactional / Billing Notification,1,0,None,True,True
+80,0,Legitimate,jdelacruz@company.com.ph,Re: Budget approval for Q4 marketing campaign,Other / General,English,General Business Inquiry,0,0,None,True,True
+73,0,Legitimate,orders@shopee.ph,Receipt: GCash transfer to Juan dela Cruz,GCash,English,Transactional / Billing Notification,1,0,None,True,True
+29,1,Phishing,promo@shopee-ph-promo.tk,Lazada: Your order is on hold - confirm payment details,Shopee,English,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+58,0,Legitimate,jdelacruz@company.com.ph,Your PhilHealth contribution receipt for October 2026,Shopee,English,Transactional / Billing Notification,0,0,None,True,True
+82,0,Legitimate,mreyes@businesspartner.com.ph,SSS PRN for Q4 2026 - Payment Reference,SSS,English,General Business Inquiry,0,0,None,True,True
+12,1,Phishing,noreply@bpi-secure-login.xyz,Metrobank: Suspicious transaction detected on your account,BPI,English,BEC / Wire Transfer Coercion,1,1,Receipt.pdf.vbs,False,False
+28,1,Phishing,noreply@shopee-promo.icu,Security Alert: Unauthorized login detected on your Maya account,BPI,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+60,0,Legitimate,projectlead@consultancy.ph,Globe: Your October 2026 statement is available,Globe Telecom,English,Transactional / Billing Notification,1,0,None,True,True
+98,0,Legitimate,projectlead@consultancy.ph,FWD: MMDC academic calendar update,PhilHealth,English,Routine Internal Communication,1,0,None,True,True
+48,1,Phishing,support@bdo-reset-now.loan,Security Alert: Unauthorized login detected on your Maya account,BDO,English,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+84,0,Legitimate,hr@mmdc.edu.ph,Shopee Order Confirmation - Order #SHP-2026-12345,Shopee,English,Transactional / Billing Notification,0,0,None,True,True
+77,0,Legitimate,mreyes@businesspartner.com.ph,Re: Budget approval for Q4 marketing campaign,Other / General,English,General Business Inquiry,0,0,None,True,True
+34,1,Phishing,ceo.office@globalcorp-ph.com,PhilHealth: Update your member information immediately,Shopee,English,BEC / Wire Transfer Coercion,1,1,Statement.docx.exe,False,False
+85,0,Legitimate,hr@mmdc.edu.ph,Welcome to the Aegis SME Security Newsletter,Lazada,English,Transactional / Billing Notification,1,0,None,True,True
+75,0,Legitimate,mreyes@businesspartner.com.ph,Receipt: GCash transfer to Juan dela Cruz,GCash,English,Transactional / Billing Notification,1,0,None,True,True
+42,1,Phishing,finance@acme-enterprise.xyz,Kailangan mong i-update ang iyong Maya account ngayon,Maya,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+76,0,Legitimate,mreyes@businesspartner.com.ph,Follow-up: Contract renewal discussion,BDO,English,General Business Inquiry,1,0,None,True,True
+3,1,Phishing,support@bdo-reset-now.loan,URGENT: Your GCash account has been suspended,BPI,English,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+81,0,Legitimate,newsletter@aegis-security.ph,Welcome to the Aegis SME Security Newsletter,Aegis Internal,English,Transactional / Billing Notification,1,0,None,True,True
+22,1,Phishing,sss-notification@sss-gov-ph.click,URGENT: I-verify ang iyong GCash account agad na,BPI,Tagalog/Taglish,Credential Harvesting,1,0,None,False,False
+20,1,Phishing,security@metrobank-ph.gq,Action Required: Verify your BPI account immediately,BPI,English,Credential Harvesting,1,0,None,False,False
+30,1,Phishing,sss-notification@sss-gov-ph.click,Final Notice: Your account will be deactivated in 24 hours,SSS,English,BEC / Wire Transfer Coercion,1,0,None,False,False
+19,1,Phishing,billing@lazada-confirm.top,SSS: Important notice regarding your contribution records,Shopee,English,Lottery / Reward Baiting,1,0,None,False,False
+79,0,Legitimate,jdelacruz@company.com.ph,Team lunch - please confirm attendance,Lazada,English,Transactional / Billing Notification,1,0,None,True,True
+52,0,Legitimate,gcash@gcash.com,Your monthly Lazada invoice is ready,GCash,English,Transactional / Billing Notification,0,0,None,True,True
+71,0,Legitimate,projectlead@consultancy.ph,Follow-up: Contract renewal discussion,SSS,English,General Business Inquiry,0,0,None,True,True
+87,0,Legitimate,finance@legitcorp.com.ph,Follow-up: Contract renewal discussion,Other / General,English,Transactional / Billing Notification,0,0,None,True,True
+13,1,Phishing,admin@rcbc-online.tk,RCBC Online Banking: Account verification required,Lazada,English,Credential Harvesting,1,0,None,False,False
+31,1,Phishing,admin@rcbc-online.tk,SSS: Important notice regarding your contribution records,BPI,English,Credential Harvesting,1,0,None,False,False
+26,1,Phishing,billing@lazada-confirm.top,URGENT: I-verify ang iyong GCash account agad na,BPI,Tagalog/Taglish,Credential Harvesting,1,0,None,False,False
+45,1,Phishing,security@gcash-verify.top,Security Alert: Unauthorized login detected on your Maya account,GCash,Tagalog/Taglish,Account Suspension / Security Panic,1,0,None,False,False
+91,0,Legitimate,jdelacruz@company.com.ph,Shopee Order Confirmation - Order #SHP-2026-12345,Shopee,English,Transactional / Billing Notification,0,0,None,True,True
+46,1,Phishing,security@gcash-verify.top,I-confirm ang iyong Shopee order para maiwasan ang pagkansela,GCash,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+39,1,Phishing,noreply@bpi-secure-login.xyz,URGENT: I-verify ang iyong GCash account agad na,BPI,Tagalog/Taglish,Lottery / Reward Baiting,1,0,None,False,False
+5,1,Phishing,support@bdo-reset-now.loan,Kailangan mong i-update ang iyong Maya account ngayon,BPI,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Statement.docx.exe,False,False
+16,1,Phishing,sss-notification@sss-gov-ph.click,Lazada: Your order is on hold - confirm payment details,Lazada,English,BEC / Wire Transfer Coercion,1,1,Statement.docx.exe,False,False
+55,0,Legitimate,noreply@bdo.com.ph,Re: Budget approval for Q4 marketing campaign,BDO,English,General Business Inquiry,0,0,None,True,True
+18,1,Phishing,admin@rcbc-online.tk,Google: Security alert for your connected account,BPI,Tagalog/Taglish,Account Suspension / Security Panic,1,0,None,False,False
+70,0,Legitimate,hr@mmdc.edu.ph,Your OTP for BDO Online Banking,BDO,English,Routine Internal Communication,1,0,None,True,True
+74,0,Legitimate,billing@globe.com.ph,Receipt: GCash transfer to Juan dela Cruz,GCash,English,Transactional / Billing Notification,1,0,None,True,True
+47,1,Phishing,noreply@bpi-secure-login.xyz,Action Required: Verify your BPI account immediately,BPI,English,Credential Harvesting,1,0,None,False,False
+4,1,Phishing,security@amazon-account-verify.xyz,SSS: Kailangan mong i-verify ang iyong impormasyon agad,GCash,Tagalog/Taglish,Malicious Attachment Delivery,1,1,Receipt.pdf.vbs,False,False
+69,0,Legitimate,mreyes@businesspartner.com.ph,Your monthly Lazada invoice is ready,BDO,English,Transactional / Billing Notification,0,0,None,True,True

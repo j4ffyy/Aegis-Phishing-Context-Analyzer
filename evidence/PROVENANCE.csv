@@ -17,3 +17,5 @@ E-09_flower-shop-probe/E-09_flower-shop-probe_script_20261106_na.py,copy,,,,sour
 E-09_flower-shop-probe/E-09_flower-shop-probe_output_20261106_na.json,copy,,,,source=evidences/09_flower_shop_nlp_probe.json
 E-32_nfr04-sample-size/E-32_nfr04-sample-size_output_20261107_91e1e8d.txt,manual,,,,Wilson score confidence interval and minimum sample size calculation for NFR04 recall (I-03)
 E-32_nfr04-sample-size/E-32_nfr04-sample-size_script_20261107_91e1e8d.py,manual,,,,Python calculator source code for Wilson score sample size determination (I-03)
+E-20_test-set-composition/E-20_test-set-composition_breakdown_20261107_91e1e8d.csv,manual,,,,"Granular per-email breakdown of 100 test dataset samples covering brands, language, categories, and synthetic auth cues (I-06)"
+E-20_test-set-composition/E-20_test-set-composition_report_20261107_91e1e8d.md,manual,,,,Test dataset composition and synthetic label contamination audit report (I-06)
