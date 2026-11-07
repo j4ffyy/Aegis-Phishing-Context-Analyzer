@@ -157,6 +157,14 @@ def is_model_warm() -> bool:
     return _model_warm
 
 
+MODEL_ID: str = "phishing_distilbert_onnx_4cls"
+
+
+def get_model_id() -> str:
+    """Returns the model checkpoint identifier."""
+    return MODEL_ID if _model_warm else "none"
+
+
 # ---------------------------------------------------------------------------
 # Inference & Risk Intent Evaluation (§6.3)
 # ---------------------------------------------------------------------------
