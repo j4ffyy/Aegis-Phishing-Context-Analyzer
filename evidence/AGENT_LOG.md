@@ -169,6 +169,41 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T15:46Z  I-17 / E-29  Done (a482063)
+- Produced: E-29 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Documented formal re-scoping and revised specification for FR01 and FR08. Re-scoped FR01 from overclaimed native 'Email Ingestion' to 'Email Content Observation' (ephemeral DOM observation via MutationObserver; zero internal API/IMAP/transport interaction). Re-scoped FR08 from overclaimed 'User Alert & Quarantine' to 'Advisory Risk Notification' (ephemeral client-side overlay banner and modal; zero mailbox state alteration or message moving). Formally aligned with Revision Matrix Row 25 and Row 16.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:47Z  I-17 / E-27  Done (a482063)
+- Produced: E-27 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Audited operational environment for all 3 participating UAT small enterprises (Mini Grocery, Dental/Gym, Commercial Trading), verifying active daily use of Google Gmail webmail on Google Chrome workstations, confirming compatibility with the client-side DOM observer.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:48Z  I-06 / E-33  Done (a482063)
+- Produced: E-33 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Conducted dataset labeling review; formally recorded that dual-blind inter-rater agreement (Cohen's Kappa) was NOT conducted across independent annotators for the 100-sample test dataset. Disclosed labeling provenance and synthetic authentication cue coupling (E-20) as known academic limitations.
+- Deviations from plan: none
+- Needs human: Optional second annotator pass if time allows post-submission.
+- Open questions: none
+
+## 2026-11-07T15:49Z  I-17 / E-25  Done (a482063)
+- Produced: E-25 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Audited all primary literature citations across manuscript Chapters 1–5: Herrera et al. (2022, TweetTaglish), Sanh et al. (2019, DistilBERT), Lemonade-SDK (2023), Trend Micro (2024), Fortinet (2024), Wilson (1927), Brooke (1996), RFC 7208 (SPF), and RFC 6376 (DKIM). Formally retracted Gmail API and DMARC RFC 7489 integration claims.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-07T15:50Z  I-16 / E-31  Done (a482063)
+- Produced: E-31 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Constructed reproducible open science package: `E-31_repro-package_readme_20261107_a482063.md` detailing execution environment, virtualenv setup, fixed seeds (42), and single-command reproduction workflows; generated `E-31_repro-package_hashes_20261107_a482063.txt` registering SHA-256 digests for model checkpoints, test datasets, and evaluation scripts.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
 
 
 

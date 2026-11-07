@@ -32,3 +32,9 @@ E-05_placeholder-benchmark/E-05_placeholder-benchmark_20261023_8c42233.json,copy
 E-12_manuscript-figure-audit/E-12_manuscript-figure-audit_20261107_d801129.txt,script,tools/audit_manuscript_figures.py,python tools/audit_manuscript_figures.py --commit d801129,f40a3f0f652e241cc3e097f69996d36af8b38df5816d536b9262f932590ad044,
 E-23_uat-data/E-23_uat-data_anonymized_20261107_ac979d3.csv,script,tools/generate_e23_uat.py,python tools/generate_e23_uat.py --commit ac979d3,c1c5eff3eb69f4c152bfd97432569209d83d77ab45e381dbbf020b93e9ebdbfc,
 E-23_uat-data/E-23_uat-data_report_20261107_ac979d3.md,script,tools/generate_e23_uat.py,python tools/generate_e23_uat.py --commit ac979d3,c1c5eff3eb69f4c152bfd97432569209d83d77ab45e381dbbf020b93e9ebdbfc,
+E-29_fr01-fr08-wording/E-29_fr01-fr08-wording_refs_20261107_a482063.md,manual,,,,Original vs revised wording for FR01 and FR08 with Ch 3 references
+E-27_gmail-use-confirmation/E-27_gmail-use-confirmation_refs_20261107_a482063.md,manual,,,,Gmail webmail usage confirmation audit for the 3 participating UAT businesses
+E-33_inter-rater/E-33_inter-rater_report_20261107_a482063.md,manual,,,,Inter-rater reliability audit confirming dual-annotator agreement was not conducted
+E-25_citation-check/E-25_citation-check_sources_20261107_a482063.md,manual,,,,Academic primary source verification and citation audit
+E-31_repro-package/E-31_repro-package_readme_20261107_a482063.md,manual,,,,Independent reproduction package instructions prerequisites and execution commands
+E-31_repro-package/E-31_repro-package_hashes_20261107_a482063.txt,manual,,,,Cryptographic SHA-256 digest register for reproducible model assets and datasets
