@@ -16,6 +16,8 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+from typing import Any, Dict, List, Tuple
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 E08_DIR = REPO_ROOT / "evidence" / "E-08_phishing-corpus-metrics"
 
@@ -23,28 +25,28 @@ Z_95 = 1.959963984540054   # z for 95% two-sided confidence (N(0,1) quantile)
 NFR04_RECALL_TARGET = 90.0  # NFR04 minimum recall threshold (%)
 
 
-def wilson_interval(k: int, n: int, z: float = Z_95) -> tuple:
+def wilson_interval(k: int, n: int, z: float = Z_95) -> Tuple[float, float]:
     """Computes exact two-sided Wilson score confidence interval [lower%, upper%]."""
     if n == 0:
         return 0.0, 0.0
-    p = k / n
-    denom = 1.0 + (z ** 2 / n)
-    center = (p + (z ** 2 / (2.0 * n))) / denom
-    spread = (z * math.sqrt((p * (1.0 - p) / n) + (z ** 2 / (4.0 * n ** 2)))) / denom
+    p = float(k) / float(n)
+    denom = 1.0 + (z ** 2 / float(n))
+    center = (p + (z ** 2 / (2.0 * float(n)))) / denom
+    spread = (z * math.sqrt((p * (1.0 - p) / float(n)) + (z ** 2 / (4.0 * float(n) ** 2)))) / denom
     return max(0.0, center - spread) * 100.0, min(1.0, center + spread) * 100.0
 
 
-def compute_min_sample_size(target_p: float, threshold_lower: float = NFR04_RECALL_TARGET) -> tuple:
+def compute_min_sample_size(target_p: float, threshold_lower: float = NFR04_RECALL_TARGET) -> Tuple[int, int, float]:
     """Finds smallest N such that Wilson lower bound >= threshold_lower at observed recall target_p."""
     for n in range(5, 10000):
-        k = round(target_p * n)
+        k = int(round(float(target_p) * float(n)))
         low, _ = wilson_interval(k, n)
         if low >= threshold_lower:
             return n, k, low
     return -1, -1, 0.0
 
 
-def load_e08_metrics(e08_commit_hint: str) -> tuple:
+def load_e08_metrics(e08_commit_hint: str) -> Tuple[Dict[str, Any], str, Dict[str, Any]]:
     """
     Loads Neutral Auth metrics from the E-08 JSON evidence file.
     Searches E-08 directory for a JSON report matching e08_commit_hint.
@@ -62,7 +64,7 @@ def load_e08_metrics(e08_commit_hint: str) -> tuple:
         )
     report_file = sorted(candidates)[-1]
     print(f"[E-32v2] Loading E-08 from: {report_file.name}")
-    data = json.loads(report_file.read_text(encoding="utf-8"))
+    data: Dict[str, Any] = json.loads(report_file.read_text(encoding="utf-8"))
     return data["metrics_neutral_auth"], report_file.name, data
 
 
@@ -75,18 +77,18 @@ def generate_report(script_commit: str, e08_commit_hint: str) -> str:
 
     # --- Load real E-08 results ---
     neu, e08_filename, e08_full = load_e08_metrics(e08_commit_hint)
-    e08_commit  = e08_full.get("commit", "unknown")
-    e08_model   = e08_full.get("model_id", "unknown")
-    e08_sha256  = e08_full.get("dataset_sha256", "unknown")
-    e08_seed    = e08_full.get("seed", "unknown")
-    e08_total   = e08_full.get("total_samples", "unknown")
+    e08_commit  = str(e08_full.get("commit", "unknown"))
+    e08_model   = str(e08_full.get("model_id", "unknown"))
+    e08_sha256  = str(e08_full.get("dataset_sha256", "unknown"))
+    e08_seed    = str(e08_full.get("seed", "unknown"))
+    e08_total   = str(e08_full.get("total_samples", "unknown"))
 
     # --- Extract TP / FN / N_phishing from loaded data ---
-    tp          = neu["tp"]
-    fn          = neu["fn"]
-    n_phishing  = tp + fn
-    n_total     = neu["n"]
-    recall_pct  = neu["recall"]   # stored as float, e.g. 100.0
+    tp          = int(neu["tp"])
+    fn          = int(neu["fn"])
+    n_phishing  = int(tp + fn)
+    n_total     = int(neu["n"])
+    recall_pct  = float(neu["recall"])   # stored as float, e.g. 100.0
 
     # --- Compute Wilson CI live (same formula as v1 E-32) ---
     wilson_lower, wilson_upper = wilson_interval(tp, n_phishing)
@@ -100,10 +102,10 @@ def generate_report(script_commit: str, e08_commit_hint: str) -> str:
     p_targets = [0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.00]
     min_n_rows = []
     for p in p_targets:
-        n_min, k_min, lo = compute_min_sample_size(p)
-        _, hi = wilson_interval(k_min, n_min)
-        is_actual = abs(p * 100.0 - recall_pct) < 0.01
-        min_n_rows.append((p, n_min, k_min, lo, hi, is_actual))
+        n_min, k_min, lo = compute_min_sample_size(float(p))
+        _, hi = wilson_interval(int(k_min), int(n_min))
+        is_actual = abs(float(p) * 100.0 - float(recall_pct)) < 0.01
+        min_n_rows.append((float(p), int(n_min), int(k_min), float(lo), float(hi), bool(is_actual)))
 
     min_n_actual = next((r[1] for r in min_n_rows if r[5]), -1)
 
