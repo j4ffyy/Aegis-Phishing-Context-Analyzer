@@ -1,0 +1,12 @@
+# Force LF line endings across text files to prevent SHA256 mismatches across Windows/Linux checkouts
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.onnx binary
+*.pkl binary

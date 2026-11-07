@@ -29,3 +29,10 @@
 - Needs human: Render dashboard screenshot for region/settings (E-02, E-04 companion).
 - Open questions: none
 
+## 2026-11-07T13:56Z  I-10  Done (6a6ba94)
+- Produced: E-19 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Scan trigger is debounced (300 ms) and deduplicated by composite signature (sender, subject, attachments, links, body); user interaction required via FAB when panel closed; VirusTotal outbound queries capped at 2 URLs and paced by >= 15.0s asyncio.Lock with triple local cache.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
