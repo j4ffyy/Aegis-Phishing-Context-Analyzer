@@ -169,18 +169,18 @@ def build_uat_records() -> list:
     records = []
     for i, (rid, cid, btype, esize, role_cat, role_title) in enumerate(respondent_meta):
         if xlsx_source and xlsx_scores:
-            q1s, q1t = xlsx_scores[i]["q1"], xlsx_scores[i]["q1_text"]
-            q2s, q2t = xlsx_scores[i]["q2"], xlsx_scores[i]["q2_text"]
-            q3s, q3t = xlsx_scores[i]["q3"], xlsx_scores[i]["q3_text"]
-            q4s, q4t = xlsx_scores[i]["q4"], xlsx_scores[i]["q4_text"]
+            q1s, q1t = int(xlsx_scores[i]["q1"]), str(xlsx_scores[i]["q1_text"])
+            q2s, q2t = int(xlsx_scores[i]["q2"]), str(xlsx_scores[i]["q2_text"])
+            q3s, q3t = int(xlsx_scores[i]["q3"]), str(xlsx_scores[i]["q3_text"])
+            q4s, q4t = int(xlsx_scores[i]["q4"]), str(xlsx_scores[i]["q4_text"])
         else:
             fb = FALLBACK_RECORDS[i]
-            q1s, q1t = fb["q1_speed_score"], fb["q1_speed_text"]
-            q2s, q2t = fb["q2_accuracy_score"], fb["q2_accuracy_text"]
-            q3s, q3t = fb["q3_comprehension_score"], fb["q3_comprehension_text"]
-            q4s, q4t = fb["q4_workflow_score"], fb["q4_workflow_text"]
+            q1s, q1t = int(fb["q1_speed_score"]), str(fb["q1_speed_text"])
+            q2s, q2t = int(fb["q2_accuracy_score"]), str(fb["q2_accuracy_text"])
+            q3s, q3t = int(fb["q3_comprehension_score"]), str(fb["q3_comprehension_text"])
+            q4s, q4t = int(fb["q4_workflow_score"]), str(fb["q4_workflow_text"])
 
-        mean = round((q1s + q2s + q3s + q4s) / 4.0, 2)
+        mean = round((float(q1s) + float(q2s) + float(q3s) + float(q4s)) / 4.0, 2)
         records.append({
             "respondent_id": rid,
             "company_id": cid,
@@ -221,8 +221,9 @@ def generate_e23(commit: str):
     owner_records = [r for r in UAT_RECORDS if r["role_category"] == "Owner"]
     staff_records = [r for r in UAT_RECORDS if r["role_category"] == "Staff"]
 
-    def avg(records, field):
-        return sum(r[field] for r in records) / len(records)
+    def avg(records: list, field: str) -> float:
+        vals = [float(r[field]) for r in records]
+        return sum(vals) / len(vals) if vals else 0.0
 
     owner_mean_speed = avg(owner_records, "q1_speed_score")
     owner_mean_acc   = avg(owner_records, "q2_accuracy_score")

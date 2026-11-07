@@ -22,7 +22,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from sklearn.metrics import roc_auc_score
@@ -104,7 +104,7 @@ def bootstrap_roc_auc_ci(
     return base_auc, low, high
 
 
-def calc_metrics(y_true: List[int], y_pred: List[int], latencies: List[float] = None) -> Dict[str, Any]:
+def calc_metrics(y_true: List[int], y_pred: List[int], latencies: Optional[List[float]] = None) -> Dict[str, Any]:
     """Computes classification metrics: Accuracy, Precision, Recall, F1, FPR, FNR, and Wilson CIs."""
     n = len(y_true)
     tp = sum(1 for t, p in zip(y_true, y_pred) if t == 1 and p == 1)
@@ -252,7 +252,7 @@ def evaluate_single_sample(
 
     return {
         "id": row.get("id"),
-        "label": int(row.get("label")),
+        "label": int(row.get("label") or 0),
         "label_name": row.get("label_name"),
         "senderEmail": row.get("senderEmail"),
         "subject": subject,
