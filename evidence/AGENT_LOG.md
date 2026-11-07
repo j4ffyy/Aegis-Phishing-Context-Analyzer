@@ -22,3 +22,10 @@
 - Needs human: Confirm pre-training corpus lineage if historical archives are accessible; otherwise limitation note stands.
 - Open questions: none
 
+## 2026-11-07T13:22Z  I-09  Done (85e8e3a)
+- Produced: E-03, E-04, E-28 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Full email body sent as scrubbed plain text (PII redacted via pii_scrubber.js); backend logs no request bodies; in-memory dicts (_in_flight_scans, _analysis_store, _detection_log, _feedback_log) are process-volatile and reset on restart.
+- Deviations from plan: none
+- Needs human: Render dashboard screenshot for region/settings (E-02, E-04 companion).
+- Open questions: none
+
