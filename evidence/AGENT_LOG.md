@@ -46,4 +46,18 @@
   3. `evidence/E-14_spf-dkim-drawer-states/E-14_spf-dkim-drawer-states_state-null_YYYYMMDD_human.png` (collapsed/unverified headers showing "Not verified")
 - Open questions: none
 
+## 2026-11-07T14:36Z  I-12  Done (a824a4e)
+- Produced: E-17 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Audited all three post-defense UI features and introduced missing guided presets:
+  1. Two-tier XAI panel (plain-language summary card + expandable Advanced FAM modal): verified introduced in commits `bef94c6`, `fc0ea76`, `d990bdd`, and `326b02d`.
+  2. VirusTotal reasons in XAI panel and threat indicators: verified in commits `8947afe`, `d990bdd`, and `56a8819`.
+  3. Conservative / Standard / Aggressive presets with tooltips: raw sliders from commit `5357495` upgraded in `a824a4e` with 3 guided presets (Conservative 35%/65%, Standard 45%/75%, Aggressive 55%/85%) and contextual risk tooltips for non-technical users.
+- Deviations from plan: none
+- Needs human: Capture live UI screenshots for Annex A:
+  1. `evidence/E-13_two-tier-xai-panel/E-13_two-tier-xai-panel_before_YYYYMMDD_human.png` & `_after_...png`
+  2. `evidence/E-15_virustotal-reasons-panel/E-15_virustotal-reasons-panel_...png`
+  3. `evidence/E-16_threshold-presets/E-16_threshold-presets_...png` (dashboard settings with preset buttons active)
+- Open questions: none
+
+
 

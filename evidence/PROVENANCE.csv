@@ -8,3 +8,5 @@ E-04_request-body-logging/E-04_request-body-logging_refs_20261107_85e8e3a.md,man
 E-28_in-memory-dict-check/E-28_in-memory-dict-check_refs_20261107_85e8e3a.md,manual,,,,"Code reference audit for data handling, logging, and in-memory stores (I-09)"
 E-19_scan-trigger-ratelimit/E-19_scan-trigger-ratelimit_refs_20261107_6a6ba94.md,manual,,,,Code reference audit for Gmail DOM MutationObserver debounce and VirusTotal rate pacing (I-10)
 E-14_spf-dkim-drawer-states/E-14_spf-dkim-drawer-states_test-output_20261107_799f152.txt,script,aegis-backend/tests/test_auth_states.py,python -m unittest aegis-backend/tests/test_auth_states.py -v,0919c5145ace8604eaceb6d8105e524ec40802ea6453e5310fb03add57906bd6,
+
+E-17_post-defense-ui-commits/E-17_post-defense-ui-commits_20261107_a824a4e.txt,manual,,,,"Git log commit audit for post-defense UI features: Two-tier XAI panel, VirusTotal reasons in panel, and guided sensitivity presets (I-12, I-13)"
