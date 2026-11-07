@@ -144,6 +144,13 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-07T15:40Z  E-05  Done (8c42233)
+- Produced: E-05 (files listed in EVIDENCE_INDEX.csv)
+- Findings: Ingested original submitted benchmark report `evaluation_report.json` (produced at commit `8c42233` on 2026-10-23) establishing the historical baseline (Accuracy 93.00%, Recall 86.00%, Precision 100.00%, F1 92.47%, FPR 0.00%; TP=43, TN=50, FP=0, FN=7) executed under the un-warmed heuristic fallback path prior to the I-02 model-loaded guard.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
 
 
 
