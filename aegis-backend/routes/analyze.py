@@ -472,7 +472,7 @@ def evaluate_behavioral(payload: EmailPayload) -> int:
     """
     if payload.behavioralScore is not None:
         try:
-            return max(0, min(100, int(payload.behavioralScore)))
+            return max(0, min(100, payload.behavioralScore))
         except (ValueError, TypeError):
             pass
     if payload.behavioral_meta and isinstance(payload.behavioral_meta, dict):
@@ -503,6 +503,8 @@ def build_analysis_response(
     behavioral_meta: Optional[Dict[str, Any]] = None,
     execution_time_ms: int = 0,
     detected_language: Optional[str] = None,  # PR-06
+    spf_pass: Optional[bool] = None,
+    dkim_pass: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Constructs the canonical Aegis analysis payload compatible with the overlay via meta_classifier."""
     result = synthesize_assessment(
@@ -518,6 +520,8 @@ def build_analysis_response(
         behavioral_meta=behavioral_meta,
         execution_time_ms=execution_time_ms,
         detected_language=detected_language,  # PR-06
+        spf_pass=spf_pass,
+        dkim_pass=dkim_pass,
     )
     if detected_language:
         result["detectedLanguage"] = detected_language  # PR-06: expose to frontend
@@ -588,6 +592,8 @@ async def _execute_background_vt_scan(
             vt_result=vt_result,
             behavioral_meta=base_state.get("behavioral_meta"),
             execution_time_ms=duration_ms,
+            spf_pass=base_state.get("spf_pass"),
+            dkim_pass=base_state.get("dkim_pass"),
         )
 
         # Store completed analysis for subsequent GET polling
@@ -618,6 +624,8 @@ async def _execute_background_vt_scan(
             vt_result={"status": "error", "error": str(exc)},
             behavioral_meta=base_state.get("behavioral_meta"),
             execution_time_ms=int((time.time() - start_time) * 1000),
+            spf_pass=base_state.get("spf_pass"),
+            dkim_pass=base_state.get("dkim_pass"),
         )
         _analysis_store[email_hash] = final_analysis
     finally:
@@ -725,6 +733,8 @@ async def analyze_email(
         behavioral_meta=payload.behavioral_meta,
         execution_time_ms=execution_time_ms,
         detected_language=payload.detectedLanguage,  # PR-06
+        spf_pass=payload.spfPass,
+        dkim_pass=payload.dkimPass,
     )
 
     if vt_status == "completed":
@@ -740,6 +750,8 @@ async def analyze_email(
             "behavioral_meta": payload.behavioral_meta,
             "ensemble_used": heuristics.get("ensemble_used", False),
             "s_ensemble": heuristics.get("s_ensemble", 0),
+            "spf_pass": payload.spfPass,
+            "dkim_pass": payload.dkimPass,
         }
         _in_flight_scans[email_hash] = {
             "status": "pending",
@@ -869,7 +881,7 @@ async def log_result(payload: LogResultPayload) -> Dict[str, Any]:
         "sender":    payload.sender,
         "subject":   payload.subject,
         "source":    payload.source,
-        "analyzedAt": payload.analyzedAt or _dt.datetime.utcnow().isoformat() + "Z",
+        "analyzedAt": payload.analyzedAt or _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
     _detection_log.insert(0, entry)
@@ -947,7 +959,7 @@ async def submit_feedback(payload: FeedbackPayload) -> Dict[str, Any]:
         "notes":       payload.notes,
         "sender":      payload.sender,
         "subject":     payload.subject,
-        "reportedAt":  payload.reportedAt or _dt.datetime.utcnow().isoformat() + "Z",
+        "reportedAt":  payload.reportedAt or _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
     _feedback_log.append(record)
 

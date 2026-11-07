@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Aegis: AI-Powered Phishing Context Analyzer
  * Component: Overlay Controller
  */
@@ -825,6 +825,8 @@
           iconClass = 'fas fa-exclamation'; iconType = 'icon-warn'; statusClass = 'status-warn'; statusText = 'Warn'; break;
         case 'fa-spinner':
           iconClass = 'fas fa-spinner fa-spin'; iconType = 'icon-pending'; statusClass = 'status-pending'; statusText = 'Scanning'; break;
+        case 'fa-minus-circle':
+          iconClass = 'fas fa-minus'; iconType = 'icon-skip'; statusClass = 'status-skip'; statusText = (key === 'auth') ? 'Not verified' : 'Skip'; break;
         default:
           iconClass = 'fas fa-minus'; iconType = 'icon-skip'; statusClass = 'status-skip'; statusText = 'Skip';
       }

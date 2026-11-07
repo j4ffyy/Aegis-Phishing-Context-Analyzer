@@ -459,9 +459,10 @@ def main():
 
     for fp in fp_records:
         pattern = "Transactional / Billing receipt context"
-        if "PRN" in fp["subject"] or "receipt" in fp["subject"] or "invoice" in fp["subject"] or "bill" in fp["subject"]:
+        subject_str = str(fp["subject"])
+        if "PRN" in subject_str or "receipt" in subject_str or "invoice" in subject_str or "bill" in subject_str:
             pattern = "Invoice / Statement notification keywords"
-        elif "lunch" in fp["subject"]:
+        elif "lunch" in subject_str:
             pattern = "Calendar / RSVP notification keywords"
         audit_text.append(
             f"| {fp['id']} | `{fp['senderEmail']}` | {fp['subject']} | {fp['p_phish']:.4f} | {fp['s_heuristic']} | {fp['s_nlp']} | {fp['composite_score']} | {pattern} |"

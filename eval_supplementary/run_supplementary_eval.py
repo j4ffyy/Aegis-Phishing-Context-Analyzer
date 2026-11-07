@@ -730,7 +730,7 @@ def export_all(
         f.write("| " + " | ".join(headers) + " |\n")
         f.write("| " + " | ".join(["---"] * len(headers)) + " |\n")
         for r in summary_rows:
-            f.write("| " + " | ".join(str(r[h]) for h in headers) + " |\n")
+            f.write("| " + " | ".join(r[h] for h in headers) + " |\n")
     print(f"Saved: {md_sum.relative_to(REPO_ROOT)}")
 
     # 6. Generate Comprehensive README.md

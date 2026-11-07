@@ -95,7 +95,7 @@ def normalize_url(url: str) -> str:
         return url.strip()
 
 
-def is_valid_sha256(h: str) -> bool:
+def is_valid_sha256(h: str | None) -> bool:
     """Validates whether string is a 64-character hexadecimal SHA-256 hash (PR-09)."""
     if not h or not isinstance(h, str):
         return False

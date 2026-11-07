@@ -39,7 +39,7 @@ TIER_WARNING_MAX: int = 74     # Score 45-74 -> Warning
 
 def clamp_score(score: float) -> int:
     """Clamps a numeric score strictly to integer bounds [0, 100]."""
-    return max(0, min(100, int(round(score))))
+    return max(0, min(100, round(score)))
 
 
 def synthesize_composite_score(
@@ -248,23 +248,32 @@ def build_layers_status(
     urls: List[str],
     vt_result: Optional[Dict[str, Any]] = None,
     behavioral_meta: Optional[Dict[str, Any]] = None,
+    spf_pass: Optional[bool] = None,
+    dkim_pass: Optional[bool] = None,
 ) -> Dict[str, Dict[str, str]]:
     """
     Constructs the canonical 5-layer status structure utilized by the Aegis overlay
     and Full Analysis Modal (FAM).
     """
-    # Layer 1: Auth & Spoofing
-    auth_icon = "fa-check-circle"
-    auth_detail = "Pass: Domain & identity verified"
-    for f in flags:
-        if "SPF" in f.get("title", "") or "DKIM" in f.get("title", ""):
-            auth_icon = "fa-times-circle"
-            auth_detail = f"Failed: {f.get('evidence', 'Auth validation failure')}"
-            break
-        elif "Spoofing" in f.get("title", "") or "Typosquatting" in f.get("title", ""):
-            auth_icon = "fa-times-circle"
-            auth_detail = f"Flagged: {f.get('title', 'Domain mismatch')}"
-            break
+    # Layer 1: Auth & Spoofing (I-01 3-state display: Fail / Pass / Not verified)
+    has_auth_fail = any("SPF" in f.get("title", "") or "DKIM" in f.get("title", "") for f in flags)
+    has_spoof_flag = any("Spoofing" in f.get("title", "") or "Typosquatting" in f.get("title", "") for f in flags)
+
+    if has_auth_fail or (spf_pass is False or dkim_pass is False):
+        auth_icon = "fa-times-circle"
+        auth_fail_flag = next((f for f in flags if "SPF" in f.get("title", "") or "DKIM" in f.get("title", "")), None)
+        auth_detail = f"Failed: {auth_fail_flag.get('evidence', 'Auth validation failure')}" if auth_fail_flag else "Failed: Authentication validation failed"
+    elif has_spoof_flag:
+        auth_icon = "fa-times-circle"
+        spoof_flag = next((f for f in flags if "Spoofing" in f.get("title", "") or "Typosquatting" in f.get("title", "")), None)
+        auth_detail = f"Flagged: {spoof_flag.get('title', 'Domain mismatch')}" if spoof_flag else "Flagged: Domain mismatch"
+    elif spf_pass is True or dkim_pass is True:
+        auth_icon = "fa-check-circle"
+        auth_detail = "Pass: Domain & identity verified"
+    else:
+        # Indeterminate / collapsed headers -> unverified (Row 13 / I-01)
+        auth_icon = "fa-minus-circle"
+        auth_detail = "Not verified: Authentication headers missing"
 
     # Layer 2: Attachment Intelligence (PR-09)
     has_malicious_hash = any("Malicious Attachment" in f.get("title", "") for f in flags)
@@ -379,6 +388,8 @@ def synthesize_assessment(
     behavioral_meta: Optional[Dict[str, Any]] = None,
     execution_time_ms: int = 0,
     detected_language: Optional[str] = None,  # PR-06
+    spf_pass: Optional[bool] = None,
+    dkim_pass: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """
     Orchestrates 4-layer risk synthesis, risk tier classification, XAI generation,
@@ -409,17 +420,28 @@ def synthesize_assessment(
         final_score = 75
 
     # Multi-Indicator Warning Threat Floor (§6.5):
-    # If multiple distinct threat layers are flagged (e.g. suspicious attachment + urgency coercion),
-    # ensure the score is bounded by a minimum Warning threshold (52%) so active threats
-    # are not diluted into "Safe" simply because external links or sender novelty are absent.
+    # Triggers when EITHER:
+    #   (a) both an attachment threat and an urgency/NLP threat are present, OR
+    #   (b) s_heuristic >= 40 (high raw heuristic risk — e.g. SPF+DKIM both fail)
+    # Ensures these active threat signals are not diluted into "Safe" by low
+    # behavioral or missing VT scores.
     has_attachment_threat = any("Attachment" in f.get("title", "") for f in flags)
     has_urgency_threat = any("Urgency" in f.get("title", "") for f in flags) or s_nlp >= 25
     if (has_attachment_threat and has_urgency_threat) or s_heuristic >= 40:
         if final_score < 52:
-            logger.info(
-                "[MetaClassifier] Elevating score %d -> 52 due to combined attachment and urgency indicators",
-                final_score,
-            )
+            if s_heuristic >= 40 and not (has_attachment_threat and has_urgency_threat):
+                logger.info(
+                    "[MetaClassifier] Elevating score %d -> 52: "
+                    "s_heuristic=%d >= 40 threshold (high heuristic risk floor)",
+                    final_score,
+                    s_heuristic,
+                )
+            else:
+                logger.info(
+                    "[MetaClassifier] Elevating score %d -> 52: "
+                    "attachment threat + urgency/NLP threat both present",
+                    final_score,
+                )
             final_score = 52
 
     risk_level, risk_class, desc = derive_risk_tier(final_score)
@@ -447,6 +469,8 @@ def synthesize_assessment(
         urls=urls,
         vt_result=vt_result,
         behavioral_meta=behavioral_meta,
+        spf_pass=spf_pass,
+        dkim_pass=dkim_pass,
     )
 
     return {

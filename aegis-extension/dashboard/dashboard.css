@@ -815,6 +815,7 @@ body {
 
 .sens-slider {
   -webkit-appearance: none;
+  appearance: none;
   width: 180px;
   height: 4px;
   border-radius: 0;

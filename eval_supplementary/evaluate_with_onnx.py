@@ -86,8 +86,9 @@ def bootstrap_roc_auc_ci(
             continue
 
     if boot_aucs:
-        low = float(np.percentile(boot_aucs, 2.5))
-        high = float(np.percentile(boot_aucs, 97.5))
+        _boot_arr = np.array(boot_aucs, dtype=np.float64)
+        low = float(np.percentile(_boot_arr, 2.5))
+        high = float(np.percentile(_boot_arr, 97.5))
     else:
         low, high = base_auc, base_auc
 
@@ -310,7 +311,7 @@ def run_step_3(rows: list[dict]):
         pred = 1 if res["score"] >= PHISHING_SCORE_THRESHOLD else 0
         y = true_labels[i]
 
-        syn_scores.append(res["score"])
+        syn_scores.append(float(res["score"]))
         syn_preds.append(pred)
         syn_lats.append(res["elapsed_ms"])
 
@@ -359,7 +360,7 @@ def run_step_3(rows: list[dict]):
         pred = 1 if res["score"] >= PHISHING_SCORE_THRESHOLD else 0
         y = true_labels[i]
 
-        neu_scores.append(res["score"])
+        neu_scores.append(float(res["score"]))
         neu_preds.append(pred)
         neu_lats.append(res["elapsed_ms"])
 
@@ -641,7 +642,7 @@ def export_summary(m_syn: dict, m_neu: dict, ablation_results: dict, p_phish_sta
         f.write("| " + " | ".join(headers) + " |\n")
         f.write("| " + " | ".join(["---"] * len(headers)) + " |\n")
         for r in summary_rows:
-            f.write("| " + " | ".join(str(r[h]) for h in headers) + " |\n")
+            f.write("| " + " | ".join(r[h] for h in headers) + " |\n")
     print(f"Saved: {md_path.relative_to(REPO_ROOT)}")
 
 

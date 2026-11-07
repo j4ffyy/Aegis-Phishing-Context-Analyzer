@@ -276,6 +276,9 @@ def score_with_ensemble(
 
         X = np.array([features], dtype=np.float32)
 
+        assert _rf_model is not None  # guarded by _models_loaded check above
+        assert _xgb_model is not None  # guarded by _models_loaded check above
+
         # Random Forest — probability of phishing class (index 1)
         rf_proba = _rf_model.predict_proba(X)[0]
         rf_phish_prob = float(rf_proba[1]) if len(rf_proba) > 1 else float(rf_proba[0])
