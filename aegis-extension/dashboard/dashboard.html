@@ -191,6 +191,43 @@
       </div>
 
       <div class="sensitivity-card">
+        <!-- Guided Sensitivity Presets (Row 21 / I-12) -->
+        <div class="sens-presets-wrap" id="sens-presets-wrap">
+          <div class="sens-presets-header">
+            <span class="sens-tier-name">Guided Protection Profiles</span>
+            <span class="sens-tier-desc">Select an operational preset or fine-tune thresholds below. Hover over each preset for risk guidance.</span>
+          </div>
+          <div class="sens-presets-group" role="group" aria-label="Guided Protection Profiles">
+            <button type="button" class="preset-btn" id="preset-conservative"
+              title="Conservative (High Protection): Warning ≥ 35%, Critical ≥ 65%. Prioritizes maximum threat interception. Recommended for financial, executive, or wire-transfer inboxes."
+              data-warn="35" data-crit="65">
+              <span class="preset-btn-icon">🛡️</span>
+              <div class="preset-btn-text">
+                <span class="preset-btn-title">Conservative</span>
+                <span class="preset-btn-sub">35% / 65% · High Protection</span>
+              </div>
+            </button>
+            <button type="button" class="preset-btn preset-btn--active" id="preset-standard"
+              title="Standard (Default): Warning ≥ 45%, Critical ≥ 75%. Balanced sensitivity for standard operational SME workflows."
+              data-warn="45" data-crit="75">
+              <span class="preset-btn-icon">⚖️</span>
+              <div class="preset-btn-text">
+                <span class="preset-btn-title">Standard</span>
+                <span class="preset-btn-sub">45% / 75% · Balanced (Default)</span>
+              </div>
+            </button>
+            <button type="button" class="preset-btn" id="preset-aggressive"
+              title="Aggressive (Low Alert Volume): Warning ≥ 55%, Critical ≥ 85%. Requires stronger multi-layer corroboration before alerting. Minimizes false alerts in high-volume environments."
+              data-warn="55" data-crit="85">
+              <span class="preset-btn-icon">⚡</span>
+              <div class="preset-btn-text">
+                <span class="preset-btn-title">Aggressive</span>
+                <span class="preset-btn-sub">55% / 85% · Low Alert Volume</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <div class="sens-row" id="sens-row-warning">
           <div class="sens-label-group">
             <span class="sens-tier-dot sens-tier-dot--amber"></span>

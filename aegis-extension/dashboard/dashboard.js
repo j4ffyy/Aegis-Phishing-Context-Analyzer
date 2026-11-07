@@ -500,7 +500,7 @@ function initLogControls() {
   }
 }
 
-// ─── Sensitivity Sliders ──────────────────────────────────────────────────────
+// ─── Sensitivity Sliders & Presets (Row 21 / I-12) ───────────────────────────
 function initSensitivityControls(saved) {
   const wSlider  = qs('slider-warning');
   const cSlider  = qs('slider-critical');
@@ -512,10 +512,40 @@ function initSensitivityControls(saved) {
 
   if (!wSlider || !cSlider) return;
 
+  const presetBtns = [
+    { btn: qs('preset-conservative'), warn: 35, crit: 65 },
+    { btn: qs('preset-standard'),     warn: 45, crit: 75 },
+    { btn: qs('preset-aggressive'),   warn: 55, crit: 85 },
+  ];
+
+  function syncPresetHighlight() {
+    const wVal = parseInt(wSlider.value, 10);
+    const cVal = parseInt(cSlider.value, 10);
+    presetBtns.forEach(({ btn, warn, crit }) => {
+      if (!btn) return;
+      if (wVal === warn && cVal === crit) {
+        btn.classList.add('preset-btn--active');
+      } else {
+        btn.classList.remove('preset-btn--active');
+      }
+    });
+  }
+
+  presetBtns.forEach(({ btn, warn, crit }) => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      wSlider.value = warn;
+      cSlider.value = crit;
+      updateSensUI();
+      syncPresetHighlight();
+    });
+  });
+
   // Apply saved values
   wSlider.value = saved.warningThreshold;
   cSlider.value = saved.criticalThreshold;
   updateSensUI();
+  syncPresetHighlight();
 
   wSlider.addEventListener('input', () => {
     // Enforce warning < critical
@@ -523,6 +553,7 @@ function initSensitivityControls(saved) {
       cSlider.value = parseInt(wSlider.value) + 5;
     }
     updateSensUI();
+    syncPresetHighlight();
   });
 
   cSlider.addEventListener('input', () => {
@@ -530,6 +561,7 @@ function initSensitivityControls(saved) {
       wSlider.value = parseInt(cSlider.value) - 5;
     }
     updateSensUI();
+    syncPresetHighlight();
   });
 
   // Save button
@@ -556,6 +588,7 @@ function initSensitivityControls(saved) {
       wSlider.value = DEFAULT_SENSITIVITY.warningThreshold;
       cSlider.value = DEFAULT_SENSITIVITY.criticalThreshold;
       updateSensUI();
+      syncPresetHighlight();
     });
   }
 

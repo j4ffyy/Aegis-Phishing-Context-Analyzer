@@ -767,6 +767,80 @@ body {
   overflow: hidden;
 }
 
+/* Guided Sensitivity Presets (Row 21 / I-12) */
+.sens-presets-wrap {
+  padding: 18px 20px 14px;
+  background: var(--aegis-surface);
+  border-bottom: 3px solid var(--aegis-border);
+}
+
+.sens-presets-header {
+  margin-bottom: 12px;
+}
+
+.sens-presets-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.preset-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--aegis-bg);
+  border: 2px solid var(--aegis-border);
+  box-shadow: 2px 2px 0px #000;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.1s ease;
+  font-family: var(--aegis-font);
+}
+
+.preset-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000;
+}
+
+.preset-btn--active {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+  box-shadow: 2px 2px 0px var(--aegis-risk-yellow);
+}
+
+.preset-btn--active .preset-btn-sub {
+  color: #e5e7eb;
+}
+
+.preset-btn-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.preset-btn-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.preset-btn-title {
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preset-btn-sub {
+  font-size: 9px;
+  color: var(--aegis-text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .sens-row {
   display: flex;
   align-items: center;
