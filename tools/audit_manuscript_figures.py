@@ -1,11 +1,12 @@
 """
-Aegis Manuscript Figure & Claim Audit Tool (I-17 / E-12)
-Specification: AEGIS Implementation Plan v3.2 §4.2, §7 (I-17)
+Aegis Manuscript Text and Claim Audit Tool (E-12)
+Audits documentation and markdown files across the repository for deprecated
+metrics, outdated risk tier terminology, and disavowed integration claims.
 
-Audits all manuscript, documentation, and reporting files for:
-1. Historical / phantom metrics (97.5%, 96.0%, 93.8%, 0.955, 86.0%, 93.0%, 83.0%)
-2. Deprecated / disavowed risk tier labels ("High" instead of Critical/Warning/Safe)
-3. Disavowed integration claims (Gmail API, DMARC enforcement)
+Audit Targets:
+  1. Deprecated Metrics: 97.5%, 96.0%, 93.8%, 0.955, 86.0%, 93.0%, 83.0%
+  2. Legacy Risk Tier Labels: 'High' Risk Tier (Aegis uses Safe, Warning, Critical)
+  3. Disavowed Claims: Direct Gmail API integration, runtime DMARC enforcement
 """
 
 import argparse
@@ -78,7 +79,7 @@ def audit_files(commit: str) -> str:
 
         try:
             content = file_path.read_text(encoding="utf-8", errors="replace")
-        except Exception as e:
+        except Exception:
             continue
 
         file_hit_lines = []
