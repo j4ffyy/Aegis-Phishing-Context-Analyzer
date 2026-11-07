@@ -190,7 +190,7 @@ def evaluate_single_sample(
     # "heuristics_nlp" -> s_layer1 (no ensemble) + DistilBERT
     # "full" -> full multi-layer
     if config == "heuristics_only":
-        heur = evaluate_heuristics(payload, urls)
+        heur = evaluate_heuristics(payload)
         final_score = heur["score"]
         s_nlp = 0
         s_b = 0
@@ -215,7 +215,7 @@ def evaluate_single_sample(
 
         if config == "heuristics_nlp_no_ensemble":
             # Heuristics rules without ensemble + NLP
-            heur = evaluate_heuristics(payload, urls)
+            heur = evaluate_heuristics(payload)
             s_h_raw = heur["score"]
             final_score = synthesize_composite_score(
                 s_heuristic=s_h_raw,
