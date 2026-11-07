@@ -59,5 +59,11 @@
   3. `evidence/E-16_threshold-presets/E-16_threshold-presets_...png` (dashboard settings with preset buttons active)
 - Open questions: none
 
+## 2026-11-07T14:40Z  FREEZE  Done (eval-freeze)
+- Tag: `eval-freeze`
+- Target Commit: `f86cf64ca69545bdb84955ac9be4189f374a9d45`
+- Status: Code frozen for Phase C evaluations. All Phase A setup items (A-0, manifest tooling) and Phase B fixes (I-01 auth display, I-02 model guard, I-07 model provenance, I-09 data audit, I-10 scan trigger audit, I-12 UI confirm/build & guided presets, I-13 string audit) completed and verified across 74 backend tests and 21 extension tests. No further code modifications permitted until evaluations conclude.
+
+
 
 
