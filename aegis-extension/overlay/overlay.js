@@ -116,7 +116,16 @@
           </div>
 
           <div class="aegis-layer-analysis">
-            <h4>Multi-Layered Defense Status</h4>
+            <div class="aegis-layer-header-row">
+              <h4>Multi-Layered Defense Status</h4>
+              <label class="aegis-toggle-container" id="aegis-view-toggle-wrap" title="Toggle between Plain Language and Technical Details">
+                <span class="aegis-toggle-label" id="aegis-view-toggle-text">Technical View</span>
+                <span class="aegis-toggle-switch">
+                  <input type="checkbox" id="aegis-view-toggle-cb" aria-label="Toggle Technical Details">
+                  <span class="aegis-toggle-slider"></span>
+                </span>
+              </label>
+            </div>
             <ul class="aegis-layers-list" id="aegis-layers-list">
               <li id="aegis-layer-sanitization"><i class="fas fa-minus-circle aegis-icon-skip"></i> Pre-processing: HTML Sanitization</li>
               <li id="aegis-layer-auth"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 1: Auth (SPF/DKIM)</li>
@@ -417,6 +426,9 @@
     get scoreValue()       { return document.getElementById('aegis-score-value'); },
     get riskLevel()        { return document.getElementById('aegis-risk-level'); },
     get riskDesc()         { return document.getElementById('aegis-risk-desc'); },
+    get viewToggleWrap()   { return document.getElementById('aegis-view-toggle-wrap'); },
+    get viewToggleCb()     { return document.getElementById('aegis-view-toggle-cb'); },
+    get viewToggleText()   { return document.getElementById('aegis-view-toggle-text'); },
     get layerSanitization(){ return document.getElementById('aegis-layer-sanitization'); },
     get layerAuth()        { return document.getElementById('aegis-layer-auth'); },
     get layerAttach()      { return document.getElementById('aegis-layer-attach'); },
@@ -659,6 +671,141 @@
     }, VT_POLLING_INTERVAL_MS);
   }
 
+  // ─── Literacy-Adaptive UI State (Two-Tier XAI) ─────────────────────────────
+  // Defaults to Simplified Plain-Language View for non-technical retail/office staff
+  let isTechnicalView = false;
+
+  function getSimplifiedLayer(key, rawData) {
+    const isPass = rawData.icon === 'fa-check-circle';
+    const isWarn = rawData.icon === 'fa-exclamation-triangle';
+    const isFail = rawData.icon === 'fa-times-circle';
+
+    switch (key) {
+      case 'sanitization':
+        return {
+          title: 'Privacy Check',
+          detail: isPass
+            ? 'Hidden trackers removed & personal info protected'
+            : 'Personal info sanitized before analysis'
+        };
+
+      case 'auth':
+        return {
+          title: 'Sender Legitimacy',
+          detail: isPass
+            ? 'Confirmed sent by genuine organization (not spoofed)'
+            : (isFail ? 'Warning: Sender address appears fake or spoofed' : 'Sender identity could not be fully verified')
+        };
+
+      case 'attach':
+        return {
+          title: 'File Attachments',
+          detail: isPass
+            ? (rawData.detail && rawData.detail.toLowerCase().includes('no attach')
+                ? 'No files attached'
+                : 'Attached files safe & verified')
+            : (isFail ? 'Warning: Dangerous attachment detected' : 'Attachment contains suspicious features')
+        };
+
+      case 'behavior':
+        return {
+          title: 'Sender Routine',
+          detail: isPass
+            ? 'Routine sender during normal business hours'
+            : (isFail ? 'First-time sender at unusual off-hours' : 'Unfamiliar sender or atypical timing')
+        };
+
+      case 'nlp':
+        return {
+          title: 'Message Tone',
+          detail: isPass
+            ? 'Normal context without fake urgency or threats'
+            : (isFail ? 'High-pressure urgency or deceptive links detected' : 'Urgent tone or promotional links detected')
+        };
+
+      default:
+        return {
+          title: rawData.text || key,
+          detail: rawData.detail || ''
+        };
+    }
+  }
+
+  function renderLayerList(analysis) {
+    if (!analysis || !analysis.layers) return;
+
+    const layerEls = {
+      sanitization: el.layerSanitization,
+      auth:         el.layerAuth,
+      attach:       el.layerAttach,
+      behavior:     el.layerBehavior,
+      nlp:          el.layerNlp,
+    };
+
+    const iconClassMap = {
+      'fa-check-circle':        { cls: 'fas fa-check-circle aegis-icon-pass',    liClass: 'layer-pass'    },
+      'fa-times-circle':        { cls: 'fas fa-times-circle aegis-icon-fail',    liClass: 'layer-fail'    },
+      'fa-exclamation-triangle':{ cls: 'fas fa-exclamation-triangle aegis-icon-warn', liClass: 'layer-warn' },
+      'fa-minus-circle':        { cls: 'fas fa-minus-circle aegis-icon-skip',    liClass: 'layer-skip'    },
+      'fa-spinner':             { cls: 'fas fa-spinner fa-spin aegis-icon-pending', liClass: 'layer-pending' },
+    };
+
+    Object.entries(layerEls).forEach(([key, listItem]) => {
+      if (!listItem) return;
+      const data = analysis.layers[key] || { text: key, detail: 'N/A', icon: 'fa-minus-circle' };
+      const icon = iconClassMap[data.icon] || iconClassMap['fa-minus-circle'];
+      listItem.className = icon.liClass;
+
+      if (isTechnicalView) {
+        // Technical engineering view
+        listItem.innerHTML = `
+          <i class="${icon.cls} aegis-layer-icon"></i>
+          <div class="aegis-layer-content">
+            <span class="aegis-layer-title">${data.text}</span>
+            <span class="aegis-layer-detail">${data.detail}</span>
+          </div>`;
+      } else {
+        // Simplified plain-language view for non-technical users
+        const simple = getSimplifiedLayer(key, data);
+        listItem.innerHTML = `
+          <i class="${icon.cls} aegis-layer-icon"></i>
+          <div class="aegis-layer-content">
+            <span class="aegis-layer-title">${simple.title}</span>
+            <span class="aegis-layer-detail">${simple.detail}</span>
+          </div>`;
+      }
+    });
+
+    if (el.xaiText) {
+      if (isTechnicalView) {
+        el.xaiText.textContent = analysis.xai;
+      } else {
+        if (analysis.riskLevel === 'Safe') {
+          el.xaiText.textContent = 'This email passed all security checks. The sender is verified, no fake rush was detected, and there are no dangerous links or attachments.';
+        } else if (analysis.riskLevel === 'Critical') {
+          el.xaiText.textContent = 'HIGH RISK WARNING: Do not click any links or download attachments. This email appears to be an impersonation or fraud attempt.';
+        } else {
+          el.xaiText.textContent = 'CAUTION: Exercise care before responding or opening links. This email contains unfamiliar signals or unverified sender details.';
+        }
+      }
+    }
+  }
+
+  function updateToggleBtnState() {
+    if (el.viewToggleCb) {
+      el.viewToggleCb.checked = isTechnicalView;
+    }
+    if (el.viewToggleWrap) {
+      el.viewToggleWrap.classList.toggle('active-tech', isTechnicalView);
+      el.viewToggleWrap.title = isTechnicalView 
+        ? 'Technical details active — Click to switch back to simplified plain language' 
+        : 'Simplified view active — Click to switch to technical engineering details';
+    }
+    if (el.viewToggleText) {
+      el.viewToggleText.textContent = isTechnicalView ? 'Technical View' : 'Technical View';
+    }
+  }
+
   function populateAnalysis(analysis) {
     if (!currentEmailContext || (currentEmailContext.subject && /^conversations?$/i.test(currentEmailContext.subject.trim()))) {
       currentEmailContext = null;
@@ -709,33 +856,12 @@
       }
     }
 
-    // --- Layer Color-Coded Status ---
-    const layerEls = {
-      sanitization: el.layerSanitization,
-      auth:         el.layerAuth,
-      attach:       el.layerAttach,
-      behavior:     el.layerBehavior,
-      nlp:          el.layerNlp,
-    };
-
-    // Map icon key â†’ { icon class string, li status class }
-    const iconClassMap = {
-      'fa-check-circle':        { cls: 'fas fa-check-circle aegis-icon-pass',    liClass: 'layer-pass'    },
-      'fa-times-circle':        { cls: 'fas fa-times-circle aegis-icon-fail',    liClass: 'layer-fail'    },
-      'fa-exclamation-triangle':{ cls: 'fas fa-exclamation-triangle aegis-icon-warn', liClass: 'layer-warn' },
-      'fa-minus-circle':        { cls: 'fas fa-minus-circle aegis-icon-skip',    liClass: 'layer-skip'    },
-      'fa-spinner':             { cls: 'fas fa-spinner fa-spin aegis-icon-pending', liClass: 'layer-pending' },
-    };
-
-    Object.entries(layerEls).forEach(([key, listItem]) => {
-      const data = analysis.layers[key];
-      const icon = iconClassMap[data.icon] || iconClassMap['fa-minus-circle'];
-      // Apply color-coded class to the <li> itself (replaces any previous status class)
-      listItem.className = icon.liClass;
-      listItem.innerHTML = `<i class="${icon.cls}"></i> ${data.text}: ${data.detail}`;
-    });
-
-    el.xaiText.textContent = analysis.xai;
+    // --- Layer Color-Coded Status & Two-Tier XAI ---
+    if (currentEmailContext) {
+      currentEmailContext._lastAnalysis = analysis;
+    }
+    updateToggleBtnState();
+    renderLayerList(analysis);
 
     if (analysis.riskLevel === 'Safe') {
       el.whitelistBtn.style.display = 'flex';
@@ -1137,6 +1263,17 @@
 
   function attachEventListeners() {
     el.closeBtn.addEventListener('click', closeAnalyzer);
+
+    if (el.viewToggleCb) {
+      el.viewToggleCb.addEventListener('change', (e) => {
+        e.stopPropagation();
+        isTechnicalView = e.target.checked;
+        updateToggleBtnState();
+        if (currentEmailContext && currentEmailContext._lastAnalysis) {
+          renderLayerList(currentEmailContext._lastAnalysis);
+        }
+      });
+    }
 
     if (el.reloadBtn) {
       el.reloadBtn.addEventListener('click', () => {

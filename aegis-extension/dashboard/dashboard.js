@@ -604,30 +604,8 @@ function initSensitivityControls(saved) {
 
 // ─── Model Metric Rings ───────────────────────────────────────────────────────
 function animateMetricRings() {
-  const rings = [
-    { ringId: 'ring-accuracy',  pct: 94.3, color: '#1a73e8' },
-    { ringId: 'ring-precision', pct: 93.1, color: '#b06000' },
-    { ringId: 'ring-recall',    pct: 95.8, color: '#7b3f9e' },
-    { ringId: 'ring-f1',        pct: 94.4, color: '#188038' },
-    { ringId: 'ring-fpr',       pct: 5.7,  color: '#d93025' },
-    { ringId: 'ring-latency',   pct: 72,   color: '#000000' },
-  ];
-
-  // circumference = 2πr = 2 × π × 32 ≈ 201.06
-  const circumference = 2 * Math.PI * 32;
-
-  rings.forEach(({ ringId, pct, color }) => {
-    const el = qs(ringId);
-    if (!el) return;
-    el.style.stroke = color;
-    // Animate after a brief delay so the browser registers the initial state
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const offset = circumference * (1 - pct / 100);
-        el.style.strokeDashoffset = String(offset);
-      });
-    });
-  });
+  // Operational SME Dashboard: Model evaluation metrics are omitted from client UI
+  // and documented exclusively in Chapter 4 of the academic manuscript.
 }
 
 // ─── Backend Status ───────────────────────────────────────────────────────────
