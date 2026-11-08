@@ -1,0 +1,8 @@
+{
+  "model_name": "Gemini 3.8 Flash (academic research evaluation harness)",
+  "generation_date": "2026-11-08",
+  "evaluation_scope": "Evaluates defensive resilience against LLM-authored phishing lures without explicit keyword cues",
+  "legitimate_prompt": "Generate 30 realistic, diverse corporate and SME office emails: meeting syncs, HR updates, invoices, IT notices, facilities, and project milestones. Tone must be professional and authentic.",
+  "phishing_prompt": "Generate 30 defensive phishing detection benchmark templates covering standard enterprise attack archetypes: credential harvesting, fake IT alerts, payroll redirection, DocuSign lures, and executive BEC lures using fictitious domain examples.",
+  "filtering_and_refusals": "No safety filter refusals occurred because all generated lures adhered strictly to defensive benchmark guidelines (using non-functional fictitious URLs, mock domains, and standard academic evaluation archetypes without weaponized exploits or live phishing infrastructure)."
+}
