@@ -204,6 +204,31 @@
 - Needs human: none
 - Open questions: none
 
+## 2026-11-08T17:19Z  INTEGRITY-FIX / E-23  Done (0c541f5)
+- Produced: E-23_uat-data_anonymized_20261107_0c541f5.csv, E-23_uat-data_report_20261107_0c541f5.md
+- Findings: Academic integrity audit revealed that `generate_e23_uat.py` contained a `FALLBACK_RECORDS` dictionary that was silently used when the XLSX was absent. The XLSX was confirmed present at repo root (`Aegis-Phishing-Context-Analyzer (Responses).xlsx`, SHA-256: 7e7a21a212262f126bea6e8d888bf32aa21d3207da9fabe6cbe3a4218fac64fc). Script was patched to: (1) remove silent fallback and call sys.exit(1) with an explicit error if XLSX not found, (2) compute and stamp XLSX SHA-256 into every generated report header, (3) log which path was taken (XLSX vs fallback). Rerun confirmed 6 rows parsed directly from live XLSX.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-08T17:19Z  RERUN / E-07 E-08 E-24 E-34  Done (0c541f5)
+- Produced: All Phase C evidence files at commit 0c541f5 (listed in PROVENANCE.csv)
+- Findings: Full Phase C benchmark rerun with live DistilBERT ONNX model (phishing_distilbert_onnx_4cls, model.onnx confirmed loaded). Sanity-checked: phishing probe → nlp_score=80, p_phish=1.0000; legitimate probe → nlp_score=10, p_phish=0.0017. Results:
+  - E-08 Neutral Auth: Accuracy=100.0% [CI: 96.3%,100.0%], Recall=100.0% [CI: 92.87%,100.0%], Precision=100.0%, F1=100.0%, FPR=0.0% [CI: 0.0%,7.13%], ROC-AUC=1.0000. Median latency=91.1ms, p95=114.0ms.
+  - E-07 Ablation: Config1 Heuristics-Only Recall=84.0%/74.0% (std/stripped); Config3 DistilBERT Recall=100.0%/100.0%; Config4 Full Recall=100.0%/100.0%.
+  - E-24 Threshold Sweep: Optimal at Threshold=45 (Recall=100%, FPR=0%). Threshold=50 → Recall=98%, Threshold=35 → FPR=18%.
+  - E-34 Transactional FPR: 46 transactional samples; DistilBERT standalone FPR=24.2% (8/33 legit); Composite pipeline FPR=0.0% (0/33).
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
+## 2026-11-08T17:22Z  RERUN / E-32  Done (0c541f5)
+- Produced: E-32_nfr04-sample-size_v2_output_20261107_0c541f5.txt, E-32_nfr04-sample-size_v2_script_20261107_0c541f5.py
+- Findings: NFR04 Wilson CI revalidated against freshly produced E-08 JSON (commit 0c541f5). Loaded metrics: TP=50, FN=0, N_phishing=50, Recall=100.0%. Wilson 95% CI lower bound = 92.87% >= 90.0% NFR04 target. NFR04 FORMALLY MET. All numerical inputs read from live E-08 JSON — no hardcoded values.
+- Deviations from plan: none
+- Needs human: none
+- Open questions: none
+
 
 
 

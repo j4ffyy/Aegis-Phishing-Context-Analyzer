@@ -8,11 +8,17 @@ Survey Details:
   - Scope: N = 6 participants across 3 Philippine small and micro-enterprises
   - 5-point Likert scale (1 = Poor/Disruptive, 5 = Highly Favorable/Seamless)
     covering Processing Speed (Q1), Accuracy (Q2), Comprehension (Q3), and Workflow (Q4).
+
+INTEGRITY NOTE:
+  This script requires the actual survey spreadsheet to be present.
+  It will ABORT if the file is not found — no fallback or hardcoded values are used.
+  The spreadsheet file is committed to the repository at REPO_ROOT level.
 """
 
 import argparse
 import csv
 import subprocess
+import sys
 import zipfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -20,65 +26,14 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Response spreadsheet path (local survey export)
+# Response spreadsheet path — MUST exist; script aborts if missing.
+# File committed at repo root: Aegis-Phishing-Context-Analyzer (Responses).xlsx
 XLSX_PATH = REPO_ROOT / "Aegis-Phishing-Context-Analyzer (Responses).xlsx"
 
 SCORE_PREFIX_MAP = {
     "1 –": 1, "2 –": 2, "3 –": 3, "4 –": 4, "5 –": 5,
     "1": 1, "2": 2, "3": 3, "4": 4, "5": 5,
 }
-
-# Fallback transcribed records if raw spreadsheet is unavailable
-FALLBACK_RECORDS = [
-    {"respondent_id": "R01", "company_id": "SME-01", "business_type": "Mini Grocery / Retail",
-     "enterprise_size": "Micro-enterprise (< 10 employees)", "role_category": "Owner",
-     "role_title": "Mini Grocery Owner",
-     "q1_speed_score": 5, "q1_speed_text": "5 – Instant: Appeared immediately without any delay.",
-     "q2_accuracy_score": 5, "q2_accuracy_text": "5 – Highly Accurate: Correctly identified safe vs. dangerous emails every time.",
-     "q3_comprehension_score": 5, "q3_comprehension_text": "5 – Very Clear: Plain, simple language that made it obvious what action to take.",
-     "q4_workflow_score": 5, "q4_workflow_text": "5 – Seamless: I did not notice Aegis at all; it never interrupted my workflow.",
-     "mean_score": 5.0},
-    {"respondent_id": "R02", "company_id": "SME-02", "business_type": "Dental Clinic & Gym Facility",
-     "enterprise_size": "Small Business (< 50 employees)", "role_category": "Owner",
-     "role_title": "Dentist / Gym Owner / Businessman",
-     "q1_speed_score": 4, "q1_speed_text": "4 – Fast: Loaded quickly with minimal waiting.",
-     "q2_accuracy_score": 4, "q2_accuracy_text": "4 – Accurate: Correctly identified almost all emails with rare mistakes.",
-     "q3_comprehension_score": 4, "q3_comprehension_text": "4 – Clear: Easy to read and gave a good reason for the alert.",
-     "q4_workflow_score": 4, "q4_workflow_text": "4 – Smooth: Worked well in the background with minimal distraction.",
-     "mean_score": 4.0},
-    {"respondent_id": "R03", "company_id": "SME-03", "business_type": "Commercial Trading & Services",
-     "enterprise_size": "Small Business (< 50 employees)", "role_category": "Owner",
-     "role_title": "Businessman",
-     "q1_speed_score": 4, "q1_speed_text": "4 – Fast: Loaded quickly with minimal waiting.",
-     "q2_accuracy_score": 4, "q2_accuracy_text": "4 – Accurate: Correctly identified almost all emails with rare mistakes.",
-     "q3_comprehension_score": 4, "q3_comprehension_text": "4 – Clear: Easy to read and gave a good reason for the alert.",
-     "q4_workflow_score": 4, "q4_workflow_text": "4 – Smooth: Worked well in the background with minimal distraction.",
-     "mean_score": 4.0},
-    {"respondent_id": "R04", "company_id": "SME-01", "business_type": "Mini Grocery / Retail",
-     "enterprise_size": "Micro-enterprise (< 10 employees)", "role_category": "Staff",
-     "role_title": "Grocery Staff",
-     "q1_speed_score": 5, "q1_speed_text": "5 – Instant: Appeared immediately without any delay.",
-     "q2_accuracy_score": 5, "q2_accuracy_text": "5 – Highly Accurate: Correctly identified safe vs. dangerous emails every time.",
-     "q3_comprehension_score": 5, "q3_comprehension_text": "5 – Very Clear: Plain, simple language that made it obvious what action to take.",
-     "q4_workflow_score": 5, "q4_workflow_text": "5 – Seamless: I did not notice Aegis at all; it never interrupted my workflow.",
-     "mean_score": 5.0},
-    {"respondent_id": "R05", "company_id": "SME-02", "business_type": "Dental Clinic & Gym Facility",
-     "enterprise_size": "Small Business (< 50 employees)", "role_category": "Staff",
-     "role_title": "Dental / Gym Staff",
-     "q1_speed_score": 5, "q1_speed_text": "5 – Instant: Appeared immediately without any delay.",
-     "q2_accuracy_score": 5, "q2_accuracy_text": "5 – Highly Accurate: Correctly identified safe vs. dangerous emails every time.",
-     "q3_comprehension_score": 5, "q3_comprehension_text": "5 – Very Clear: Plain, simple language that made it obvious what action to take.",
-     "q4_workflow_score": 5, "q4_workflow_text": "5 – Seamless: I did not notice Aegis at all; it never interrupted my workflow.",
-     "mean_score": 5.0},
-    {"respondent_id": "R06", "company_id": "SME-03", "business_type": "Commercial Trading & Services",
-     "enterprise_size": "Small Business (< 50 employees)", "role_category": "Staff",
-     "role_title": "Office / Administrative Staff",
-     "q1_speed_score": 5, "q1_speed_text": "5 – Instant: Appeared immediately without any delay.",
-     "q2_accuracy_score": 5, "q2_accuracy_text": "5 – Highly Accurate: Correctly identified safe vs. dangerous emails every time.",
-     "q3_comprehension_score": 5, "q3_comprehension_text": "5 – Very Clear: Plain, simple language that made it obvious what action to take.",
-     "q4_workflow_score": 5, "q4_workflow_text": "5 – Seamless: I did not notice Aegis at all; it never interrupted my workflow.",
-     "mean_score": 5.0},
-]
 
 
 def parse_score(text: str) -> int:
@@ -147,7 +102,12 @@ def parse_xlsx_scores() -> list:
 
 
 def build_uat_records() -> list:
-    """Builds survey records from spreadsheet data (or fallback if file is absent)."""
+    """Builds survey records from spreadsheet data.
+
+    INTEGRITY CONTRACT: This function will ABORT (sys.exit) if the XLSX is not found.
+    No hardcoded fallback values are used. All survey scores must come from the
+    actual spreadsheet file: Aegis-Phishing-Context-Analyzer (Responses).xlsx
+    """
     respondent_meta = [
         ("R01", "SME-01", "Mini Grocery / Retail", "Micro-enterprise (< 10 employees)", "Owner", "Mini Grocery Owner"),
         ("R02", "SME-02", "Dental Clinic & Gym Facility", "Small Business (< 50 employees)", "Owner", "Dentist / Gym Owner / Businessman"),
@@ -157,28 +117,27 @@ def build_uat_records() -> list:
         ("R06", "SME-03", "Commercial Trading & Services", "Small Business (< 50 employees)", "Staff", "Office / Administrative Staff"),
     ]
 
-    xlsx_scores = None
-    xlsx_source = False
-    try:
-        xlsx_scores = parse_xlsx_scores()
-        xlsx_source = True
-        print(f"[E-23] Loaded survey responses from: {XLSX_PATH.name}")
-    except FileNotFoundError:
-        print(f"[E-23] Spreadsheet not found at {XLSX_PATH}. Using fallback data.")
+    # ENFORCE: XLSX must be present — abort if missing, never use fallback
+    if not XLSX_PATH.exists():
+        print(
+            f"\n[E-23] ABORT: Survey spreadsheet not found at:\n  {XLSX_PATH}\n"
+            "Academic integrity requires the actual survey file.\n"
+            "Ensure 'Aegis-Phishing-Context-Analyzer (Responses).xlsx' is at repo root.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    xlsx_scores = parse_xlsx_scores()
+    print(f"[E-23] ✓ Loaded survey responses from XLSX: {XLSX_PATH.name}")
+    print(f"[E-23]   Source path: {XLSX_PATH}")
+    print(f"[E-23]   Rows parsed: {len(xlsx_scores)} (expected 6)")
 
     records = []
     for i, (rid, cid, btype, esize, role_cat, role_title) in enumerate(respondent_meta):
-        if xlsx_source and xlsx_scores:
-            q1s, q1t = int(xlsx_scores[i]["q1"]), str(xlsx_scores[i]["q1_text"])
-            q2s, q2t = int(xlsx_scores[i]["q2"]), str(xlsx_scores[i]["q2_text"])
-            q3s, q3t = int(xlsx_scores[i]["q3"]), str(xlsx_scores[i]["q3_text"])
-            q4s, q4t = int(xlsx_scores[i]["q4"]), str(xlsx_scores[i]["q4_text"])
-        else:
-            fb = FALLBACK_RECORDS[i]
-            q1s, q1t = int(fb["q1_speed_score"]), str(fb["q1_speed_text"])
-            q2s, q2t = int(fb["q2_accuracy_score"]), str(fb["q2_accuracy_text"])
-            q3s, q3t = int(fb["q3_comprehension_score"]), str(fb["q3_comprehension_text"])
-            q4s, q4t = int(fb["q4_workflow_score"]), str(fb["q4_workflow_text"])
+        q1s, q1t = int(xlsx_scores[i]["q1"]), str(xlsx_scores[i]["q1_text"])
+        q2s, q2t = int(xlsx_scores[i]["q2"]), str(xlsx_scores[i]["q2_text"])
+        q3s, q3t = int(xlsx_scores[i]["q3"]), str(xlsx_scores[i]["q3_text"])
+        q4s, q4t = int(xlsx_scores[i]["q4"]), str(xlsx_scores[i]["q4_text"])
 
         mean = round((float(q1s) + float(q2s) + float(q3s) + float(q4s)) / 4.0, 2)
         records.append({
@@ -204,6 +163,17 @@ def generate_e23(commit: str):
     e23_dir.mkdir(parents=True, exist_ok=True)
 
     UAT_RECORDS = build_uat_records()
+
+    # Compute xlsx sha256 for provenance
+    import hashlib
+    xlsx_sha256 = ""
+    if XLSX_PATH.exists():
+        h = hashlib.sha256()
+        with open(XLSX_PATH, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        xlsx_sha256 = h.hexdigest()
+        print(f"[E-23]   XLSX SHA-256: {xlsx_sha256}")
 
     # Write anonymized CSV
     csv_path = e23_dir / f"E-23_uat-data_anonymized_20261107_{commit}.csv"
@@ -249,7 +219,9 @@ def generate_e23(commit: str):
         f"- **Evidence ID:** E-23",
         f"- **Generated:** {now_utc}",
         f"- **Commit:** `{commit}`",
+        f"- **Data Source:** XLSX (actual survey spreadsheet — no hardcoded fallback used)",
         f"- **Source File:** `Aegis-Phishing-Context-Analyzer (Responses).xlsx`",
+        f"- **Source SHA-256:** `{xlsx_sha256}`",
         f"- **Evaluation Date:** October 9, 2026",
         f"- **Sample Scope:** N = 6 participants across 3 distinct Philippine micro-enterprises and small businesses",
         f"",
