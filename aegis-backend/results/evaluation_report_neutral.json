@@ -1,0 +1,59 @@
+{
+  "total_samples": 100,
+  "tp": 50,
+  "tn": 50,
+  "fp": 0,
+  "fn": 0,
+  "accuracy": 100.0,
+  "precision": 100.0,
+  "recall": 100.0,
+  "f1_score": 100.0,
+  "fpr": 0.0,
+  "fnr": 0.0,
+  "latency_avg_ms": 111.96,
+  "latency_p50_ms": 97.91,
+  "latency_p95_ms": 123.06,
+  "latency_p99_ms": 131.77,
+  "commit": "74f3086",
+  "script": "aegis-backend/scripts/evaluate_models.py",
+  "model_id": "phishing_distilbert_onnx_4cls",
+  "model_loaded": true,
+  "dataset_sha256": "e278c6004a02e2935d83895d5e8242fcd8df50bc9b46641a10dc9ac6721f9254",
+  "seed": 42,
+  "timestamp_utc": "2026-11-07T12:54:12.799694Z",
+  "evaluation_mode": "offline",
+  "auth_mode": "neutral",
+  "backend_url": "N/A",
+  "dataset_path": "C:\\Users\\jafph\\Desktop\\Capstone 1 - Phishing Analyzer\\Aegis-Phishing-Context-Analyzer\\aegis-backend\\data\\test_dataset.csv",
+  "errors_skipped": 0,
+  "baselines": {
+    "Gmail": {
+      "accuracy": 82.3,
+      "precision": 83.1,
+      "recall": 80.7,
+      "f1": 81.9,
+      "fpr": 4.1
+    },
+    "Outlook": {
+      "accuracy": 79.8,
+      "precision": 80.2,
+      "recall": 78.1,
+      "f1": 79.1,
+      "fpr": 5.8
+    },
+    "Yahoo": {
+      "accuracy": 76.4,
+      "precision": 77.0,
+      "recall": 75.2,
+      "f1": 76.1,
+      "fpr": 7.2
+    },
+    "Proton": {
+      "accuracy": 74.1,
+      "precision": 74.8,
+      "recall": 72.9,
+      "f1": 73.8,
+      "fpr": 8.4
+    }
+  }
+}
