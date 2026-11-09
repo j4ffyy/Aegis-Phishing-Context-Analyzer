@@ -927,27 +927,6 @@ async def log_result(payload: LogResultPayload) -> Dict[str, Any]:
     return {"ok": True, "total_logged": len(_detection_log)}
 
 
-@router.post(
-    "/settings/logging",
-    summary="Toggle in-memory detection telemetry logging",
-)
-async def toggle_telemetry_logging(enabled: bool = Body(..., embed=True)) -> Dict[str, Any]:
-    """Allows enabling/disabling detection result logging."""
-    global _logging_enabled
-    _logging_enabled = bool(enabled)
-    logger.info("Telemetry logging toggle set to: %s", _logging_enabled)
-    return {"ok": True, "logging_enabled": _logging_enabled}
-
-
-@router.get(
-    "/settings/logging",
-    summary="Get current telemetry logging status",
-)
-async def get_telemetry_logging_status() -> Dict[str, Any]:
-    """Returns whether telemetry logging is currently active."""
-    return {"logging_enabled": _logging_enabled}
-
-
 @router.get(
     "/stats",
     summary="Return aggregated detection statistics for the SME dashboard",

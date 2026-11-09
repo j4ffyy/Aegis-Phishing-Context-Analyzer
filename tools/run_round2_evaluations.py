@@ -280,7 +280,7 @@ def extract_email_components(raw_bytes: bytes) -> Dict[str, Any]:
     subject = re.sub(r"\s+", " ", subject).strip()
 
     url_pattern = re.compile(r"https?://[^\s<>\"'()]+", re.IGNORECASE)
-    links = list(set(url_pattern.findall(body)))
+    links = sorted(set(url_pattern.findall(body)))
 
     return {
         "senderEmail": sender,
@@ -620,7 +620,7 @@ def build_item1_dataset(corpora_dir: Path, out_dir: Path, suffix: str = "") -> T
                 continue
             seen_hashes.add(h)
             url_pattern = re.compile(r"https?://[^\s<>\"'()]+", re.IGNORECASE)
-            links = list(set(url_pattern.findall(msg)))
+            links = sorted(set(url_pattern.findall(msg)))
             ham_enron.append({
                 "senderEmail": "colleague@enron.com",
                 "subject": subj,

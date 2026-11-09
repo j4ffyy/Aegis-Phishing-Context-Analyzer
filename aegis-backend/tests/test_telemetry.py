@@ -15,7 +15,6 @@ from routes.analyze import (
     extract_sender_domain,
     scrub_subject_text,
     log_result,
-    toggle_telemetry_logging,
     _detection_log,
 )
 
@@ -43,7 +42,6 @@ class TestTelemetrySanitization(unittest.TestCase):
 
     async def async_test_log_result_sanitizes_storage(self):
         """Validates that /api/v1/log-result stores only sanitized domain and scrubbed subject."""
-        await toggle_telemetry_logging(True)
         payload = LogResultPayload(
             emailHash="abcd1234efgh5678",
             score=85,
@@ -63,32 +61,9 @@ class TestTelemetrySanitization(unittest.TestCase):
         self.assertIn("[NUMBER]", stored["subject"])
         self.assertIn("[EMAIL]", stored["subject"])
 
-    async def async_test_logging_toggle_disables_log(self):
-        """Validates that setting logging toggle to False stops storing records."""
-        _detection_log.clear()
-        await toggle_telemetry_logging(False)
-        payload = LogResultPayload(
-            emailHash="test_hash_disabled",
-            score=90,
-            riskLevel="Critical",
-            sender="admin@phish.net",
-            subject="Urgent test",
-        )
-        res = await log_result(payload)
-        self.assertFalse(res["ok"])
-        self.assertTrue(res["disabled"])
-        self.assertEqual(len(_detection_log), 0)
-
-        # Re-enable
-        await toggle_telemetry_logging(True)
-        res2 = await log_result(payload)
-        self.assertTrue(res2["ok"])
-        self.assertEqual(len(_detection_log), 1)
-
     def test_async_wrapper(self):
         import asyncio
         asyncio.run(self.async_test_log_result_sanitizes_storage())
-        asyncio.run(self.async_test_logging_toggle_disables_log())
 
 
 if __name__ == "__main__":

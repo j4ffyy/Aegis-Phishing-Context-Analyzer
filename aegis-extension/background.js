@@ -457,6 +457,30 @@ async function checkVTHash(fileHash) {
   return response.json();
 }
 
+async function logResultToBackend(logPayload) {
+  const backendBaseUrl = await getBackendUrl();
+  const targetUrl = `${backendBaseUrl.replace(/\/+$/, '')}/api/v1/log-result`;
+
+  try {
+    const response = await fetchWithTimeout(
+      targetUrl,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(logPayload || {})
+      },
+      CONFIG.NETWORK_TIMEOUT_MS
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (err) {
+    console.warn(`${LOG_PREFIX} Log result submission to backend failed (offline/timeout):`, err.message);
+    return { ok: false, offline: true, error: err.message };
+  }
+}
+
 /**
  * Submits false-positive or confirmed threat feedback to backend (§PR-05).
  * @param {object} feedbackData
@@ -554,6 +578,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
       return true;
     }
 
+    if (action === 'AEGIS_LOG_RESULT') {
+      logResultToBackend(payload)
+        .then((result) => sendResponse({ success: true, data: result }))
+        .catch((err) => sendResponse({ success: false, error: err.message }));
+      return true;
+    }
+
     if (action === 'AEGIS_CHECK_VT_HASH') {
       const fileHash = typeof payload === 'string' ? payload : payload?.fileHash;
       checkVTHash(fileHash)
@@ -584,7 +615,8 @@ const BackgroundBridgeAPI = {
   dispatchEmailAnalysis,
   checkBackendHealth,
   checkVTStatus,
-  checkVTHash
+  checkVTHash,
+  logResultToBackend
 };
 
 if (typeof module !== 'undefined' && module.exports) {

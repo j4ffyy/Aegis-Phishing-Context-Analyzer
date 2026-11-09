@@ -1,0 +1,13 @@
+dataset,variant,n_samples,recall,fpr,f1,auc
+Phase C Config 3 (Heuristics + DistilBERT),Strict Cue-Strip (Original Domain),100,96.00%,0.00%,97.96%,0.9968
+Phase C Config 3 (Heuristics + DistilBERT),Strict Cue-Strip (Neutral Domain),100,48.00%,0.00%,64.86%,0.9584
+Phase C Config 4 (Full Pipeline),Strict Cue-Strip (Original Domain),100,96.00%,0.00%,97.96%,0.9968
+Phase C Config 4 (Full Pipeline),Strict Cue-Strip (Neutral Domain),100,48.00%,0.00%,64.86%,0.9646
+Public Test Config 3 (Heuristics + DistilBERT),Strict Cue-Strip (Original Domain),50,0.00%,0.00%,0.00%,1.0000
+Public Test Config 3 (Heuristics + DistilBERT),Strict Cue-Strip (Neutral Domain),50,0.00%,0.00%,0.00%,1.0000
+Public Test Config 4 (Full Pipeline),Strict Cue-Strip (Original Domain),50,0.00%,0.00%,0.00%,1.0000
+Public Test Config 4 (Full Pipeline),Strict Cue-Strip (Neutral Domain),50,0.00%,0.00%,0.00%,1.0000
+Philippine / Taglish Set (Full Pipeline),Strict Cue-Strip (Original Domain),60,66.67%,10.00%,75.47%,0.8017
+Philippine / Taglish Set (Full Pipeline),Strict Cue-Strip (Neutral Domain),60,13.33%,0.00%,23.53%,0.7000
+LLM-Authored Set (Full Pipeline),Strict Cue-Strip (Original Domain),60,3.33%,0.00%,6.45%,0.7456
+LLM-Authored Set (Full Pipeline),Strict Cue-Strip (Neutral Domain),60,3.33%,0.00%,6.45%,0.7456
