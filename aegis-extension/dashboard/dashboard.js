@@ -498,6 +498,31 @@ function initLogControls() {
       renderDonutChart(computeLocalStats([]));
     });
   }
+
+  // Detection logging toggle (Post-Defense Item 3)
+  const loggingToggle = qs('toggle-detection-logging');
+  const loggingStatus = qs('logging-status-text');
+  const LOGGING_KEY   = 'aegis_logging_enabled';
+
+  if (loggingToggle) {
+    storageGet([LOGGING_KEY]).then(res => {
+      const isEnabled = res[LOGGING_KEY] !== false;
+      loggingToggle.checked = isEnabled;
+      if (loggingStatus) {
+        loggingStatus.textContent = isEnabled ? 'Active' : 'Disabled';
+        loggingStatus.style.color = isEnabled ? '#10b981' : '#ef4444';
+      }
+    });
+
+    loggingToggle.addEventListener('change', async () => {
+      const isEnabled = loggingToggle.checked;
+      await storageSet({ [LOGGING_KEY]: isEnabled });
+      if (loggingStatus) {
+        loggingStatus.textContent = isEnabled ? 'Active' : 'Disabled';
+        loggingStatus.style.color = isEnabled ? '#10b981' : '#ef4444';
+      }
+    });
+  }
 }
 
 // ─── Sensitivity Sliders & Presets (Row 21 / I-12) ───────────────────────────

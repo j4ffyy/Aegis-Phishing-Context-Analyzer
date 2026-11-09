@@ -286,6 +286,14 @@
         <p class="section-desc">The last 100 email analyses processed by Aegis on this device. Data is stored locally and never transmitted.</p>
       </div>
 
+      <div class="log-toggle-container" style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+        <input type="checkbox" id="toggle-detection-logging" checked style="cursor: pointer; width: 16px; height: 16px;">
+        <label for="toggle-detection-logging" style="font-size: 13px; color: var(--text-secondary); cursor: pointer; user-select: none;">
+          Enable Detection Log (store scan history locally on this device)
+        </label>
+        <span id="logging-status-text" style="margin-left: auto; font-size: 12px; color: #10b981; font-weight: 500;">Active</span>
+      </div>
+
       <div class="log-filter-bar">
         <button class="log-filter-btn active" data-filter="all" id="filter-all">All</button>
         <button class="log-filter-btn" data-filter="Critical" id="filter-critical">Critical</button>

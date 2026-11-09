@@ -22,7 +22,7 @@ import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Body, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from modules.link_scanner import (
@@ -861,25 +861,55 @@ class FeedbackPayload(BaseModel):
     reportedAt:   Optional[str] = Field(default=None, description="ISO-8601 report timestamp")
 
 
+# Global telemetry logging configuration (Post-Defense Item 3)
+_logging_enabled: bool = True
+
+def extract_sender_domain(sender: str) -> str:
+    """Extracts only the domain component from sender email string for telemetry privacy."""
+    if not sender:
+        return "[DOMAIN]"
+    match = re.search(r'@([a-zA-Z0-9.\-]+)', sender)
+    if match:
+        return match.group(1).lower().rstrip('>').strip()
+    return sender.split('@')[-1].lower().rstrip('>').strip()
+
+def scrub_subject_text(subject: str) -> str:
+    """Sanitizes PII (emails, phone numbers, numeric IDs) from email subject before telemetry storage."""
+    if not subject:
+        return "[SUBJECT]"
+    s = str(subject).strip()
+    s = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '[EMAIL]', s)
+    s = re.sub(r'\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b', '[PHONE]', s)
+    s = re.sub(r'\b\d{7,16}\b', '[NUMBER]', s)
+    return s or "[SUBJECT]"
+
+
 @router.post(
     "/log-result",
     summary="Log a completed analysis result to the detection store",
     description=(
         "Called by the Chrome extension after each analysis completes. "
         "Stores a scrubbed summary in memory for the /stats and SME dashboard. "
-        "No raw email body or PII is stored."
+        "Sender is scrubbed to domain only and subject is PII-scrubbed."
     ),
 )
 async def log_result(payload: LogResultPayload) -> Dict[str, Any]:
-    """Append one detection result entry to the in-memory log."""
+    """Append one detection result entry to the in-memory log with domain-only sender and scrubbed subject."""
+    global _logging_enabled
+    if not _logging_enabled:
+        return {"ok": False, "disabled": True, "total_logged": len(_detection_log)}
+
     import datetime as _dt
+
+    sanitized_sender = extract_sender_domain(payload.sender)
+    sanitized_subject = scrub_subject_text(payload.subject)
 
     entry: Dict[str, Any] = {
         "emailHash": payload.emailHash,
         "score":     payload.score,
         "riskLevel": payload.riskLevel,
-        "sender":    payload.sender,
-        "subject":   payload.subject,
+        "sender":    sanitized_sender,
+        "subject":   sanitized_subject,
         "source":    payload.source,
         "analyzedAt": payload.analyzedAt or _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
@@ -891,10 +921,31 @@ async def log_result(payload: LogResultPayload) -> Dict[str, Any]:
         del _detection_log[_DETECTION_LOG_MAX:]
 
     logger.info(
-        "Detection logged | hash=%s score=%d tier=%s",
-        payload.emailHash[:12], payload.score, payload.riskLevel,
+        "Detection logged (sanitized) | hash=%s score=%d tier=%s domain=%s",
+        payload.emailHash[:12], payload.score, payload.riskLevel, sanitized_sender,
     )
     return {"ok": True, "total_logged": len(_detection_log)}
+
+
+@router.post(
+    "/settings/logging",
+    summary="Toggle in-memory detection telemetry logging",
+)
+async def toggle_telemetry_logging(enabled: bool = Body(..., embed=True)) -> Dict[str, Any]:
+    """Allows enabling/disabling detection result logging."""
+    global _logging_enabled
+    _logging_enabled = bool(enabled)
+    logger.info("Telemetry logging toggle set to: %s", _logging_enabled)
+    return {"ok": True, "logging_enabled": _logging_enabled}
+
+
+@router.get(
+    "/settings/logging",
+    summary="Get current telemetry logging status",
+)
+async def get_telemetry_logging_status() -> Dict[str, Any]:
+    """Returns whether telemetry logging is currently active."""
+    return {"logging_enabled": _logging_enabled}
 
 
 @router.get(

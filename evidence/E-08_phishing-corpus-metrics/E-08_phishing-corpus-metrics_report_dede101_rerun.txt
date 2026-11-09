@@ -1,0 +1,32 @@
+================================================================================
+AEGIS PHISHING ANALYZER -- FULL PIPELINE EVALUATION REPORT (E-08)
+Commit: dede101 | Model: phishing_distilbert_onnx_4cls (Loaded) | Seed: 42
+Generated: 2026-11-09T09:09:57.716820+00:00
+Dataset: aegis-backend/data/test_dataset.csv (SHA256: e278c6004a02e293...)
+================================================================================
+
+--- NEUTRAL AUTHENTICATION PIPELINE (SPF/DKIM Held Constant at Pass) ---
+Accuracy:       100.00%  [95% Wilson CI: 96.3%, 100.0%]
+Precision:      100.00%
+Recall:         100.00%  [95% Wilson CI: 92.9%, 100.0%]
+F1-Score:       100.00%
+False Pos Rate:   0.00%  [95% Wilson CI: 0.0%, 7.1%]
+ROC-AUC:        1.0000  [95% Bootstrap CI: 1.0000, 1.0000]
+Response Time:  Median = 90.8 ms | p95 = 114.0 ms
+
+Confusion Matrix (Neutral Auth):
+  TN = 50 | FP = 0
+  FN = 0 | TP = 50
+
+--- SYNTHETIC AUTHENTICATION PIPELINE (Dataset Native SPF/DKIM Flags) ---
+Accuracy:       100.00%  [95% Wilson CI: 96.3%, 100.0%]
+Precision:      100.00%
+Recall:         100.00%  [95% Wilson CI: 92.9%, 100.0%]
+F1-Score:       100.00%
+False Pos Rate:   0.00%  [95% Wilson CI: 0.0%, 7.1%]
+ROC-AUC:        1.0000
+
+Confusion Matrix (Synthetic Auth):
+  TN = 50 | FP = 0
+  FN = 0 | TP = 50
+================================================================================

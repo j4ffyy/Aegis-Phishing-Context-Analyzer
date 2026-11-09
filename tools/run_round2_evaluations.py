@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-from sklearn.metrics import cohen_kappa_score, roc_auc_score
+from sklearn.metrics import roc_auc_score
 
 # Repository & Backend Path Configuration
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -1366,35 +1366,6 @@ def run_item4_eval(out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[st
     # Independent Double Coding Simulation (Blind Review)
     # Coder 1 and Coder 2 annotate independently
     # Introduce 3 realistic borderline disagreements on ambiguous wording
-    coder1_labels = []
-    coder2_labels = []
-
-    for item in ph_dataset:
-        lbl = item["label"]
-        # Coder 1 labels with high accuracy (96.7%)
-        if item["id"] == "PH_24":  # SPayLater urgent notice (legit format lure)
-            c1 = 0  # Coder 1 thought it might be aggressive debt collection
-        else:
-            c1 = lbl
-
-        # Coder 2 labels with high accuracy (95.0%)
-        if item["id"] == "PH_24":
-            c2 = 1  # Coder 2 saw spoofed domain
-        elif item["id"] == "PH_31":  # BIR urgent notice
-            c2 = 1
-        elif item["id"] == "PH_04":  # BDO promo with link
-            c2 = 1  # Coder 2 mistook promotional link for phishing
-        else:
-            c2 = lbl
-
-        coder1_labels.append(c1)
-        coder2_labels.append(c2)
-
-    kappa = float(cohen_kappa_score(coder1_labels, coder2_labels))
-    disagreements = [
-        item["id"] for idx, item in enumerate(ph_dataset) if coder1_labels[idx] != coder2_labels[idx]
-    ]
-
     # Run Heuristics Only vs Full Pipeline
     heur_preds = []
     heur_scores = []
@@ -1461,9 +1432,6 @@ def run_item4_eval(out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[st
         "dataset_size": len(ph_dataset),
         "phishing_count": phish_count,
         "legitimate_count": legit_count,
-        "inter_rater_cohen_kappa": round(kappa, 4),
-        "disagreements_count": len(disagreements),
-        "disagreement_sample_ids": disagreements,
         "heuristics_only_metrics": m_heur,
         "full_pipeline_metrics": m_full,
         "brand_gap_analysis": {
@@ -1826,7 +1794,6 @@ def main():
     print("━" * 70)
     e42_dir = EVIDENCE_DIR / "E-42_philippine-taglish"
     item4_results = run_item4_eval(e42_dir, args.commit, suffix=args.suffix)
-    print(f"  Double Coding Cohen's Kappa: {item4_results['inter_rater_cohen_kappa']} (Disagreements: {item4_results['disagreements_count']})")
     print(f"  Heuristics Only -> Rec: {item4_results['heuristics_only_metrics']['recall']}% | FPR: {item4_results['heuristics_only_metrics']['fpr']}% | F1: {item4_results['heuristics_only_metrics']['f1_score']}%")
     print(f"  Full Pipeline   -> Rec: {item4_results['full_pipeline_metrics']['recall']}% | FPR: {item4_results['full_pipeline_metrics']['fpr']}% | F1: {item4_results['full_pipeline_metrics']['f1_score']}%")
     print(f"  Brands NOT covered by Layer 1: {item4_results['brand_gap_analysis']['not_covered_by_layer1']}")

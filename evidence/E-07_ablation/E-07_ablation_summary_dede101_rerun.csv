@@ -1,0 +1,9 @@
+Configuration,Condition,Accuracy (%),Precision (%),Recall (%),F1-Score (%),FPR (%),ROC-AUC,TP,TN,FP,FN
+Config 1: Heuristics Only,Standard Text (Neutral Auth),92.0,100.0,84.0,91.3,0.0,0.998,42,50,0,8
+Config 1: Heuristics Only,Cue-Stripped Text (Neutral Auth),87.0,100.0,74.0,85.06,0.0,0.9964,37,50,0,13
+Config 2: Heuristics + XGBoost/RF,Standard Text (Neutral Auth),79.0,100.0,58.0,73.42,0.0,0.9976,29,50,0,21
+Config 2: Heuristics + XGBoost/RF,Cue-Stripped Text (Neutral Auth),79.0,100.0,58.0,73.42,0.0,0.9944,29,50,0,21
+Config 3: Heuristics + DistilBERT,Standard Text (Neutral Auth),100.0,100.0,100.0,100.0,0.0,1.0,50,50,0,0
+Config 3: Heuristics + DistilBERT,Cue-Stripped Text (Neutral Auth),100.0,100.0,100.0,100.0,0.0,1.0,50,50,0,0
+Config 4: Full Pipeline,Standard Text (Neutral Auth),100.0,100.0,100.0,100.0,0.0,1.0,50,50,0,0
+Config 4: Full Pipeline,Cue-Stripped Text (Neutral Auth),100.0,100.0,100.0,100.0,0.0,1.0,50,50,0,0

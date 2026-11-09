@@ -165,6 +165,11 @@ def get_model_id() -> str:
     return MODEL_ID if _model_warm else "none"
 
 
+def is_nlp_base_only() -> bool:
+    """Returns True if base-only NLP scoring is enabled via environment variable."""
+    return os.environ.get("AEGIS_NLP_BASE_ONLY", "false").lower() in ("1", "true", "yes")
+
+
 # ---------------------------------------------------------------------------
 # Inference & Risk Intent Evaluation (§6.3)
 # ---------------------------------------------------------------------------
@@ -173,6 +178,7 @@ def classify_email_text(
     text: str,
     urgency_penalty: int = 0,
     bec_penalty: int = 0,
+    base_only: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """
     Classifies email text using the DistilBERT ONNX model.
@@ -181,22 +187,33 @@ def classify_email_text(
         P_phish = P(1) + P(3)
         S_base = 60 * P_phish if P_phish > 0.50 else 10 * (1 - P_phish)
         S_nlp = min(100, round(S_base + S_urgency + S_bec))
+        If base_only (or AEGIS_NLP_BASE_ONLY=1): S_nlp = min(100, round(S_base))
 
     Args:
         text: Sanitized plain text of email subject + body.
         urgency_penalty: Heuristic urgency adjustment (0–20 points).
         bec_penalty: Business Email Compromise pattern adjustment (0–20 points).
+        base_only: Optional flag to return only pure S_base without heuristic adjustments.
 
     Returns:
         Structured classification dictionary.
     """
     clean_text = (text or "").strip()
-    urgency_adj = max(0, min(20, int(urgency_penalty)))
-    bec_adj = max(0, min(20, int(bec_penalty)))
+
+    # Resolve base-only flag from argument or environment variable
+    if base_only is None:
+        base_only = os.environ.get("AEGIS_NLP_BASE_ONLY", "false").lower() in ("1", "true", "yes")
+
+    if base_only:
+        urgency_adj = 0
+        bec_adj = 0
+    else:
+        urgency_adj = max(0, min(20, int(urgency_penalty)))
+        bec_adj = max(0, min(20, int(bec_penalty)))
 
     # Fallback mode if model assets are not loaded
     if _session is None or _tokenizer is None:
-        return _fallback_classification(clean_text, urgency_adj, bec_adj)
+        return _fallback_classification(clean_text, urgency_adj, bec_adj, base_only=base_only)
 
     try:
         # 1. Tokenize input bounded to 512 tokens
@@ -236,7 +253,10 @@ def classify_email_text(
             s_base = 10.0 * (1.0 - p_phish)
 
         # 6. Add heuristic adjustments and clamp to [0, 100]
-        s_nlp = min(100, round(s_base + urgency_adj + bec_adj))
+        if base_only:
+            s_nlp = min(100, round(s_base))
+        else:
+            s_nlp = min(100, round(s_base + urgency_adj + bec_adj))
 
         # 7. Identify predicted label class
         pred_idx = int(np.argmax(probs))
@@ -256,23 +276,28 @@ def classify_email_text(
             "s_base": round(s_base, 2),
             "s_urgency": urgency_adj,
             "s_bec": bec_adj,
+            "base_only": base_only,
             "model_warm": True,
         }
 
     except Exception as exc:
         logger.error("[Aegis NLP] Inference error: %s. Falling back.", exc, exc_info=True)
-        return _fallback_classification(clean_text, urgency_adj, bec_adj)
+        return _fallback_classification(clean_text, urgency_adj, bec_adj, base_only=base_only)
 
 
 def _fallback_classification(
     text: str,
     urgency_adj: int,
     bec_adj: int,
+    base_only: bool = False,
 ) -> Dict[str, Any]:
     """Provides resilient heuristic scoring when model weights are not loaded."""
     # Basic intent estimation from text length and adjustments
     base = 20 if len(text) > 100 else 10
-    total = min(100, round(base + urgency_adj + bec_adj))
+    if base_only:
+        total = min(100, round(base))
+    else:
+        total = min(100, round(base + urgency_adj + bec_adj))
 
     return {
         "nlp_score": total,

@@ -1,0 +1,78 @@
+{
+  "commit": "dede101",
+  "script": "tools/run_phase_c_evaluations.py",
+  "model_id": "phishing_distilbert_onnx_4cls",
+  "model_loaded": true,
+  "dataset_sha256": "e278c6004a02e2935d83895d5e8242fcd8df50bc9b46641a10dc9ac6721f9254",
+  "seed": 42,
+  "timestamp_utc": "2026-11-09T09:09:57.716820+00:00",
+  "total_samples": 100,
+  "metrics_neutral_auth": {
+    "n": 100,
+    "tp": 50,
+    "tn": 50,
+    "fp": 0,
+    "fn": 0,
+    "accuracy": 100.0,
+    "accuracy_ci": [
+      96.3,
+      100.0
+    ],
+    "precision": 100.0,
+    "recall": 100.0,
+    "recall_ci": [
+      92.87,
+      100.0
+    ],
+    "fpr": 0.0,
+    "fpr_ci": [
+      0.0,
+      7.13
+    ],
+    "fnr": 0.0,
+    "f1_score": 100.0,
+    "latency_avg_ms": 93.56,
+    "latency_p50_ms": 90.81,
+    "latency_p95_ms": 114.04,
+    "latency_p99_ms": 127.66,
+    "roc_auc": 1.0,
+    "roc_auc_ci": [
+      1.0,
+      1.0
+    ]
+  },
+  "metrics_synthetic_auth": {
+    "n": 100,
+    "tp": 50,
+    "tn": 50,
+    "fp": 0,
+    "fn": 0,
+    "accuracy": 100.0,
+    "accuracy_ci": [
+      96.3,
+      100.0
+    ],
+    "precision": 100.0,
+    "recall": 100.0,
+    "recall_ci": [
+      92.87,
+      100.0
+    ],
+    "fpr": 0.0,
+    "fpr_ci": [
+      0.0,
+      7.13
+    ],
+    "fnr": 0.0,
+    "f1_score": 100.0,
+    "latency_avg_ms": 95.82,
+    "latency_p50_ms": 88.87,
+    "latency_p95_ms": 120.18,
+    "latency_p99_ms": 153.84,
+    "roc_auc": 1.0,
+    "roc_auc_ci": [
+      1.0,
+      1.0
+    ]
+  }
+}

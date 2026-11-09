@@ -806,14 +806,97 @@
     }
   }
 
-  function populateAnalysis(analysis) {
-    if (!currentEmailContext || (currentEmailContext.subject && /^conversations?$/i.test(currentEmailContext.subject.trim()))) {
-      currentEmailContext = null;
-      el.overlay.classList.remove('threat-safe', 'threat-warning', 'threat-critical');
-      showIdle();
-      return;
+  // ---------------------------------------------------------------------------
+  // Privacy & Telemetry Sanitization Helpers (Post-Defense Item 3)
+  // ---------------------------------------------------------------------------
+  function extractSenderDomain(sender) {
+    if (!sender) return '[DOMAIN]';
+    const match = sender.match(/@([a-zA-Z0-9.\-]+)/);
+    if (match && match[1]) {
+      return match[1].toLowerCase().replace(/[>\])]+$/, '').trim();
+    }
+    const parts = sender.split('@');
+    if (parts.length > 1) {
+      return parts[1].toLowerCase().replace(/[>\])]+$/, '').trim();
+    }
+    return sender.toLowerCase().trim();
+  }
+
+  function getScrubbedSubject(emailCtx) {
+    if (!emailCtx) return '[SUBJECT]';
+    if (emailCtx.scrubbedSubject) return emailCtx.scrubbedSubject;
+    if (typeof window !== 'undefined' && window.AegisPIIScrubber && typeof window.AegisPIIScrubber.scrubText === 'function') {
+      return window.AegisPIIScrubber.scrubText(emailCtx.subject || '').scrubbedText;
+    }
+    let s = (emailCtx.subject || '').trim();
+    s = s.replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g, '[EMAIL]');
+    s = s.replace(/\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[PHONE]');
+    s = s.replace(/\b\d{7,16}\b/g, '[NUMBER]');
+    return s || '[SUBJECT]';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sensitivity Preset-Aware Tier Adjustment (Post-Defense Item 4)
+  // Enforces that backend floors (VT-malicious, attachment) always stay Critical
+  // and explanation text matches the displayed tier.
+  // ---------------------------------------------------------------------------
+  function applyPresetTier(analysis, sensitivity) {
+    if (!analysis || typeof analysis.score !== 'number') return analysis;
+
+    const warn = (sensitivity && typeof sensitivity.warningThreshold === 'number') ? sensitivity.warningThreshold : 45;
+    const crit = (sensitivity && typeof sensitivity.criticalThreshold === 'number') ? sensitivity.criticalThreshold : 75;
+
+    // Hard backend threat floors that MUST ALWAYS remain Critical:
+    // 1. VirusTotal confirmed malicious link destination(s)
+    // 2. VirusTotal confirmed malicious attachment file signature(s)
+    // 3. Flags with critical severity
+    // 4. Whitelist auto-revocation triggers
+    const hasCriticalFloor = Boolean(
+      (analysis.flags && analysis.flags.some(f => f.severity === 'critical' || (f.title && f.title.toLowerCase().includes('malicious')))) ||
+      (analysis.s_vt && analysis.s_vt >= 75) ||
+      (analysis.vt_tier === 'malicious') ||
+      (analysis.layers && analysis.layers.attach && analysis.layers.attach.icon === 'fa-times-circle') ||
+      (analysis._whitelist && analysis._whitelist.revoked)
+    );
+
+    let newTier;
+    let newDesc;
+
+    if (hasCriticalFloor) {
+      newTier = 'Critical';
+      newDesc = analysis.desc || 'High-probability phishing attempt detected (Threat floor enforced).';
+      if (!analysis.xai || !analysis.xai.includes('Threat floor enforced')) {
+        analysis.xai = `CRITICAL SECURITY ALERT (Threat floor enforced: malicious link/attachment confirmed). ${analysis.xai || ''}`.trim();
+      }
+    } else {
+      if (analysis.score >= crit) {
+        newTier = 'Critical';
+        newDesc = 'High-probability phishing attempt detected. Do not click links, send funds, or disclose credentials.';
+        if (!analysis.xai || !analysis.xai.toLowerCase().includes('critical')) {
+          analysis.xai = `CRITICAL ALERT (Sensitivity Preset Cut-off ≥ ${crit}%): ${analysis.xai || newDesc}`;
+        }
+      } else if (analysis.score >= warn) {
+        newTier = 'Warning';
+        newDesc = 'Suspicious characteristics detected. Exercise caution before opening links or attachments.';
+        if (!analysis.xai || (!analysis.xai.toLowerCase().includes('warning') && !analysis.xai.toLowerCase().includes('caution'))) {
+          analysis.xai = `WARNING (Sensitivity Preset Cut-off ≥ ${warn}%): ${analysis.xai || newDesc}`;
+        }
+      } else {
+        newTier = 'Safe';
+        newDesc = 'No significant threats detected. Standard communication pattern.';
+        if (!analysis.xai || !analysis.xai.toLowerCase().includes('safe')) {
+          analysis.xai = `Aegis evaluated this email as Safe under current sensitivity preset (Warning cut-off: ${warn}%). ${analysis.xai || newDesc}`;
+        }
+      }
     }
 
+    analysis.riskLevel = newTier;
+    analysis.riskClass = `risk-${newTier.toLowerCase()}`;
+    analysis.desc = newDesc;
+    return analysis;
+  }
+
+  function _renderPopulatedAnalysis(analysis) {
     const levelLower = (analysis.riskLevel || 'safe').toLowerCase();
     const threatClass = `threat-${levelLower}`;
     const riskClass = analysis.riskClass || `risk-${levelLower}`;
@@ -871,6 +954,28 @@
       el.whitelistBtn.style.display = 'none';
       el.blockBtn.style.display     = 'flex';
       el.reportBtn.style.display    = 'flex';
+    }
+  }
+
+  function populateAnalysis(analysis) {
+    if (!currentEmailContext || (currentEmailContext.subject && /^conversations?$/i.test(currentEmailContext.subject.trim()))) {
+      currentEmailContext = null;
+      el.overlay.classList.remove('threat-safe', 'threat-warning', 'threat-critical');
+      showIdle();
+      return;
+    }
+
+    // Apply sensitivity preset tiering (strictly preserving backend threat floors)
+    if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['aegis_sensitivity'], (res) => {
+        const sens = res && res.aegis_sensitivity;
+        if (sens) {
+          applyPresetTier(analysis, sens);
+        }
+        _renderPopulatedAnalysis(analysis);
+      });
+    } else {
+      _renderPopulatedAnalysis(analysis);
     }
   }
 
@@ -1082,50 +1187,64 @@
   // ---------------------------------------------------------------------------
   const DETECTION_LOG_KEY = 'aegis_detection_log';
   const FEEDBACK_LOG_KEY = 'aegis_feedback_log';
+  const SETTINGS_LOGGING_KEY = 'aegis_logging_enabled';
 
   function logDetectionResult(emailCtx, analysis) {
     if (!emailCtx || !analysis) return;
-    const emailHash = analysis.emailHash
-      || emailCtx.emailHash
-      // Fallback: stable dedup key from sender + subject when backend hasn't provided a hash
-      // (offline/fallback path — btoa is always available in extension contexts)
-      || btoa(encodeURIComponent(
-          `${emailCtx.senderEmail || ''}|${emailCtx.subject || ''}`
-        )).slice(0, 40);
-    if (!emailHash) return;
 
-    const entry = {
-      emailHash: emailHash,
-      score: typeof analysis.score === 'number' ? analysis.score : 0,
-      riskLevel: analysis.riskLevel || 'Safe',
-      sender: emailCtx.senderEmail || '[SENDER]',
-      subject: emailCtx.subject || '[SUBJECT]',
-      source: analysis._source || 'local',
-      analyzedAt: new Date().toISOString(),
-      userOverride: !!analysis._userOverride,
+    const performLog = (loggingEnabled) => {
+      if (loggingEnabled === false) {
+        return; // User disabled detection logging
+      }
+
+      const emailHash = analysis.emailHash
+        || emailCtx.emailHash
+        || btoa(encodeURIComponent(
+            `${emailCtx.senderEmail || ''}|${emailCtx.subject || ''}`
+          )).slice(0, 40);
+      if (!emailHash) return;
+
+      const entry = {
+        emailHash: emailHash,
+        score: typeof analysis.score === 'number' ? analysis.score : 0,
+        riskLevel: analysis.riskLevel || 'Safe',
+        sender: extractSenderDomain(emailCtx.senderEmail),
+        subject: getScrubbedSubject(emailCtx),
+        source: analysis._source || 'local',
+        analyzedAt: new Date().toISOString(),
+        userOverride: !!analysis._userOverride,
+      };
+
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get([DETECTION_LOG_KEY], (res) => {
+          let list = (res && res[DETECTION_LOG_KEY]) || [];
+          const existingIdx = list.findIndex(e => e.emailHash === emailHash);
+          if (existingIdx !== -1) {
+            list[existingIdx] = Object.assign({}, list[existingIdx], entry);
+          } else {
+            list.unshift(entry);
+          }
+          if (list.length > 100) list = list.slice(0, 100);
+          chrome.storage.local.set({ [DETECTION_LOG_KEY]: list });
+        });
+      }
+
+      if (isExtensionContextValid() && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage({
+            action: 'AEGIS_LOG_RESULT',
+            payload: entry
+          });
+        } catch (_) {}
+      }
     };
 
     if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get([DETECTION_LOG_KEY], (res) => {
-        let list = (res && res[DETECTION_LOG_KEY]) || [];
-        const existingIdx = list.findIndex(e => e.emailHash === emailHash);
-        if (existingIdx !== -1) {
-          list[existingIdx] = Object.assign({}, list[existingIdx], entry);
-        } else {
-          list.unshift(entry);
-        }
-        if (list.length > 100) list = list.slice(0, 100);
-        chrome.storage.local.set({ [DETECTION_LOG_KEY]: list });
+      chrome.storage.local.get([SETTINGS_LOGGING_KEY], (res) => {
+        performLog(res ? res[SETTINGS_LOGGING_KEY] : true);
       });
-    }
-
-    if (isExtensionContextValid() && chrome.runtime && chrome.runtime.sendMessage) {
-      try {
-        chrome.runtime.sendMessage({
-          action: 'AEGIS_LOG_RESULT',
-          payload: entry
-        });
-      } catch (_) {}
+    } else {
+      performLog(true);
     }
   }
 
@@ -1617,7 +1736,10 @@
     enforceListViewPolicy();
     window.addEventListener('hashchange', enforceListViewPolicy);
     window.addEventListener('popstate', enforceListViewPolicy);
-    setInterval(enforceListViewPolicy, 250);
+    const intervalId = setInterval(enforceListViewPolicy, 250);
+    if (typeof intervalId === 'object' && typeof intervalId.unref === 'function') {
+      intervalId.unref();
+    }
     console.log(`${LOG_PREFIX} Overlay initialized.`);
   }
 
@@ -1632,5 +1754,18 @@
     closeFullAnalysisModal,
     openFullAnalysisModal,
     getCurrentContext: () => currentEmailContext,
+    extractSenderDomain,
+    getScrubbedSubject,
+    applyPresetTier,
+    logDetectionResult,
   };
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      extractSenderDomain,
+      getScrubbedSubject,
+      applyPresetTier,
+      logDetectionResult,
+    };
+  }
 })();
