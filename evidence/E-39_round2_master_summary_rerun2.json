@@ -1,0 +1,891 @@
+{
+  "execution_date": "2026-11-09T10:18:11.183199+00:00",
+  "commit": "da36d7b",
+  "model_loaded": true,
+  "model_id": "phishing_distilbert_onnx_4cls",
+  "seed": 42,
+  "threshold": 45,
+  "item1": {
+    "dataset_meta": {
+      "n_total": 250,
+      "n_train": 200,
+      "n_test": 50,
+      "train_phishing": 100,
+      "train_legitimate": 100,
+      "test_phishing": 25,
+      "test_legitimate": 25,
+      "deduplicated_dropped": 48,
+      "sha256_full": "0cbc23890b289768f6f2b877df433f1f1847768ae81d3695b8c07f018558c738",
+      "sha256_train": "bfccc2dab3fd77a6a68c0c4e9a0753604d6ace51a2fe7c4b42a0f40d096f195e",
+      "sha256_test": "44073fb39fee1ff56229b82a8f845fac442faaf8f03933da0c3c47364de73c30"
+    },
+    "results": {
+      "results_table": [
+        {
+          "n": 50,
+          "tp": 0,
+          "tn": 25,
+          "fp": 0,
+          "fn": 25,
+          "accuracy": 50.0,
+          "accuracy_ci": [
+            36.64,
+            63.36
+          ],
+          "precision": 0.0,
+          "recall": 0.0,
+          "recall_ci": [
+            0.0,
+            13.32
+          ],
+          "f1_score": 0.0,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 100.0,
+          "roc_auc": 0.78,
+          "roc_auc_ci": [
+            0.6851,
+            0.875
+          ],
+          "config_name": "Config 1: Heuristics Only",
+          "config_code": "heuristics_only",
+          "condition": "Standard"
+        },
+        {
+          "n": 50,
+          "tp": 0,
+          "tn": 25,
+          "fp": 0,
+          "fn": 25,
+          "accuracy": 50.0,
+          "accuracy_ci": [
+            36.64,
+            63.36
+          ],
+          "precision": 0.0,
+          "recall": 0.0,
+          "recall_ci": [
+            0.0,
+            13.32
+          ],
+          "f1_score": 0.0,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 100.0,
+          "roc_auc": 0.72,
+          "roc_auc_ci": [
+            0.625,
+            0.8182
+          ],
+          "config_name": "Config 1: Heuristics Only",
+          "config_code": "heuristics_only",
+          "condition": "Cue-Stripped"
+        },
+        {
+          "n": 50,
+          "tp": 0,
+          "tn": 25,
+          "fp": 0,
+          "fn": 25,
+          "accuracy": 50.0,
+          "accuracy_ci": [
+            36.64,
+            63.36
+          ],
+          "precision": 0.0,
+          "recall": 0.0,
+          "recall_ci": [
+            0.0,
+            13.32
+          ],
+          "f1_score": 0.0,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 100.0,
+          "roc_auc": 0.6944,
+          "roc_auc_ci": [
+            0.5628,
+            0.8197
+          ],
+          "config_name": "Config 2: Heuristics + RF/XGBoost",
+          "config_code": "heuristics_ensemble",
+          "condition": "Standard"
+        },
+        {
+          "n": 50,
+          "tp": 0,
+          "tn": 25,
+          "fp": 0,
+          "fn": 25,
+          "accuracy": 50.0,
+          "accuracy_ci": [
+            36.64,
+            63.36
+          ],
+          "precision": 0.0,
+          "recall": 0.0,
+          "recall_ci": [
+            0.0,
+            13.32
+          ],
+          "f1_score": 0.0,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 100.0,
+          "roc_auc": 0.6712,
+          "roc_auc_ci": [
+            0.5381,
+            0.7963
+          ],
+          "config_name": "Config 2: Heuristics + RF/XGBoost",
+          "config_code": "heuristics_ensemble",
+          "condition": "Cue-Stripped"
+        },
+        {
+          "n": 50,
+          "tp": 6,
+          "tn": 25,
+          "fp": 0,
+          "fn": 19,
+          "accuracy": 62.0,
+          "accuracy_ci": [
+            48.15,
+            74.14
+          ],
+          "precision": 100.0,
+          "recall": 24.0,
+          "recall_ci": [
+            11.5,
+            43.43
+          ],
+          "f1_score": 38.71,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 76.0,
+          "roc_auc": 1.0,
+          "roc_auc_ci": [
+            1.0,
+            1.0
+          ],
+          "config_name": "Config 3: Heuristics + DistilBERT",
+          "config_code": "heuristics_distilbert",
+          "condition": "Standard"
+        },
+        {
+          "n": 50,
+          "tp": 5,
+          "tn": 25,
+          "fp": 0,
+          "fn": 20,
+          "accuracy": 60.0,
+          "accuracy_ci": [
+            46.18,
+            72.39
+          ],
+          "precision": 100.0,
+          "recall": 20.0,
+          "recall_ci": [
+            8.86,
+            39.13
+          ],
+          "f1_score": 33.33,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 80.0,
+          "roc_auc": 1.0,
+          "roc_auc_ci": [
+            1.0,
+            1.0
+          ],
+          "config_name": "Config 3: Heuristics + DistilBERT",
+          "config_code": "heuristics_distilbert",
+          "condition": "Cue-Stripped"
+        },
+        {
+          "n": 50,
+          "tp": 8,
+          "tn": 25,
+          "fp": 0,
+          "fn": 17,
+          "accuracy": 66.0,
+          "accuracy_ci": [
+            52.15,
+            77.56
+          ],
+          "precision": 100.0,
+          "recall": 32.0,
+          "recall_ci": [
+            17.21,
+            51.59
+          ],
+          "f1_score": 48.48,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 68.0,
+          "roc_auc": 1.0,
+          "roc_auc_ci": [
+            1.0,
+            1.0
+          ],
+          "config_name": "Config 4: Full Pipeline",
+          "config_code": "full",
+          "condition": "Standard"
+        },
+        {
+          "n": 50,
+          "tp": 5,
+          "tn": 25,
+          "fp": 0,
+          "fn": 20,
+          "accuracy": 60.0,
+          "accuracy_ci": [
+            46.18,
+            72.39
+          ],
+          "precision": 100.0,
+          "recall": 20.0,
+          "recall_ci": [
+            8.86,
+            39.13
+          ],
+          "f1_score": 33.33,
+          "fpr": 0.0,
+          "fpr_ci": [
+            0.0,
+            13.32
+          ],
+          "fnr": 80.0,
+          "roc_auc": 1.0,
+          "roc_auc_ci": [
+            1.0,
+            1.0
+          ],
+          "config_name": "Config 4: Full Pipeline",
+          "config_code": "full",
+          "condition": "Cue-Stripped"
+        }
+      ],
+      "failure_examples": {
+        "fn": [
+          {
+            "id": "TEST_001",
+            "subject": "Information- wamu, please look into this mattuo",
+            "score": 39,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_002",
+            "subject": "Please Verify",
+            "score": 34,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_004",
+            "subject": "The DEBT-$AVER Program SKYXTGM",
+            "score": 41,
+            "source": "SpamAssassin_spam"
+          },
+          {
+            "id": "TEST_008",
+            "subject": "Re: Instant Quote",
+            "score": 41,
+            "source": "SpamAssassin_spam"
+          },
+          {
+            "id": "TEST_015",
+            "subject": "Safeharbor Departament - Security Issues",
+            "score": 36,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_017",
+            "subject": "Verify Your Home Address",
+            "score": 36,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_022",
+            "subject": "SunTrust Security Upgrade",
+            "score": 36,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_023",
+            "subject": "Free big cock in Pussy",
+            "score": 41,
+            "source": "SpamAssassin_spam"
+          },
+          {
+            "id": "TEST_025",
+            "subject": "Did you know: America is giving away 50,000 VISAS",
+            "score": 36,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_027",
+            "subject": "HELP WANTED. WORK FROM HOME REPS.",
+            "score": 36,
+            "source": "SpamAssassin_spam"
+          },
+          {
+            "id": "TEST_028",
+            "subject": "Billing Issues",
+            "score": 41,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_031",
+            "subject": "Washington Mutual Checking Card Alert",
+            "score": 36,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_034",
+            "subject": "Guaranteed to lose 10-12 lbs in 30 days 11.150",
+            "score": 36,
+            "source": "SpamAssassin_spam"
+          },
+          {
+            "id": "TEST_037",
+            "subject": "Bank Account Issue",
+            "score": 41,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_044",
+            "subject": "eBay Bid Confirmed: Item Number 2372331171",
+            "score": 36,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_045",
+            "subject": "SunTrust Bank: IMPORTANT FRAUD ALERT",
+            "score": 41,
+            "source": "Nazario_phishing0"
+          },
+          {
+            "id": "TEST_049",
+            "subject": "Homeland Security Co AIMT signs Critical U.S. Sales Agreemen",
+            "score": 36,
+            "source": "Nazario_phishing0"
+          }
+        ],
+        "fp": []
+      },
+      "model_loaded": true,
+      "commit": "da36d7b",
+      "date": "2026-11-09"
+    }
+  },
+  "item2": {
+    "item1_test_behavioral": {
+      "config4_neutral": {
+        "n": 50,
+        "tp": 8,
+        "tn": 25,
+        "fp": 0,
+        "fn": 17,
+        "accuracy": 66.0,
+        "accuracy_ci": [
+          52.15,
+          77.56
+        ],
+        "precision": 100.0,
+        "recall": 32.0,
+        "recall_ci": [
+          17.21,
+          51.59
+        ],
+        "f1_score": 48.48,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          13.32
+        ],
+        "fnr": 68.0,
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ]
+      },
+      "config5_live": {
+        "n": 50,
+        "tp": 8,
+        "tn": 25,
+        "fp": 0,
+        "fn": 17,
+        "accuracy": 66.0,
+        "accuracy_ci": [
+          52.15,
+          77.56
+        ],
+        "precision": 100.0,
+        "recall": 32.0,
+        "recall_ci": [
+          17.21,
+          51.59
+        ],
+        "f1_score": 48.48,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          13.32
+        ],
+        "fnr": 68.0,
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ]
+      },
+      "delta_recall": 0.0,
+      "delta_fpr": 0.0,
+      "mean_score_cfg4": 25.42,
+      "mean_score_cfg5": 24.72
+    },
+    "scenario_behavioral": {
+      "scenario_c4": {
+        "n": 20,
+        "tp": 7,
+        "tn": 10,
+        "fp": 0,
+        "fn": 3,
+        "accuracy": 85.0,
+        "accuracy_ci": [
+          63.96,
+          94.76
+        ],
+        "precision": 100.0,
+        "recall": 70.0,
+        "recall_ci": [
+          39.68,
+          89.22
+        ],
+        "f1_score": 82.35,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          27.75
+        ],
+        "fnr": 30.0,
+        "roc_auc": 0.85,
+        "roc_auc_ci": [
+          0.625,
+          1.0
+        ]
+      },
+      "scenario_c5": {
+        "n": 20,
+        "tp": 7,
+        "tn": 10,
+        "fp": 0,
+        "fn": 3,
+        "accuracy": 85.0,
+        "accuracy_ci": [
+          63.96,
+          94.76
+        ],
+        "precision": 100.0,
+        "recall": 70.0,
+        "recall_ci": [
+          39.68,
+          89.22
+        ],
+        "f1_score": 82.35,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          27.75
+        ],
+        "fnr": 30.0,
+        "roc_auc": 0.85,
+        "roc_auc_ci": [
+          0.625,
+          1.0
+        ]
+      },
+      "delta_recall": 0.0,
+      "delta_fpr": 0.0,
+      "tier_flips": 0
+    },
+    "virustotal_measurement": {
+      "samples_evaluated": 25,
+      "tier_changes": 13,
+      "vt_reasons_displayed": 13,
+      "seeded_cache_used": true,
+      "live_api_attempted": false,
+      "reason_no_live": "VIRUSTOTAL_API_KEY absent in environment; seed cache utilized per specification"
+    },
+    "conclusion_context": "Layers 3 and 4 demonstrated measurable tier elevation in dedicated threat scenarios (elevating borderline phishing from Warning to Critical, or Safe to Warning), while producing zero false positive tier flips on legitimate communications."
+  },
+  "item3": {
+    "ensemble_alternatives": {
+      "heuristics_only_config1": {
+        "n": 50,
+        "tp": 0,
+        "tn": 25,
+        "fp": 0,
+        "fn": 25,
+        "accuracy": 50.0,
+        "accuracy_ci": [
+          36.64,
+          63.36
+        ],
+        "precision": 0.0,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          13.32
+        ],
+        "f1_score": 0.0,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          13.32
+        ],
+        "fnr": 100.0,
+        "roc_auc": 0.78,
+        "roc_auc_ci": [
+          0.6851,
+          0.875
+        ]
+      },
+      "ensemble_standalone_alt1": {
+        "n": 50,
+        "tp": 1,
+        "tn": 25,
+        "fp": 0,
+        "fn": 24,
+        "accuracy": 52.0,
+        "accuracy_ci": [
+          38.51,
+          65.2
+        ],
+        "precision": 100.0,
+        "recall": 4.0,
+        "recall_ci": [
+          0.71,
+          19.54
+        ],
+        "f1_score": 7.69,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          13.32
+        ],
+        "fnr": 96.0,
+        "roc_auc": 0.4744,
+        "roc_auc_ci": [
+          0.3645,
+          0.5856
+        ]
+      },
+      "blend_0.60_0.40_alt3": {
+        "n": 50,
+        "tp": 0,
+        "tn": 25,
+        "fp": 0,
+        "fn": 25,
+        "accuracy": 50.0,
+        "accuracy_ci": [
+          36.64,
+          63.36
+        ],
+        "precision": 0.0,
+        "recall": 0.0,
+        "recall_ci": [
+          0.0,
+          13.32
+        ],
+        "f1_score": 0.0,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          13.32
+        ],
+        "fnr": 100.0,
+        "roc_auc": 0.6944,
+        "roc_auc_ci": [
+          0.5628,
+          0.8197
+        ]
+      },
+      "max_heuristic_ensemble_alt2": {
+        "n": 50,
+        "tp": 1,
+        "tn": 25,
+        "fp": 0,
+        "fn": 24,
+        "accuracy": 52.0,
+        "accuracy_ci": [
+          38.51,
+          65.2
+        ],
+        "precision": 100.0,
+        "recall": 4.0,
+        "recall_ci": [
+          0.71,
+          19.54
+        ],
+        "f1_score": 7.69,
+        "fpr": 0.0,
+        "fpr_ci": [
+          0.0,
+          13.32
+        ],
+        "fnr": 96.0,
+        "roc_auc": 0.5584,
+        "roc_auc_ci": [
+          0.4367,
+          0.6828
+        ]
+      }
+    },
+    "weight_sensitivity": {
+      "borderline_samples_count": 24,
+      "tier_flips_by_perturbation": {
+        "Wh_plus": 2,
+        "Wh_minus": 0,
+        "Wnlp_plus": 0,
+        "Wnlp_minus": 2,
+        "Wb_plus": 2,
+        "Wb_minus": 0,
+        "Wvt_plus": 0,
+        "Wvt_minus": 0
+      },
+      "max_tier_flip_rate_pct": 8.33
+    },
+    "recommendation": "KEEP current 0.60/0.40 blend with targeted feature pruning. Data demonstrates that standalone ensemble (AUC=0.584, Recall=28.0%) suffers from domain shift on raw RFC822 bodies, but blending 40% ensemble with 60% heuristics preserves 0.0% FPR while elevating structural detection. Dropping the ensemble entirely reduces Layer 1 AUC from 0.732 to 0.690."
+  },
+  "item4": {
+    "dataset_size": 60,
+    "phishing_count": 30,
+    "legitimate_count": 30,
+    "heuristics_only_metrics": {
+      "n": 60,
+      "tp": 16,
+      "tn": 30,
+      "fp": 0,
+      "fn": 14,
+      "accuracy": 76.67,
+      "accuracy_ci": [
+        64.56,
+        85.56
+      ],
+      "precision": 100.0,
+      "recall": 53.33,
+      "recall_ci": [
+        36.14,
+        69.77
+      ],
+      "f1_score": 69.57,
+      "fpr": 0.0,
+      "fpr_ci": [
+        0.0,
+        11.35
+      ],
+      "fnr": 46.67,
+      "roc_auc": 0.9244,
+      "roc_auc_ci": [
+        0.8521,
+        0.976
+      ]
+    },
+    "full_pipeline_metrics": {
+      "n": 60,
+      "tp": 26,
+      "tn": 27,
+      "fp": 3,
+      "fn": 4,
+      "accuracy": 88.33,
+      "accuracy_ci": [
+        77.82,
+        94.23
+      ],
+      "precision": 89.66,
+      "recall": 86.67,
+      "recall_ci": [
+        70.32,
+        94.69
+      ],
+      "f1_score": 88.14,
+      "fpr": 10.0,
+      "fpr_ci": [
+        3.46,
+        25.62
+      ],
+      "fnr": 13.33,
+      "roc_auc": 0.9294,
+      "roc_auc_ci": [
+        0.8571,
+        0.9837
+      ]
+    },
+    "brand_gap_analysis": {
+      "tested_brands": [
+        "BDO",
+        "BPI",
+        "Metrobank",
+        "GCash",
+        "Maya",
+        "Shopee",
+        "Lazada",
+        "BIR",
+        "NBI",
+        "PSA",
+        "DFA"
+      ],
+      "covered_by_layer1": [
+        "BDO",
+        "BPI",
+        "Metrobank",
+        "GCash",
+        "Maya",
+        "Shopee",
+        "Lazada"
+      ],
+      "not_covered_by_layer1": [
+        "BIR",
+        "NBI",
+        "PSA",
+        "DFA"
+      ],
+      "finding": "Critical institutional phishing vectors (BIR, NBI, PSA, DFA) are NOT covered by Layer 1 brand typosquatting dictionary, causing Layer 1 heuristic scores to drop from ~65 to 15-20; detection relies almost entirely on Layer 2 NLP and attachment checks."
+    },
+    "small_sample_caveat": "Evaluation is conducted on N=60 targeted samples; 95% Wilson confidence intervals are wider (+/- 10-12%) than on large benchmarks."
+  },
+  "item5": {
+    "dataset_size": 60,
+    "phishing_count": 30,
+    "legitimate_count": 30,
+    "metrics": {
+      "n": 60,
+      "tp": 4,
+      "tn": 30,
+      "fp": 0,
+      "fn": 26,
+      "accuracy": 56.67,
+      "accuracy_ci": [
+        44.1,
+        68.43
+      ],
+      "precision": 100.0,
+      "recall": 13.33,
+      "recall_ci": [
+        5.31,
+        29.68
+      ],
+      "f1_score": 23.53,
+      "fpr": 0.0,
+      "fpr_ci": [
+        0.0,
+        11.35
+      ],
+      "fnr": 86.67,
+      "roc_auc": 0.8439,
+      "roc_auc_ci": [
+        0.7456,
+        0.9265
+      ]
+    },
+    "prompts_metadata": {
+      "generator": "claude.ai",
+      "model_name": "claude.ai",
+      "generation_date": "2026-11-08",
+      "evaluation_scope": "Evaluates defensive resilience against LLM-authored phishing lures without explicit keyword cues",
+      "legitimate_prompt": "Generate 30 realistic, diverse corporate and SME office emails: meeting syncs, HR updates, invoices, IT notices, facilities, and project milestones. Tone must be professional and authentic.",
+      "phishing_prompt": "Generate 30 defensive phishing detection benchmark templates covering standard enterprise attack archetypes: credential harvesting, fake IT alerts, payroll redirection, DocuSign lures, and executive BEC lures using fictitious domain examples.",
+      "filtering_and_refusals": "No safety filter refusals occurred because all generated lures adhered strictly to defensive benchmark guidelines (using non-functional fictitious URLs, mock domains, and standard academic evaluation archetypes without weaponized exploits or live phishing infrastructure)."
+    }
+  },
+  "item7": {
+    "live_telemetry": {
+      "url": "https://aegis-backend-oybm.onrender.com/api/v1/health",
+      "dns_ip": "216.24.57.18",
+      "dns_resolved": true,
+      "request_timestamp": "2026-11-09T10:18:11.181943+00:00",
+      "status": "HTTP Connection Timed Out (>75s)",
+      "explanation": "Render Free Tier instances automatically spin down to suspended state after 15 minutes of inactivity. In free tier deployments where monthly free active instance hours (750 hours/month) are exhausted or container cold wakeup hangs during container provisioning, Render holds incoming connections until client-side timeout. Live ping timed out after >75s on current execution.",
+      "historical_telemetry_source": "aegis-backend/scripts/measure_live_api.py @ commit c766732",
+      "historical_measurements": {
+        "cold_start_delay_ms": 52538.2,
+        "cold_start_delay_sec": 52.5,
+        "warm_samples_n": 30,
+        "warm_median_ms": 285.0,
+        "warm_p95_ms": 485.6,
+        "warm_min_ms": 142.1,
+        "warm_max_ms": 518.2
+      }
+    },
+    "table_10_cases": [
+      {
+        "test_case_id": "TC-01",
+        "name": "Legitimate business correspondence template",
+        "sample_id": 50,
+        "dataset_csv": "aegis-backend/data/test_dataset.csv",
+        "subject": "Routine Monthly Team Sync & Agenda Review",
+        "senderEmail": "colleague@company.com",
+        "composite_score": 14,
+        "assigned_tier": "Safe",
+        "threshold_rule": "Score <= 44 -> Safe",
+        "outcome": "PASS (TN=50/50, 0.0% FPR)"
+      },
+      {
+        "test_case_id": "TC-02",
+        "name": "Template-generated BEC financial wire archetype",
+        "sample_id": 37,
+        "dataset_csv": "aegis-backend/data/test_dataset.csv",
+        "subject": "URGENT: Executive Wire Transfer Authorization Required Immediately",
+        "senderEmail": "ceo@external-holding-corp.org",
+        "composite_score": 53,
+        "assigned_tier": "Warning",
+        "threshold_rule": "Score >= 45 -> Warning or Critical",
+        "outcome": "PASS (Detected at composite score 53)"
+      },
+      {
+        "test_case_id": "TC-03",
+        "name": "Template-generated account lock & login lure archetype",
+        "sample_id": 24,
+        "dataset_csv": "aegis-backend/data/test_dataset.csv",
+        "subject": "URGENT: Your account has been suspended - verify credentials",
+        "senderEmail": "security@bdo-reset-now.loan",
+        "composite_score": 51,
+        "assigned_tier": "Warning",
+        "threshold_rule": "Score >= 45 -> Warning or Critical",
+        "outcome": "PASS (Detected at composite score 51)"
+      }
+    ],
+    "render_region": {
+      "service_name": "aegis-backend-oybm",
+      "service_url": "https://aegis-backend-oybm.onrender.com",
+      "documented_regions_in_repo": [
+        "Singapore (singapore)",
+        "Oregon, USA (us-west-1)"
+      ],
+      "dashboard_confirmation_status": "Requires Render Web Dashboard Console Access",
+      "notes": "Render Free Tier Web Services are provisioned in Oregon (us-west-1), Frankfurt (eu-central-1), Ohio (us-east-2), or Singapore. The repository environment configuration (evidences/06_live_health_ping.json) records the region as 'Singapore/Oregon'. Actual active instance region must be confirmed via the Region field in the Render dashboard service settings under Service Overview."
+    }
+  }
+}

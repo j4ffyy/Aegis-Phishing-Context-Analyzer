@@ -122,4 +122,61 @@ runTest('Explanation text accurately reflects the final displayed tier', () => {
   assert.ok(critItem.xai.toLowerCase().includes('critical'));
 });
 
-console.log('\nAll 5 preset tiering and floor tests passed successfully!');
+runTest('Conservative preset flags strictly more than Aggressive preset', () => {
+  let flaggedConservative = 0;
+  let flaggedAggressive = 0;
+  let critConservative = 0;
+  let critAggressive = 0;
+
+  for (let s = 0; s <= 100; s++) {
+    const itemC = { score: s, riskLevel: s >= 45 ? (s >= 75 ? 'Critical' : 'Warning') : 'Safe' };
+    overlay.applyPresetTier(itemC, CONSERVATIVE);
+    if (itemC.riskLevel !== 'Safe') flaggedConservative++;
+    if (itemC.riskLevel === 'Critical') critConservative++;
+
+    const itemA = { score: s, riskLevel: s >= 45 ? (s >= 75 ? 'Critical' : 'Warning') : 'Safe' };
+    overlay.applyPresetTier(itemA, AGGRESSIVE);
+    if (itemA.riskLevel !== 'Safe') flaggedAggressive++;
+    if (itemA.riskLevel === 'Critical') critAggressive++;
+  }
+
+  // Conservative flags scores [35..100] (66 scores), Aggressive flags [55..100] (46 scores)
+  assert.ok(flaggedConservative > flaggedAggressive, `Expected Conservative (${flaggedConservative}) > Aggressive (${flaggedAggressive})`);
+  // Conservative has critical at [65..100] (36 scores), Aggressive at [85..100] (16 scores)
+  assert.ok(critConservative > critAggressive, `Expected Crit Conservative (${critConservative}) > Crit Aggressive (${critAggressive})`);
+});
+
+runTest('Backend warning floor: Score 52 (heuristic >= 40) is preserved as Warning under Aggressive preset', () => {
+  const analysis = {
+    score: 52, // Below Aggressive warn threshold of 55
+    riskLevel: 'Warning',
+    s_heuristic: 42,
+    desc: 'Suspicious email',
+    xai: 'Elevated heuristic risk',
+  };
+  overlay.applyPresetTier(analysis, AGGRESSIVE);
+  assert.strictEqual(analysis.riskLevel, 'Warning', 'Floor email must not be downgraded to Safe');
+  assert.strictEqual(analysis.riskClass, 'risk-warning');
+  assert.ok(analysis.xai.includes('Warning threat floor enforced'));
+});
+
+runTest('Backend warning floor: Score 52 (attachment + urgency) is preserved as Warning under Aggressive preset', () => {
+  const analysis = {
+    score: 52, // Below Aggressive warn threshold of 55
+    riskLevel: 'Warning',
+    s_heuristic: 25,
+    s_nlp: 30,
+    flags: [
+      { title: 'Compressed Archive Attachment', severity: 'warn' },
+      { title: 'Urgency / Coercive Language', severity: 'warn' },
+    ],
+    desc: 'Multi-threat email',
+    xai: 'Multi-indicator detected',
+  };
+  overlay.applyPresetTier(analysis, AGGRESSIVE);
+  assert.strictEqual(analysis.riskLevel, 'Warning', 'Floor email must not be downgraded to Safe');
+  assert.strictEqual(analysis.riskClass, 'risk-warning');
+  assert.ok(analysis.xai.includes('Warning threat floor enforced'));
+});
+
+console.log('\nAll 8 preset tiering, warning/critical floor, and sensitivity comparison tests passed successfully!');

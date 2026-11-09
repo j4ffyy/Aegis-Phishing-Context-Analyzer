@@ -1,0 +1,61 @@
+id,label,label_name,subject,score,pred_label,tier,s_heuristic,s_nlp,s_behavioral
+LLM_LEGIT_01,0,Legitimate,Project Status Sync - Sprint 42,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_02,0,Legitimate,Quarterly Townhall Meeting Link,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_03,0,Legitimate,Invoice Payment Confirmation - Vendor #918,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_04,0,Legitimate,Office Air Conditioning Maintenance Advisory,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_05,0,Legitimate,Draft Q4 Marketing Budget for Review,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_06,0,Legitimate,Health Maintenance Organization (HMO) Dependent Enrollment,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_LEGIT_07,0,Legitimate,Client Meeting Rescheduled to 2:00 PM,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_08,0,Legitimate,IT Equipment Inventory Audit,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_09,0,Legitimate,Welcome to the Product Engineering Team!,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_10,0,Legitimate,Weekly Code Freeze Schedule,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_11,0,Legitimate,Customer Support Ticket Escalation #8491,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_12,0,Legitimate,Expense Reimbursement Form Approval,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_13,0,Legitimate,Annual Fire and Earthquake Drill Notice,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_14,0,Legitimate,Vendor NDA Review - Cloudflare Enterprise,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_15,0,Legitimate,Monthly Internet Allowance Reimbursement,34,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,57,15
+LLM_LEGIT_16,0,Legitimate,Department Lunch Gathering This Friday,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_17,0,Legitimate,Conference Room Reservation Conflict Resolution,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_18,0,Legitimate,Security Policy Reminder: Screen Locking,35,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,59,15
+LLM_LEGIT_19,0,Legitimate,Software License Renewal Confirmation: JetBrains,34,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,57,15
+LLM_LEGIT_20,0,Legitimate,Monthly Sales Operations Metrics Review,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_21,0,Legitimate,Updated Travel Expense Policy Guidelines,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_22,0,Legitimate,Git Repository Branch Protection Rules Updated,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_23,0,Legitimate,Holiday Schedule and Office Operations Advisory,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_24,0,Legitimate,Ergonomic Assessment Scheduling for Remote Staff,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_25,0,Legitimate,Client Onboarding Checklist: Project Phoenix,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_26,0,Legitimate,Corporate CSR Volunteer Day Announcement,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_27,0,Legitimate,Internal Knowledge Sharing Session: React 19,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_28,0,Legitimate,Quarterly Performance Review Kick-off,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_29,0,Legitimate,Scheduled Database Backup Window This Weekend,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_LEGIT_30,0,Legitimate,Company Holiday Party Committee Volunteers Needed,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_PHISH_01,1,Phishing,URGENT: Microsoft 365 Password Expiration Notice,37,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",9,60,15
+LLM_PHISH_02,1,Phishing,Immediate Action: Unprocessed Payroll Remittance,39,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",17,60,15
+LLM_PHISH_03,1,Phishing,HR Advisory: Employee Benefit Policy Adjustment,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_PHISH_04,1,Phishing,CEO Urgent Request: Wire Transfer Coordination,13,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",17,10,15
+LLM_PHISH_05,1,Phishing,IT Helpdesk: Critical Security Patch Installation,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_PHISH_06,1,Phishing,Shared Document: Q4 Executive Compensation Strategy,34,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,57,15
+LLM_PHISH_07,1,Phishing,Urgent: VPN Remote Access Certificate Revocation,40,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",18,60,15
+LLM_PHISH_08,1,Phishing,Notice of Suspicious Multi-Factor Login Attempt,37,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",8,60,15
+LLM_PHISH_09,1,Phishing,Vendor Invoice Overdue: Final Legal Notice,52,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",57,60,15
+LLM_PHISH_10,1,Phishing,Zoom Video Meeting: Missed Audio Conference Message,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_PHISH_11,1,Phishing,DocuSign: Action Required - Non-Disclosure Agreement,10,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",8,10,15
+LLM_PHISH_12,1,Phishing,Google Workspace: Storage Limit Reached (98%),9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,9,15
+LLM_PHISH_13,1,Phishing,Quarterly Performance Bonus Discrepancy,11,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",12,10,15
+LLM_PHISH_14,1,Phishing,Corporate Travel Booking: Flight Itinerary Cancelled,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_PHISH_15,1,Phishing,Adobe Creative Cloud: Corporate Subscription Cancelled,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_PHISH_16,1,Phishing,Slack: Unusual Workspace Account Activity Detected,37,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",8,60,15
+LLM_PHISH_17,1,Phishing,Salesforce CRM: Lead Assignment Notification,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_PHISH_18,1,Phishing,Internal Job Referral: Resume Review Required,15,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",25,10,15
+LLM_PHISH_19,1,Phishing,Urgent: Company Credit Card Fraud Alert,40,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",18,60,15
+LLM_PHISH_20,1,Phishing,Employee Health Insurance Benefit Claim Reimbursement,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_PHISH_21,1,Phishing,GitHub: Personal Access Token Compromised,10,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",8,10,15
+LLM_PHISH_22,1,Phishing,Cisco Webex: Recording Ready for Download,14,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",19,10,15
+LLM_PHISH_23,1,Phishing,Amazon Business: Urgent Shipping Address Mismatch,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",9,58,15
+LLM_PHISH_24,1,Phishing,Stripe Billing: Payout On Hold Pending Identity Re-check,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_PHISH_25,1,Phishing,Workday: Direct Deposit Account Change Requested,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_PHISH_26,1,Phishing,Dropbox Business: File Request from Outside Counsel,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_PHISH_27,1,Phishing,DHL Express: Delivery Exception - Import Tax Due,26,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,42,15
+LLM_PHISH_28,1,Phishing,Office 365: Quarantine Notification - 4 Messages Held,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60,15
+LLM_PHISH_29,1,Phishing,DocuSign: Envelope Waiting for Signature - Board Resolution,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10,15
+LLM_PHISH_30,1,Phishing,LinkedIn: Message from Managing Director regarding opening,27,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,43,15

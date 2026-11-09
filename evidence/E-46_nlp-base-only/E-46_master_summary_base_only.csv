@@ -1,0 +1,20 @@
+dataset,condition,n_samples,recall,fpr,f1,auc
+E-08 Main 100-Sample (Full Pipeline Neutral Auth),Standard Text,100,76.00%,0.00%,86.36%,1.0000
+Phase C Ablation (Config 1: Heuristics Only),Standard,100,84.00%,0.00%,91.30%,0.9980
+Phase C Ablation (Config 1: Heuristics Only),Cue-Stripped,100,74.00%,0.00%,85.06%,0.9964
+Phase C Ablation (Config 2: Heuristics + XGBoost/RF),Standard,100,58.00%,0.00%,73.42%,0.9976
+Phase C Ablation (Config 2: Heuristics + XGBoost/RF),Cue-Stripped,100,58.00%,0.00%,73.42%,0.9944
+Phase C Ablation (Config 3: Heuristics + DistilBERT),Standard,100,96.00%,0.00%,97.96%,1.0000
+Phase C Ablation (Config 3: Heuristics + DistilBERT),Cue-Stripped,100,96.00%,0.00%,97.96%,1.0000
+Phase C Ablation (Config 4: Full Pipeline),Standard,100,76.00%,0.00%,86.36%,1.0000
+Phase C Ablation (Config 4: Full Pipeline),Cue-Stripped,100,66.00%,0.00%,79.52%,1.0000
+Public Test Split (Config 1: Heuristics Only),Standard,50,0.00%,0.00%,0.00%,0.7800
+Public Test Split (Config 1: Heuristics Only),Cue-Stripped,50,0.00%,0.00%,0.00%,0.7200
+Public Test Split (Config 2: Heuristics + RF/XGBoost),Standard,50,0.00%,0.00%,0.00%,0.6944
+Public Test Split (Config 2: Heuristics + RF/XGBoost),Cue-Stripped,50,0.00%,0.00%,0.00%,0.6712
+Public Test Split (Config 3: Heuristics + DistilBERT),Standard,50,0.00%,0.00%,0.00%,1.0000
+Public Test Split (Config 3: Heuristics + DistilBERT),Cue-Stripped,50,0.00%,0.00%,0.00%,1.0000
+Public Test Split (Config 4: Full Pipeline),Standard,50,0.00%,0.00%,0.00%,1.0000
+Public Test Split (Config 4: Full Pipeline),Cue-Stripped,50,0.00%,0.00%,0.00%,1.0000
+Philippine / Taglish Set (Full Pipeline),Standard Text,60,36.67%,0.00%,53.66%,0.9161
+LLM-Authored Set (Full Pipeline),Standard Text,60,3.33%,0.00%,6.45%,0.8433

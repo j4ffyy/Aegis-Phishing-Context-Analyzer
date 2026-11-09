@@ -846,7 +846,7 @@
     const warn = (sensitivity && typeof sensitivity.warningThreshold === 'number') ? sensitivity.warningThreshold : 45;
     const crit = (sensitivity && typeof sensitivity.criticalThreshold === 'number') ? sensitivity.criticalThreshold : 75;
 
-    // Hard backend threat floors that MUST ALWAYS remain Critical:
+    // Hard backend threat floors that MUST ALWAYS remain Critical (§6.5):
     // 1. VirusTotal confirmed malicious link destination(s)
     // 2. VirusTotal confirmed malicious attachment file signature(s)
     // 3. Flags with critical severity
@@ -857,6 +857,27 @@
       (analysis.vt_tier === 'malicious') ||
       (analysis.layers && analysis.layers.attach && analysis.layers.attach.icon === 'fa-times-circle') ||
       (analysis._whitelist && analysis._whitelist.revoked)
+    );
+
+    // Backend Warning Threat Floor (§6.5, PR-09):
+    // Multi-indicator warning threat floor sets score to 52 when:
+    // (a) both attachment threat and urgency/NLP threat are present, OR
+    // (b) s_heuristic >= 40 (high raw heuristic risk)
+    // If the backend assigned Warning due to a floor, never display below Warning.
+    const backendTier = analysis.riskLevel || analysis.tier;
+    const isWarningFloor = Boolean(
+      (backendTier === 'Warning' || analysis.score === 52) && (
+        (analysis.score === 52) ||
+        (analysis.s_heuristic && analysis.s_heuristic >= 40) ||
+        (
+          analysis.flags &&
+          analysis.flags.some(f => f.title && f.title.toLowerCase().includes('attachment')) &&
+          (
+            analysis.flags.some(f => f.title && f.title.toLowerCase().includes('urgency')) ||
+            (analysis.s_nlp && analysis.s_nlp >= 25)
+          )
+        )
+      )
     );
 
     let newTier;
@@ -875,11 +896,18 @@
         if (!analysis.xai || !analysis.xai.toLowerCase().includes('critical')) {
           analysis.xai = `CRITICAL ALERT (Sensitivity Preset Cut-off ≥ ${crit}%): ${analysis.xai || newDesc}`;
         }
-      } else if (analysis.score >= warn) {
+      } else if (analysis.score >= warn || isWarningFloor) {
         newTier = 'Warning';
-        newDesc = 'Suspicious characteristics detected. Exercise caution before opening links or attachments.';
-        if (!analysis.xai || (!analysis.xai.toLowerCase().includes('warning') && !analysis.xai.toLowerCase().includes('caution'))) {
-          analysis.xai = `WARNING (Sensitivity Preset Cut-off ≥ ${warn}%): ${analysis.xai || newDesc}`;
+        if (isWarningFloor && analysis.score < warn) {
+          newDesc = analysis.desc || 'Suspicious characteristics detected (Warning floor enforced).';
+          if (!analysis.xai || !analysis.xai.includes('Warning floor enforced')) {
+            analysis.xai = `WARNING (Warning threat floor enforced: multi-indicator threat / heuristic floor). ${analysis.xai || newDesc}`;
+          }
+        } else {
+          newDesc = 'Suspicious characteristics detected. Exercise caution before opening links or attachments.';
+          if (!analysis.xai || (!analysis.xai.toLowerCase().includes('warning') && !analysis.xai.toLowerCase().includes('caution'))) {
+            analysis.xai = `WARNING (Sensitivity Preset Cut-off ≥ ${warn}%): ${analysis.xai || newDesc}`;
+          }
         }
       } else {
         newTier = 'Safe';
