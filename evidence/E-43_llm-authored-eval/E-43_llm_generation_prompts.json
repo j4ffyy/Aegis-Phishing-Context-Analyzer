@@ -1,5 +1,6 @@
 {
-  "model_name": "Gemini 3.8 Flash (academic research evaluation harness)",
+  "generator": "claude.ai",
+  "model_name": "claude.ai",
   "generation_date": "2026-11-08",
   "evaluation_scope": "Evaluates defensive resilience against LLM-authored phishing lures without explicit keyword cues",
   "legitimate_prompt": "Generate 30 realistic, diverse corporate and SME office emails: meeting syncs, HR updates, invoices, IT notices, facilities, and project milestones. Tone must be professional and authentic.",

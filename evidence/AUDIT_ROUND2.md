@@ -241,7 +241,7 @@ Inspection of `PROTECTED_BRANDS` in `aegis-backend/routes/analyze.py:L163-L189` 
 ## ITEM 5 - LLM-Authored Phishing Evaluation
 
 ### 5.a) Model Provenance, Dates, and Prompts
-- **Model Name & Version:** Google Gemini 3.8 Flash (evaluated via automated academic research harness).
+- **Model Name & Version:** claude.ai (evaluated via automated academic research harness).
 - **Execution Date:** 2026-11-08
 - **Benchmark Corpus:** 60 synthetic emails (30 Phishing lures, 30 Legitimate workplace correspondence).
 - **Exact Prompts:**
@@ -335,3 +335,4 @@ Traced directly to `aegis-backend/data/test_dataset.csv` and `aegis-backend/resu
     - **Frankfurt, Germany** (`eu-central-1`)
     - **Ohio, USA** (`us-east-2`)
 - To verify the exact physical data center hosting `aegis-backend-oybm`, the project owner must view the **Service Settings $\rightarrow$ Region** field in the Render dashboard.
+

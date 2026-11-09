@@ -1,0 +1,90 @@
+{
+  "evaluation_note": "Pure Jose Nazario Phishing (125 samples) vs Public Ham (125 samples), seed 42 80/20 holdout test split (N=50). DistilBERT model verified warm.",
+  "model_loaded": true,
+  "model_id": "phishing_distilbert_onnx_4cls",
+  "split_seed": 42,
+  "split_ratio": "80_20",
+  "results": {
+    "45": {
+      "threshold": 45,
+      "n_phish_test": 25,
+      "n_ham_test": 25,
+      "tp": 3,
+      "fp": 0,
+      "tn": 25,
+      "fn": 22,
+      "recall_pct": 12.0,
+      "recall_ci": [
+        4.17,
+        29.96
+      ],
+      "fpr_pct": 0.0,
+      "fpr_ci": [
+        0.0,
+        13.32
+      ],
+      "precision_pct": 100.0,
+      "f1_pct": 21.43,
+      "accuracy_pct": 56.0,
+      "roc_auc": 0.992,
+      "roc_auc_ci": [
+        0.9704,
+        1.0
+      ]
+    },
+    "25": {
+      "threshold": 25,
+      "n_phish_test": 25,
+      "n_ham_test": 25,
+      "tp": 24,
+      "fp": 0,
+      "tn": 25,
+      "fn": 1,
+      "recall_pct": 96.0,
+      "recall_ci": [
+        80.46,
+        99.29
+      ],
+      "fpr_pct": 0.0,
+      "fpr_ci": [
+        0.0,
+        13.32
+      ],
+      "precision_pct": 100.0,
+      "f1_pct": 97.96,
+      "accuracy_pct": 98.0,
+      "roc_auc": 0.992,
+      "roc_auc_ci": [
+        0.9704,
+        1.0
+      ]
+    },
+    "20": {
+      "threshold": 20,
+      "n_phish_test": 25,
+      "n_ham_test": 25,
+      "tp": 24,
+      "fp": 1,
+      "tn": 24,
+      "fn": 1,
+      "recall_pct": 96.0,
+      "recall_ci": [
+        80.46,
+        99.29
+      ],
+      "fpr_pct": 4.0,
+      "fpr_ci": [
+        0.71,
+        19.54
+      ],
+      "precision_pct": 96.0,
+      "f1_pct": 96.0,
+      "accuracy_pct": 96.0,
+      "roc_auc": 0.992,
+      "roc_auc_ci": [
+        0.9704,
+        1.0
+      ]
+    }
+  }
+}

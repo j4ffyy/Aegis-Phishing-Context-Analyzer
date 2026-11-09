@@ -47,3 +47,4 @@ The participant's open-ended verbatim explanation is scored by two independent r
 - Two raters independently score all participant explanations blindly (unaware of condition assignment).
 - Inter-rater agreement is computed using **Cohen's weighted quadratic kappa ($\kappa_w$)**.
 - Discrepancies ($|R_1 - R_2| \ge 1$) are resolved through consensus discussion with a third senior adjudicator.
+

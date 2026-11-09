@@ -38,3 +38,4 @@ $$\text{SUS Total} = 2.5 \times \left( \sum_{i \in \{1,3,5,7,9\}} (Q_i - 1) + \s
 - **$68.0\text{--}80.2$:** Grade B (Good / Above average industry benchmark)
 - **$51.0\text{--}67.9$:** Grade C (Marginal / Needs improvement)
 - **$< 51.0$:** Grade F (Unacceptable / Usability failure)
+

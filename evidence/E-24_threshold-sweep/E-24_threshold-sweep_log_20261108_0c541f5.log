@@ -1,0 +1,11 @@
+================================================================================
+AEGIS THRESHOLD SENSITIVITY CALIBRATION SWEEP (E-24)
+Commit: 0c541f5 | Timestamp: 2026-11-07T17:20:28.063141+00:00
+================================================================================
+Threshold 35: Recall=100.00% | Precision=84.75% | F1=91.74% | FPR=18.00% (TP=50 FP=9)
+Threshold 45: Recall=100.00% | Precision=100.00% | F1=100.00% | FPR= 0.00% (TP=50 FP=0)
+Threshold 50: Recall=98.00% | Precision=100.00% | F1=98.99% | FPR= 0.00% (TP=49 FP=0)
+Threshold 55: Recall=94.00% | Precision=100.00% | F1=96.91% | FPR= 0.00% (TP=47 FP=0)
+Threshold 65: Recall=68.00% | Precision=100.00% | F1=80.95% | FPR= 0.00% (TP=34 FP=0)
+Threshold 75: Recall= 2.00% | Precision=100.00% | F1= 3.92% | FPR= 0.00% (TP=1 FP=0)
+Threshold 85: Recall= 0.00% | Precision= 0.00% | F1= 0.00% | FPR= 0.00% (TP=0 FP=0)

@@ -1,0 +1,130 @@
+{
+  "run_timestamp": "2026-11-06T14:59:01.796982+00:00",
+  "model_loaded": true,
+  "script": "scripts/flower_shop_nlp_probe.py",
+  "cases": [
+    {
+      "id": "flower_shop_typical",
+      "description": "Flower Shop \u2014 first-time sender, no urgency cues (Row 11 scenario)",
+      "model_loaded": true,
+      "model_warm": true,
+      "s_nlp": 60,
+      "p_phish": 0.9998,
+      "s_base": 59.99,
+      "s_urgency": 0,
+      "s_bec": 0,
+      "predicted_label": "phishing_url_context",
+      "probabilities": {
+        "legitimate_email": 0.0002,
+        "phishing_url_context": 0.9998,
+        "legitimate_url_context": 0.0,
+        "alternative_phishing": 0.0
+      },
+      "latency_ms": 58.84
+    },
+    {
+      "id": "flower_shop_spf_dkim_fail_no_urgency",
+      "description": "Flower Shop \u2014 same email but SPF+DKIM fail flags present (S_h=45), still no urgency text",
+      "model_loaded": true,
+      "model_warm": true,
+      "s_nlp": 60,
+      "p_phish": 0.9998,
+      "s_base": 59.99,
+      "s_urgency": 0,
+      "s_bec": 0,
+      "predicted_label": "phishing_url_context",
+      "probabilities": {
+        "legitimate_email": 0.0002,
+        "phishing_url_context": 0.9998,
+        "legitimate_url_context": 0.0,
+        "alternative_phishing": 0.0
+      },
+      "latency_ms": 57.54
+    },
+    {
+      "id": "phishing_full_urgency",
+      "description": "High-urgency phishing \u2014 control case to confirm model fires correctly",
+      "model_loaded": true,
+      "model_warm": true,
+      "s_nlp": 80,
+      "p_phish": 1.0,
+      "s_base": 60.0,
+      "s_urgency": 20,
+      "s_bec": 0,
+      "predicted_label": "phishing_url_context",
+      "probabilities": {
+        "legitimate_email": 0.0,
+        "phishing_url_context": 1.0,
+        "legitimate_url_context": 0.0,
+        "alternative_phishing": 0.0
+      },
+      "latency_ms": 60.42
+    },
+    {
+      "id": "legitimate_business_email",
+      "description": "Normal business email \u2014 control case (expected Safe)",
+      "model_loaded": true,
+      "model_warm": true,
+      "s_nlp": 10,
+      "p_phish": 0.0027,
+      "s_base": 9.97,
+      "s_urgency": 0,
+      "s_bec": 0,
+      "predicted_label": "legitimate_email",
+      "probabilities": {
+        "legitimate_email": 0.9973,
+        "phishing_url_context": 0.0027,
+        "legitimate_url_context": 0.0,
+        "alternative_phishing": 0.0
+      },
+      "latency_ms": 57.13
+    },
+    {
+      "id": "empty_body",
+      "description": "Empty body \u2014 tests the short-text branch of fallback (expected S_nlp=10 if model absent)",
+      "model_loaded": true,
+      "model_warm": true,
+      "s_nlp": 60,
+      "p_phish": 0.9997,
+      "s_base": 59.98,
+      "s_urgency": 0,
+      "s_bec": 0,
+      "predicted_label": "phishing_url_context",
+      "probabilities": {
+        "legitimate_email": 0.0003,
+        "phishing_url_context": 0.9997,
+        "legitimate_url_context": 0.0,
+        "alternative_phishing": 0.0
+      },
+      "latency_ms": 6.33
+    }
+  ],
+  "flower_shop_recompute": {
+    "method": "synthesize_assessment() \u2014 real meta_classifier.py code",
+    "vt_path": {
+      "vt_status_passed": "completed",
+      "is_pending": false,
+      "has_vt_targets": false,
+      "vt_pending_actual": true,
+      "formula_used": "preliminary normalization (\u00f70.85)"
+    },
+    "inputs": {
+      "s_heuristic": 45,
+      "s_nlp": 60,
+      "s_behavioral": 25,
+      "s_vt": 0,
+      "flags": [
+        "SPF Authentication Failure",
+        "DKIM Signature Invalid"
+      ],
+      "urls": [],
+      "vt_status": "completed"
+    },
+    "r_preliminary": 49,
+    "r_final": 52,
+    "floor_triggered": true,
+    "floor_note": "s_heuristic=45 >= 40 (independent trigger): R_preliminary=49 elevated to R_final=52 \u2192 Warning",
+    "tier": "Warning",
+    "xai": "Aegis detected suspicious characteristics requiring verification. Syntactic indicators flagged: SPF Authentication Failure (Sender SPF validation failed); DKIM Signature Invalid (Sender DKIM signature validation failed). DistilBERT neural semantic classification identified patterns indicative of credential harvesting, coercion, or financial urgency. First-time sender: No prior communication history exists in local baseline. Exercise caution. Verify the sender's identity through an independent channel before clicking links or executing requested actions."
+  }
+}
