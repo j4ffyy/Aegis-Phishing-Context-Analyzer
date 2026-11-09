@@ -3,6 +3,7 @@ Calibration of the Warning Cut-Off on the 200-Email TRAIN Split ONLY
 Ground-truth empirical script for Aegis Phishing Context Analyzer.
 Evaluates the 200-sample train split (E-39_dataset_train_200.csv) to determine
 an empirically calibrated Warning tier threshold.
+Generator: claude.ai
 """
 
 import sys
@@ -18,8 +19,14 @@ sys.path.insert(0, str(REPO_ROOT / "tools"))
 sys.path.insert(0, str(REPO_ROOT / "aegis-backend"))
 
 from run_round2_evaluations import evaluate_sample_pipeline, calc_metrics, wilson_ci
+from modules.nlp_classifier import warm_up_nlp, is_model_warm, get_model_id
 
 def main():
+    warm_up_nlp()
+    if not is_model_warm():
+        print("FATAL: DistilBERT model reports warm=False. Evaluation harness aborted.")
+        sys.exit(1)
+    print(f"DistilBERT Warm: {is_model_warm()} | Model ID: {get_model_id()}")
     train_csv = REPO_ROOT / "evidence" / "E-39_independent-corpus" / "E-39_dataset_train_200.csv"
     if not train_csv.exists():
         print(f"Error: {train_csv} does not exist.")
@@ -109,6 +116,10 @@ def main():
     # Output detailed report to evidence/E-39_independent-corpus/E-39_train_calibration_report.json
     out_dir = REPO_ROOT / "evidence" / "E-39_independent-corpus"
     report = {
+        "generator": "claude.ai",
+        "model_name": "claude.ai",
+        "model_loaded": is_model_warm(),
+        "model_id": get_model_id(),
         "train_samples_total": len(rows),
         "train_phishing_count": len(phish_scores),
         "train_legitimate_count": len(legit_scores),
