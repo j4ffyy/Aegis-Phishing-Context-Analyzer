@@ -10,6 +10,7 @@ import sys
 import os
 import csv
 import json
+import argparse
 from pathlib import Path
 import numpy as np
 
@@ -19,14 +20,15 @@ sys.path.insert(0, str(REPO_ROOT / "tools"))
 sys.path.insert(0, str(REPO_ROOT / "aegis-backend"))
 
 from run_round2_evaluations import evaluate_sample_pipeline, calc_metrics, wilson_ci
-from modules.nlp_classifier import warm_up_nlp, is_model_warm, get_model_id
+from model_guard import ensure_model_loaded_and_warm
 
 def main():
-    warm_up_nlp()
-    if not is_model_warm():
-        print("FATAL: DistilBERT model reports warm=False. Evaluation harness aborted.")
-        sys.exit(1)
-    print(f"DistilBERT Warm: {is_model_warm()} | Model ID: {get_model_id()}")
+    parser = argparse.ArgumentParser(description="Aegis Warning Cutoff Calibration")
+    parser.add_argument("--suffix", type=str, default="", help="Suffix for output filenames, e.g. _rerun")
+    args = parser.parse_args()
+
+    model_loaded, model_id = ensure_model_loaded_and_warm()
+    print(f"DistilBERT Warm: {model_loaded} | Model ID: {model_id}")
     train_csv = REPO_ROOT / "evidence" / "E-39_independent-corpus" / "E-39_dataset_train_200.csv"
     if not train_csv.exists():
         print(f"Error: {train_csv} does not exist.")
@@ -118,8 +120,8 @@ def main():
     report = {
         "generator": "claude.ai",
         "model_name": "claude.ai",
-        "model_loaded": is_model_warm(),
-        "model_id": get_model_id(),
+        "model_loaded": model_loaded,
+        "model_id": model_id,
         "train_samples_total": len(rows),
         "train_phishing_count": len(phish_scores),
         "train_legitimate_count": len(legit_scores),
@@ -154,10 +156,11 @@ def main():
         "all_sweep_results": sweep_results,
     }
 
-    with open(out_dir / "E-39_train_calibration_report.json", "w", encoding="utf-8") as f:
+    report_path = out_dir / f"E-39_train_calibration_report{args.suffix}.json"
+    with open(report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
 
-    print(f"\nSaved calibration report to: {out_dir / 'E-39_train_calibration_report.json'}")
+    print(f"\nSaved calibration report to: {report_path}")
 
 if __name__ == "__main__":
     main()

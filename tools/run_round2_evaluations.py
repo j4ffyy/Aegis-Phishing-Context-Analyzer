@@ -46,8 +46,13 @@ from sklearn.metrics import cohen_kappa_score, roc_auc_score
 # Repository & Backend Path Configuration
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BACKEND_DIR = REPO_ROOT / "aegis-backend"
+TOOLS_DIR = REPO_ROOT / "tools"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
+
+from model_guard import ensure_model_loaded_and_warm
 
 from modules.meta_classifier import (
     ACTIVE_PRELIMINARY_WEIGHT_SUM,
@@ -558,7 +563,7 @@ def score_behavioral_simulated(
 # ITEM 1: Dataset Construction & Evaluation Runner
 # ---------------------------------------------------------------------------
 
-def build_item1_dataset(corpora_dir: Path, out_dir: Path) -> Tuple[Path, Path, Path, Dict[str, Any]]:
+def build_item1_dataset(corpora_dir: Path, out_dir: Path, suffix: str = "") -> Tuple[Path, Path, Path, Dict[str, Any]]:
     """
     Builds a balanced 250-sample corpus (125 phishing, 125 legitimate) from SpamAssassin,
     Enron, and Nazario, split 80/20 with fixed seed 42 into train (200) and test (50).
@@ -733,9 +738,9 @@ def build_item1_dataset(corpora_dir: Path, out_dir: Path) -> Tuple[Path, Path, P
         with open(p, "rb") as f:
             return hashlib.sha256(f.read()).hexdigest()
 
-    full_csv = out_dir / "E-39_dataset_full_250.csv"
-    train_csv = out_dir / "E-39_dataset_train_200.csv"
-    test_csv = out_dir / "E-39_dataset_test_50.csv"
+    full_csv = out_dir / f"E-39_dataset_full_250{suffix}.csv"
+    train_csv = out_dir / f"E-39_dataset_train_200{suffix}.csv"
+    test_csv = out_dir / f"E-39_dataset_test_50{suffix}.csv"
 
     sha_full = write_csv(full_csv, full_all)
     sha_train = write_csv(train_csv, train_all)
@@ -760,7 +765,7 @@ def build_item1_dataset(corpora_dir: Path, out_dir: Path) -> Tuple[Path, Path, P
     return full_csv, train_csv, test_csv, meta
 
 
-def run_item1_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str, Any]:
+def run_item1_eval(test_csv: Path, out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[str, Any]:
     """
     Executes Item 1 evaluation on the untouched 20% test split (50 samples).
     Runs Configs 1-4 standard and cue-stripped. Threshold=45, neutral auth.
@@ -836,7 +841,7 @@ def run_item1_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str,
             results_table.append(m)
 
             # Write predictions CSV
-            pred_file = out_dir / f"E-39_predictions_{cfg_code}_{strip_desc.lower()}.csv"
+            pred_file = out_dir / f"E-39_predictions_{cfg_code}_{strip_desc.lower()}{suffix}.csv"
             with open(pred_file, "w", newline="", encoding="utf-8") as pf:
                 w = csv.DictWriter(pf, fieldnames=list(row_preds[0].keys()))
                 w.writeheader()
@@ -855,7 +860,7 @@ def run_item1_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str,
 # ITEM 2: Behavioral & VirusTotal Context Evaluation Runner
 # ---------------------------------------------------------------------------
 
-def run_item2_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str, Any]:
+def run_item2_eval(test_csv: Path, out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[str, Any]:
     """
     Measures Layer 3 (Behavioral) and Layer 4 (VirusTotal).
     """
@@ -993,7 +998,7 @@ def run_item2_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str,
     m_sc_c5 = calc_metrics(sc_y_true, sc_cfg5_preds, sc_scores_cfg5)
 
     # Save scenario predictions
-    with open(out_dir / "E-40_scenario_predictions.csv", "w", newline="", encoding="utf-8") as sf:
+    with open(out_dir / f"E-40_scenario_predictions{suffix}.csv", "w", newline="", encoding="utf-8") as sf:
         w = csv.DictWriter(sf, fieldnames=list(scenario_samples[0].keys()))
         w.writeheader()
         w.writerows(scenario_samples)
@@ -1066,7 +1071,7 @@ def run_item2_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str,
             "vt_reasons": "; ".join(vt_reasons) if vt_reasons else "clean_or_unrated",
         })
 
-    with open(out_dir / "E-40_vt_subset_evaluation.csv", "w", newline="", encoding="utf-8") as vf:
+    with open(out_dir / f"E-40_vt_subset_evaluation{suffix}.csv", "w", newline="", encoding="utf-8") as vf:
         w = csv.DictWriter(vf, fieldnames=list(vt_eval_records[0].keys()))
         w.writeheader()
         w.writerows(vt_eval_records)
@@ -1103,7 +1108,7 @@ def run_item2_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str,
 # ITEM 3: Ensemble ML Investigation & Weight Sensitivity
 # ---------------------------------------------------------------------------
 
-def run_item3_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str, Any]:
+def run_item3_eval(test_csv: Path, out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[str, Any]:
     """
     Evaluates RF + XGBoost ensemble vs Heuristics, tests 3 alternative integration strategies,
     and conducts weight sensitivity perturbation analysis (+/- 0.05).
@@ -1226,7 +1231,7 @@ def run_item3_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str,
         borderline_samples.append(sample_flips)
 
     # Save sensitivity results
-    with open(out_dir / "E-41_weight_sensitivity_borderline.csv", "w", newline="", encoding="utf-8") as wf:
+    with open(out_dir / f"E-41_weight_sensitivity_borderline{suffix}.csv", "w", newline="", encoding="utf-8") as wf:
         if borderline_samples:
             w = csv.DictWriter(wf, fieldnames=list(borderline_samples[0].keys()))
             w.writeheader()
@@ -1257,7 +1262,7 @@ def run_item3_eval(test_csv: Path, out_dir: Path, commit_hash: str) -> Dict[str,
 # ITEM 4: Philippine Banking, Government, E-Commerce & Taglish Test
 # ---------------------------------------------------------------------------
 
-def run_item4_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
+def run_item4_eval(out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[str, Any]:
     """
     Builds and evaluates 60 Philippine-specific emails (30 phishing, 30 legitimate)
     covering BDO, BPI, Metrobank, GCash, Maya, Shopee, Lazada, BIR, NBI, PSA, DFA.
@@ -1435,7 +1440,7 @@ def run_item4_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
     m_full = calc_metrics(y_true, full_preds, full_scores)
 
     # Save detailed evaluation to CSV
-    with open(out_dir / "E-42_philippine_evaluation.csv", "w", newline="", encoding="utf-8") as pf:
+    with open(out_dir / f"E-42_philippine_evaluation{suffix}.csv", "w", newline="", encoding="utf-8") as pf:
         w = csv.DictWriter(pf, fieldnames=list(detailed_eval[0].keys()))
         w.writeheader()
         w.writerows(detailed_eval)
@@ -1475,7 +1480,7 @@ def run_item4_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
 # ITEM 5: LLM-Authored Phishing vs Legitimate Evaluation
 # ---------------------------------------------------------------------------
 
-def run_item5_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
+def run_item5_eval(out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[str, Any]:
     """
     Evaluates 60 LLM-authored emails (30 phishing, 30 legitimate) generated by claude.ai.
     Documents exact prompts, filtering/refusal behavior, and pipeline metrics.
@@ -1615,7 +1620,7 @@ def run_item5_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
     m_llm = calc_metrics(y_true, y_pred, y_score)
 
     # Write predictions CSV
-    with open(out_dir / "E-43_llm_predictions.csv", "w", newline="", encoding="utf-8") as lf:
+    with open(out_dir / f"E-43_llm_predictions{suffix}.csv", "w", newline="", encoding="utf-8") as lf:
         w = csv.DictWriter(lf, fieldnames=list(eval_records[0].keys()))
         w.writeheader()
         w.writerows(eval_records)
@@ -1633,7 +1638,7 @@ def run_item5_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
         ),
     }
 
-    with open(out_dir / "E-43_llm_generation_prompts.json", "w", encoding="utf-8") as jf:
+    with open(out_dir / f"E-43_llm_generation_prompts{suffix}.json", "w", encoding="utf-8") as jf:
         json.dump(prompt_documentation, jf, indent=2)
 
     return {
@@ -1649,7 +1654,7 @@ def run_item5_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
 # ITEM 7: Telemetry, Table 10 Verification, and Render Region Audit
 # ---------------------------------------------------------------------------
 
-def run_item7_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
+def run_item7_eval(out_dir: Path, commit_hash: str, suffix: str = "") -> Dict[str, Any]:
     """
     Measures live API latency attempts, traces Table 10 test cases TC-01 to TC-03,
     and documents Render deployment region.
@@ -1744,10 +1749,10 @@ def run_item7_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
         ),
     }
 
-    with open(out_dir / "E-45_table10_trace.json", "w", encoding="utf-8") as tf:
+    with open(out_dir / f"E-45_table10_trace{suffix}.json", "w", encoding="utf-8") as tf:
         json.dump(table_10_trace, tf, indent=2)
 
-    with open(out_dir / "E-45_render_telemetry.json", "w", encoding="utf-8") as rf:
+    with open(out_dir / f"E-45_render_telemetry{suffix}.json", "w", encoding="utf-8") as rf:
         json.dump({"live_attempt": live_attempt, "render_region": render_region_info}, rf, indent=2)
 
     return {
@@ -1764,6 +1769,7 @@ def run_item7_eval(out_dir: Path, commit_hash: str) -> Dict[str, Any]:
 def main():
     parser = argparse.ArgumentParser(description="Aegis Phase C - Round 2 Evaluation Suite")
     parser.add_argument("--commit", type=str, default="eval-only", help="Evaluation commit label / hash")
+    parser.add_argument("--suffix", type=str, default="", help="Suffix for output filenames, e.g. _rerun")
     args = parser.parse_args()
 
     print("\n" + "=" * 70)
@@ -1774,13 +1780,10 @@ def main():
     print(f"  Commit Label: {args.commit}")
     print("=" * 70 + "\n")
 
-    # Warm up NLP model before executing benchmarks
-    print("▶ Priming Layer 2 NLP Model (ONNX Runtime)...")
-    warm_up_nlp()
-    if not is_model_warm():
-        print("FATAL: DistilBERT model reports warm=False. Evaluation harness aborted.")
-        sys.exit(1)
-    print(f"  [Model Warm] Model ID: {get_model_id()} | Warm Status: {is_model_warm()}\n")
+    # Warm up NLP model before executing benchmarks via shared ModelGuard
+    print("▶ Priming Layer 2 NLP Model (ONNX Runtime) via ModelGuard...")
+    model_loaded, model_id = ensure_model_loaded_and_warm()
+    print(f"  [Model Warm] Model ID: {model_id} | Warm Status: {model_loaded}\n")
 
     corpora_dir = REPO_ROOT / "data" / "external_corpora"
 
@@ -1789,8 +1792,8 @@ def main():
     print("▶ ITEM 1: Independent, Non-Template Evaluation (SpamAssassin, Enron, Nazario)")
     print("━" * 70)
     e39_dir = EVIDENCE_DIR / "E-39_independent-corpus"
-    full_csv, train_csv, test_csv, item1_meta = build_item1_dataset(corpora_dir, e39_dir)
-    item1_results = run_item1_eval(test_csv, e39_dir, args.commit)
+    full_csv, train_csv, test_csv, item1_meta = build_item1_dataset(corpora_dir, e39_dir, suffix=args.suffix)
+    item1_results = run_item1_eval(test_csv, e39_dir, args.commit, suffix=args.suffix)
 
     print("\n  Summary of Item 1 Ablation Results on Untouched Test Split (N=50):")
     for row in item1_results["results_table"]:
@@ -1801,7 +1804,7 @@ def main():
     print("▶ ITEM 2: Behavioral Layer (Layer 3) & VirusTotal (Layer 4) Measurement")
     print("━" * 70)
     e40_dir = EVIDENCE_DIR / "E-40_layers-3-and-4"
-    item2_results = run_item2_eval(test_csv, e40_dir, args.commit)
+    item2_results = run_item2_eval(test_csv, e40_dir, args.commit, suffix=args.suffix)
     print(f"  Item 1 Test Delta Recall: {item2_results['item1_test_behavioral']['delta_recall']}% | Delta FPR: {item2_results['item1_test_behavioral']['delta_fpr']}%")
     print(f"  Scenario Set Tier Flips: {item2_results['scenario_behavioral']['tier_flips']} / 20")
     print(f"  VirusTotal Tier Changes: {item2_results['virustotal_measurement']['tier_changes']} / {item2_results['virustotal_measurement']['samples_evaluated']}")
@@ -1811,7 +1814,7 @@ def main():
     print("▶ ITEM 3: Ensemble ML Investigation & Weight Sensitivity Analysis")
     print("━" * 70)
     e41_dir = EVIDENCE_DIR / "E-41_ensemble-investigation"
-    item3_results = run_item3_eval(test_csv, e41_dir, args.commit)
+    item3_results = run_item3_eval(test_csv, e41_dir, args.commit, suffix=args.suffix)
     print("  Ensemble Alternatives Metrics:")
     for k, v in item3_results["ensemble_alternatives"].items():
         print(f"    {k:<30} | Rec: {v['recall']:>5.1f}% | FPR: {v['fpr']:>4.1f}% | AUC: {v['roc_auc']}")
@@ -1822,7 +1825,7 @@ def main():
     print("▶ ITEM 4: Philippine Banking, Government, E-Commerce & Taglish Test")
     print("━" * 70)
     e42_dir = EVIDENCE_DIR / "E-42_philippine-taglish"
-    item4_results = run_item4_eval(e42_dir, args.commit)
+    item4_results = run_item4_eval(e42_dir, args.commit, suffix=args.suffix)
     print(f"  Double Coding Cohen's Kappa: {item4_results['inter_rater_cohen_kappa']} (Disagreements: {item4_results['disagreements_count']})")
     print(f"  Heuristics Only -> Rec: {item4_results['heuristics_only_metrics']['recall']}% | FPR: {item4_results['heuristics_only_metrics']['fpr']}% | F1: {item4_results['heuristics_only_metrics']['f1_score']}%")
     print(f"  Full Pipeline   -> Rec: {item4_results['full_pipeline_metrics']['recall']}% | FPR: {item4_results['full_pipeline_metrics']['fpr']}% | F1: {item4_results['full_pipeline_metrics']['f1_score']}%")
@@ -1833,7 +1836,7 @@ def main():
     print("▶ ITEM 5: LLM-Authored Phishing Evaluation (claude.ai)")
     print("━" * 70)
     e43_dir = EVIDENCE_DIR / "E-43_llm-authored-eval"
-    item5_results = run_item5_eval(e43_dir, args.commit)
+    item5_results = run_item5_eval(e43_dir, args.commit, suffix=args.suffix)
     print(f"  LLM Benchmark (N=60) -> Acc: {item5_results['metrics']['accuracy']}% | Rec: {item5_results['metrics']['recall']}% | FPR: {item5_results['metrics']['fpr']}% | F1: {item5_results['metrics']['f1_score']}% | AUC: {item5_results['metrics']['roc_auc']}")
 
     # --- ITEM 7 ---
@@ -1841,13 +1844,15 @@ def main():
     print("▶ ITEM 7: Telemetry, Table 10 Verification, and Render Deployment Audit")
     print("━" * 70)
     e45_dir = EVIDENCE_DIR / "E-45_small-fixes"
-    item7_results = run_item7_eval(e45_dir, args.commit)
+    item7_results = run_item7_eval(e45_dir, args.commit, suffix=args.suffix)
     print(f"  Table 10 Traced Cases: {len(item7_results['table_10_cases'])} samples verified")
 
     # Aggregate Master Summary
     master_summary = {
         "execution_date": datetime.now(timezone.utc).isoformat(),
         "commit": args.commit,
+        "model_loaded": model_loaded,
+        "model_id": model_id,
         "seed": RANDOM_SEED,
         "threshold": DECISION_THRESHOLD,
         "item1": {
@@ -1861,7 +1866,7 @@ def main():
         "item7": item7_results,
     }
 
-    summary_json_path = EVIDENCE_DIR / "E-39_round2_master_summary.json"
+    summary_json_path = EVIDENCE_DIR / f"E-39_round2_master_summary{args.suffix}.json"
     with open(summary_json_path, "w", encoding="utf-8") as sf:
         json.dump(master_summary, sf, indent=2)
 

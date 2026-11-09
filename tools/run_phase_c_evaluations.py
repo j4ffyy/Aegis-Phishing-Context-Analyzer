@@ -27,11 +27,16 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
-# Ensure aegis-backend is on path for backend module imports
+# Ensure aegis-backend and tools are on path for backend module imports
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BACKEND_DIR = REPO_ROOT / "aegis-backend"
+TOOLS_DIR = REPO_ROOT / "tools"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
+
+from model_guard import ensure_model_loaded_and_warm
 
 from modules.nlp_classifier import (
     classify_email_text,
@@ -265,7 +270,7 @@ def evaluate_single_sample(
     }
 
 
-def run_all(commit: str):
+def run_all(commit: str, suffix: str = ""):
     """Executes the full post-defense evaluation suite."""
     print("=" * 80)
     print(f"AEGIS PHASE C EVALUATION RUNNER -- COMMIT: {commit}")
@@ -273,13 +278,8 @@ def run_all(commit: str):
     print(f"Timestamp (UTC): {datetime.now(timezone.utc).isoformat()}")
     print("=" * 80)
 
-    # Pre-flight check: verify ONNX runtime model session is loaded and warm
-    if not is_model_warm():
-        print("[Pre-flight] Loading DistilBERT ONNX model...")
-        loaded = load_nlp_model()
-        if not loaded:
-            sys.exit("ABORT: Failed to load DistilBERT ONNX model. Exiting.")
-    print(f"[Pre-flight] Model verified warm: {is_model_warm()} | Model ID: {get_model_id()}")
+    # Pre-flight check via shared ModelGuard: verify ONNX runtime model session is loaded and warm
+    model_loaded, model_id = ensure_model_loaded_and_warm()
 
     # Load evaluation dataset
     with open(DATA_PATH, newline="", encoding="utf-8") as f:
@@ -334,8 +334,8 @@ def run_all(commit: str):
     report_json_data = {
         "commit": commit,
         "script": "tools/run_phase_c_evaluations.py",
-        "model_id": MODEL_ID,
-        "model_loaded": True,
+        "model_id": model_id,
+        "model_loaded": model_loaded,
         "dataset_sha256": DATASET_SHA256,
         "seed": 42,
         "timestamp_utc": now_utc_str,
@@ -343,13 +343,13 @@ def run_all(commit: str):
         "metrics_neutral_auth": m_neu,
         "metrics_synthetic_auth": m_syn,
     }
-    json_path = e08_dir / f"E-08_phishing-corpus-metrics_report_{commit}.json"
+    json_path = e08_dir / f"E-08_phishing-corpus-metrics_report_{commit}{suffix}.json"
     json_path.write_text(json.dumps(report_json_data, indent=2), encoding="utf-8")
 
     txt_lines = [
         "=" * 80,
         "AEGIS PHISHING ANALYZER -- FULL PIPELINE EVALUATION REPORT (E-08)",
-        f"Commit: {commit} | Model: {MODEL_ID} (Loaded) | Seed: 42",
+        f"Commit: {commit} | Model: {model_id} (Loaded) | Seed: 42",
         f"Generated: {now_utc_str}",
         f"Dataset: aegis-backend/data/test_dataset.csv (SHA256: {DATASET_SHA256[:16]}...)",
         "=" * 80,
@@ -380,11 +380,11 @@ def run_all(commit: str):
         f"  FN = {m_syn['fn']} | TP = {m_syn['tp']}",
         "=" * 80,
     ]
-    txt_path = e08_dir / f"E-08_phishing-corpus-metrics_report_{commit}.txt"
+    txt_path = e08_dir / f"E-08_phishing-corpus-metrics_report_{commit}{suffix}.txt"
     txt_path.write_text("\n".join(txt_lines) + "\n", encoding="utf-8")
 
     csv_fields = ["id", "label", "label_name", "senderEmail", "subject", "score", "risk_level", "p_phish", "s_nlp", "elapsed_ms", "predicted_phishing"]
-    csv_path = e08_dir / f"E-08_phishing-corpus-metrics_predictions_{commit}.csv"
+    csv_path = e08_dir / f"E-08_phishing-corpus-metrics_predictions_{commit}{suffix}.csv"
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=csv_fields)
         writer.writeheader()
@@ -443,13 +443,13 @@ def run_all(commit: str):
     e07_dir = REPO_ROOT / "evidence" / "E-07_ablation"
     e07_dir.mkdir(parents=True, exist_ok=True)
 
-    abl_csv_path = e07_dir / f"E-07_ablation_summary_{commit}.csv"
+    abl_csv_path = e07_dir / f"E-07_ablation_summary_{commit}{suffix}.csv"
     with open(abl_csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(ablation_rows[0].keys()))
         writer.writeheader()
         writer.writerows(ablation_rows)
 
-    abl_log_path = e07_dir / f"E-07_ablation_log_{commit}.log"
+    abl_log_path = e07_dir / f"E-07_ablation_log_{commit}{suffix}.log"
     abl_log_path.write_text("\n".join(ablation_log_lines) + "\n", encoding="utf-8")
     print(f"Wrote E-07 evidence files to {e07_dir}")
 
@@ -489,13 +489,13 @@ def run_all(commit: str):
     e24_dir = REPO_ROOT / "evidence" / "E-24_threshold-sweep"
     e24_dir.mkdir(parents=True, exist_ok=True)
 
-    swp_csv_path = e24_dir / f"E-24_threshold-sweep_summary_{commit}.csv"
+    swp_csv_path = e24_dir / f"E-24_threshold-sweep_summary_{commit}{suffix}.csv"
     with open(swp_csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(sweep_rows[0].keys()))
         writer.writeheader()
         writer.writerows(sweep_rows)
 
-    swp_log_path = e24_dir / f"E-24_threshold-sweep_log_{commit}.log"
+    swp_log_path = e24_dir / f"E-24_threshold-sweep_log_{commit}{suffix}.log"
     swp_log_path.write_text("\n".join(sweep_log_lines) + "\n", encoding="utf-8")
     print(f"Wrote E-24 evidence files to {e24_dir}")
 
@@ -560,7 +560,7 @@ def run_all(commit: str):
     e34_dir = REPO_ROOT / "evidence" / "E-34_transactional-fpr"
     e34_dir.mkdir(parents=True, exist_ok=True)
 
-    trans_csv_path = e34_dir / f"E-34_transactional-fpr_summary_{commit}.csv"
+    trans_csv_path = e34_dir / f"E-34_transactional-fpr_summary_{commit}{suffix}.csv"
     with open(trans_csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(trans_records[0].keys()))
         writer.writeheader()
@@ -585,7 +585,7 @@ def run_all(commit: str):
         "    signals are evaluated in combination, eliminating the false alarms.",
         "=" * 80,
     ]
-    trans_txt_path = e34_dir / f"E-34_transactional-fpr_report_{commit}.txt"
+    trans_txt_path = e34_dir / f"E-34_transactional-fpr_report_{commit}{suffix}.txt"
     trans_txt_path.write_text("\n".join(trans_report_lines) + "\n", encoding="utf-8")
     print(f"Wrote E-34 evidence files to {e34_dir}")
 
@@ -597,6 +597,7 @@ def run_all(commit: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aegis Phase C Benchmark Runner")
     parser.add_argument("--commit", type=str, default="", help="7-character commit hash")
+    parser.add_argument("--suffix", type=str, default="", help="Suffix for output filenames, e.g. _rerun")
     args = parser.parse_args()
 
     c_hash = args.commit
@@ -605,4 +606,4 @@ if __name__ == "__main__":
         p = subprocess.run(cmd, capture_output=True, text=True, check=True)
         c_hash = p.stdout.strip()[:7]
 
-    run_all(c_hash)
+    run_all(c_hash, args.suffix)
