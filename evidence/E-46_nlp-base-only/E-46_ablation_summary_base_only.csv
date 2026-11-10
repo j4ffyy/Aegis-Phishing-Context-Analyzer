@@ -1,0 +1,9 @@
+config,text_condition,recall,fpr,f1,auc
+Config 1: Heuristics Only,Standard,84.00%,0.00%,91.30%,0.9980
+Config 1: Heuristics Only,Cue-Stripped,74.00%,0.00%,85.06%,0.9964
+Config 2: Heuristics + XGBoost/RF,Standard,58.00%,0.00%,73.42%,0.9976
+Config 2: Heuristics + XGBoost/RF,Cue-Stripped,58.00%,0.00%,73.42%,0.9944
+Config 3: Heuristics + DistilBERT,Standard,96.00%,0.00%,97.96%,1.0000
+Config 3: Heuristics + DistilBERT,Cue-Stripped,96.00%,0.00%,97.96%,1.0000
+Config 4: Full Pipeline,Standard,76.00%,0.00%,86.36%,1.0000
+Config 4: Full Pipeline,Cue-Stripped,66.00%,0.00%,79.52%,1.0000

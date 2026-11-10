@@ -40,8 +40,11 @@ Comparison baselines referenced in paper (Table 16):
 
 import argparse
 import csv
+import datetime
+import hashlib
 import json
 import logging
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -328,6 +331,33 @@ def format_report(metrics: Dict[str, Any], mode: str, dataset_path: str) -> str:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+# Helpers for Model-Loaded Guard & Provenance (I-02 / Plan §4.3)
+# ---------------------------------------------------------------------------
+
+def _get_git_commit() -> str:
+    """Returns the current short git commit hash (7 hex characters)."""
+    try:
+        res = subprocess.check_output(
+            ["git", "rev-parse", "--short=7", "HEAD"],
+            cwd=str(BACKEND_DIR),
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+        return res
+    except Exception:
+        return "unknown"
+
+
+def _compute_file_sha256(path: Path) -> str:
+    """Computes SHA-256 hex digest of a file."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(
@@ -358,6 +388,14 @@ def main():
         "--export-samples", type=str, default="",
         help="Path to export per-sample results CSV (default: <output-dir>/per_sample_evaluation.csv)"
     )
+    parser.add_argument(
+        "--check-model", action=argparse.BooleanOptionalAction, default=True,
+        help="Abort if model is not loaded (I-02 guard; default: True)"
+    )
+    parser.add_argument(
+        "--seed", type=int, default=42,
+        help="Evaluation random seed (default: 42)"
+    )
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset)
@@ -368,6 +406,55 @@ def main():
             dataset_path,
         )
         sys.exit(1)
+
+    # Pre-flight Model-Loaded Guard (I-02 / Plan §5)
+    model_loaded = False
+    model_id = "unknown"
+
+    if args.check_model:
+        if args.offline:
+            backend_path = str(BACKEND_DIR)
+            if backend_path not in sys.path:
+                sys.path.insert(0, backend_path)
+            from modules.nlp_classifier import is_model_warm, warm_up_nlp, get_model_id
+            if not is_model_warm():
+                warm_up_nlp()
+            if not is_model_warm():
+                logger.error("ABORT: DistilBERT model is not loaded (model_loaded=False). Fix model loading before benchmarking.")
+                sys.exit(1)
+            model_loaded = True
+            model_id = get_model_id()
+            logger.info("Pre-flight guard passed: local model loaded (%s)", model_id)
+        else:
+            import urllib.request
+            health_url = f"{args.backend_url.rstrip('/')}/api/v1/health"
+            try:
+                with urllib.request.urlopen(health_url, timeout=5) as resp:
+                    health_data = json.loads(resp.read().decode("utf-8"))
+                    if not health_data.get("model_loaded"):
+                        logger.error(
+                            "ABORT: Backend at %s reports model_loaded=%s. Fix model loading before benchmarking.",
+                            health_url,
+                            health_data.get("model_loaded"),
+                        )
+                        sys.exit(1)
+                    model_loaded = True
+                    model_id = health_data.get("model_id", "unknown")
+                    logger.info("Pre-flight guard passed: live backend model loaded (%s)", model_id)
+            except Exception as exc:
+                logger.error("ABORT: Could not reach backend /health at %s: %s", health_url, exc)
+                sys.exit(1)
+    else:
+        if args.offline:
+            backend_path = str(BACKEND_DIR)
+            if backend_path not in sys.path:
+                sys.path.insert(0, backend_path)
+            from modules.nlp_classifier import is_model_warm, get_model_id
+            model_loaded = is_model_warm()
+            model_id = get_model_id()
+        else:
+            model_loaded = True
+            model_id = "phishing_distilbert_onnx_4cls"
 
     # Load dataset
     rows = []
@@ -438,6 +525,13 @@ def main():
 
     # Compute metrics
     metrics = compute_metrics(true_labels, pred_labels, latencies)
+    metrics["commit"]          = _get_git_commit()
+    metrics["script"]          = "aegis-backend/scripts/evaluate_models.py"
+    metrics["model_id"]        = model_id
+    metrics["model_loaded"]    = model_loaded
+    metrics["dataset_sha256"]  = _compute_file_sha256(dataset_path)
+    metrics["seed"]            = args.seed
+    metrics["timestamp_utc"]   = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
     metrics["evaluation_mode"] = "offline" if args.offline else "live_api"
     metrics["auth_mode"]       = "neutral" if args.neutral_auth else "synthetic"
     metrics["backend_url"]     = args.backend_url if not args.offline else "N/A"

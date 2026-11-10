@@ -498,9 +498,34 @@ function initLogControls() {
       renderDonutChart(computeLocalStats([]));
     });
   }
+
+  // Detection logging toggle (Post-Defense Item 3)
+  const loggingToggle = qs('toggle-detection-logging');
+  const loggingStatus = qs('logging-status-text');
+  const LOGGING_KEY   = 'aegis_logging_enabled';
+
+  if (loggingToggle) {
+    storageGet([LOGGING_KEY]).then(res => {
+      const isEnabled = res[LOGGING_KEY] !== false;
+      loggingToggle.checked = isEnabled;
+      if (loggingStatus) {
+        loggingStatus.textContent = isEnabled ? 'Active' : 'Disabled';
+        loggingStatus.style.color = isEnabled ? '#10b981' : '#ef4444';
+      }
+    });
+
+    loggingToggle.addEventListener('change', async () => {
+      const isEnabled = loggingToggle.checked;
+      await storageSet({ [LOGGING_KEY]: isEnabled });
+      if (loggingStatus) {
+        loggingStatus.textContent = isEnabled ? 'Active' : 'Disabled';
+        loggingStatus.style.color = isEnabled ? '#10b981' : '#ef4444';
+      }
+    });
+  }
 }
 
-// ─── Sensitivity Sliders ──────────────────────────────────────────────────────
+// ─── Sensitivity Sliders & Presets (Row 21 / I-12) ───────────────────────────
 function initSensitivityControls(saved) {
   const wSlider  = qs('slider-warning');
   const cSlider  = qs('slider-critical');
@@ -512,10 +537,40 @@ function initSensitivityControls(saved) {
 
   if (!wSlider || !cSlider) return;
 
+  const presetBtns = [
+    { btn: qs('preset-conservative'), warn: 35, crit: 65 },
+    { btn: qs('preset-standard'),     warn: 45, crit: 75 },
+    { btn: qs('preset-aggressive'),   warn: 55, crit: 85 },
+  ];
+
+  function syncPresetHighlight() {
+    const wVal = parseInt(wSlider.value, 10);
+    const cVal = parseInt(cSlider.value, 10);
+    presetBtns.forEach(({ btn, warn, crit }) => {
+      if (!btn) return;
+      if (wVal === warn && cVal === crit) {
+        btn.classList.add('preset-btn--active');
+      } else {
+        btn.classList.remove('preset-btn--active');
+      }
+    });
+  }
+
+  presetBtns.forEach(({ btn, warn, crit }) => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      wSlider.value = warn;
+      cSlider.value = crit;
+      updateSensUI();
+      syncPresetHighlight();
+    });
+  });
+
   // Apply saved values
   wSlider.value = saved.warningThreshold;
   cSlider.value = saved.criticalThreshold;
   updateSensUI();
+  syncPresetHighlight();
 
   wSlider.addEventListener('input', () => {
     // Enforce warning < critical
@@ -523,6 +578,7 @@ function initSensitivityControls(saved) {
       cSlider.value = parseInt(wSlider.value) + 5;
     }
     updateSensUI();
+    syncPresetHighlight();
   });
 
   cSlider.addEventListener('input', () => {
@@ -530,6 +586,7 @@ function initSensitivityControls(saved) {
       wSlider.value = parseInt(cSlider.value) - 5;
     }
     updateSensUI();
+    syncPresetHighlight();
   });
 
   // Save button
@@ -556,6 +613,7 @@ function initSensitivityControls(saved) {
       wSlider.value = DEFAULT_SENSITIVITY.warningThreshold;
       cSlider.value = DEFAULT_SENSITIVITY.criticalThreshold;
       updateSensUI();
+      syncPresetHighlight();
     });
   }
 
@@ -571,30 +629,8 @@ function initSensitivityControls(saved) {
 
 // ─── Model Metric Rings ───────────────────────────────────────────────────────
 function animateMetricRings() {
-  const rings = [
-    { ringId: 'ring-accuracy',  pct: 94.3, color: '#1a73e8' },
-    { ringId: 'ring-precision', pct: 93.1, color: '#b06000' },
-    { ringId: 'ring-recall',    pct: 95.8, color: '#7b3f9e' },
-    { ringId: 'ring-f1',        pct: 94.4, color: '#188038' },
-    { ringId: 'ring-fpr',       pct: 5.7,  color: '#d93025' },
-    { ringId: 'ring-latency',   pct: 72,   color: '#000000' },
-  ];
-
-  // circumference = 2πr = 2 × π × 32 ≈ 201.06
-  const circumference = 2 * Math.PI * 32;
-
-  rings.forEach(({ ringId, pct, color }) => {
-    const el = qs(ringId);
-    if (!el) return;
-    el.style.stroke = color;
-    // Animate after a brief delay so the browser registers the initial state
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const offset = circumference * (1 - pct / 100);
-        el.style.strokeDashoffset = String(offset);
-      });
-    });
-  });
+  // Operational SME Dashboard: Model evaluation metrics are omitted from client UI
+  // and documented exclusively in Chapter 4 of the academic manuscript.
 }
 
 // ─── Backend Status ───────────────────────────────────────────────────────────

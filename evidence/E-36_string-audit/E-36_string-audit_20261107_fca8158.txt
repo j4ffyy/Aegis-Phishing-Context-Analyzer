@@ -1,0 +1,42 @@
+# Aegis String Audit Report (E-36 / I-13)
+# Date (UTC): 2026-11-07T13:16:20.627235+00:00
+# Git Commit: fca8158
+# Total files scanned: 57
+# Scope: aegis-backend/ and aegis-extension/ source trees
+
+================================================================================
+## 1. DMARC occurrences
+Description: DMARC protocol checks are not implemented in the Aegis extension or backend (SPF and DKIM only).
+Regex Pattern: \bDMARC\b
+--------------------------------------------------------------------------------
+Found 1 match(es):
+  aegis-backend/scripts/update_paper_docx.py:137: ["Whitelist Engine", "JavaScript + chrome.storage.local", "Dedicated admin dashboard with SPF/DKIM/DMARC auto-revocation guardrail"],
+
+================================================================================
+## 2. 'High' risk tier occurrences
+Description: The Aegis three-tier system defines tiers: Safe (0-44), Warning (45-74), and Critical (75-100). 'High' should not be used as an independent tier label.
+Regex Pattern: ['\"]High['\"]|\bHigh\s+Risk\b
+--------------------------------------------------------------------------------
+Found 7 match(es):
+  aegis-backend/models/phishing_distilbert/tokenizer.json:2314: "high": 2152,
+  aegis-backend/scripts/update_paper_docx.py:186: ["R1", "Render.com container cold start (free tier spin-down after 15 min)", "High", "Medium", "2.0s AbortController fails over gracefully to local heuristics; pre-warming script available"],
+  aegis-backend/scripts/update_paper_docx.py:188: ["R3", "Gmail DOM class obfuscation across Chrome updates", "Medium", "High", "Multi-selector fallback chains targeting semantic attributes ([role='main'], [email])"],
+  aegis-backend/scripts/update_paper_docx.py:189: ["R4", "Cloud container memory exhaustion (OOM on 512 MB ceiling)", "Low", "High", "PyTorch excluded; ONNX Runtime CPU inference maintains <140 MB RSS total footprint"],
+  aegis-backend/scripts/update_paper_docx.py:190: ["R5", "Executive impersonation bypassing whitelist", "High", "High", "Real-time SPF/DKIM auto-revocation triggers 90%+ Critical override on spoofing"],
+  aegis-backend/scripts/update_paper_docx.py:191: ["R6", "AI-generated phishing evading NLP semantic layer", "Medium", "High", "Multiplicative 4-layer defense: behavioral anomaly and typosquatting detect content evaders"],
+  aegis-backend/scripts/update_paper_docx.py:192: ["R7", "Unauthorized third-party backend API access", "Low", "High", "Production CORS lockdown strictly locked to extension origin chrome-extension://cjekapggbhploagnmbplohmeechggppj"]
+
+================================================================================
+## 3. URL masking occurrences
+Description: Verification of URL masking claims in detection logic and heuristics.
+Regex Pattern: \bURL\s+masking\b|\bmasking\b
+--------------------------------------------------------------------------------
+Found 0 matches across all scanned files.
+
+================================================================================
+## 4. Gmail API / integration claims
+Description: Aegis integrates via Chrome Extension DOM extraction/MutationObserver, not direct Gmail REST API or Workspace Marketplace add-on.
+Regex Pattern: \bGmail\s+API\b|\bGoogle\s+Workspace\s+Marketplace\b|\bWorkspace\s+add-on\b
+--------------------------------------------------------------------------------
+Found 0 matches across all scanned files.
+

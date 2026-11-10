@@ -22,7 +22,7 @@ import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Body, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from modules.link_scanner import (
@@ -472,7 +472,7 @@ def evaluate_behavioral(payload: EmailPayload) -> int:
     """
     if payload.behavioralScore is not None:
         try:
-            return max(0, min(100, int(payload.behavioralScore)))
+            return max(0, min(100, payload.behavioralScore))
         except (ValueError, TypeError):
             pass
     if payload.behavioral_meta and isinstance(payload.behavioral_meta, dict):
@@ -503,6 +503,8 @@ def build_analysis_response(
     behavioral_meta: Optional[Dict[str, Any]] = None,
     execution_time_ms: int = 0,
     detected_language: Optional[str] = None,  # PR-06
+    spf_pass: Optional[bool] = None,
+    dkim_pass: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Constructs the canonical Aegis analysis payload compatible with the overlay via meta_classifier."""
     result = synthesize_assessment(
@@ -518,6 +520,8 @@ def build_analysis_response(
         behavioral_meta=behavioral_meta,
         execution_time_ms=execution_time_ms,
         detected_language=detected_language,  # PR-06
+        spf_pass=spf_pass,
+        dkim_pass=dkim_pass,
     )
     if detected_language:
         result["detectedLanguage"] = detected_language  # PR-06: expose to frontend
@@ -588,6 +592,8 @@ async def _execute_background_vt_scan(
             vt_result=vt_result,
             behavioral_meta=base_state.get("behavioral_meta"),
             execution_time_ms=duration_ms,
+            spf_pass=base_state.get("spf_pass"),
+            dkim_pass=base_state.get("dkim_pass"),
         )
 
         # Store completed analysis for subsequent GET polling
@@ -618,6 +624,8 @@ async def _execute_background_vt_scan(
             vt_result={"status": "error", "error": str(exc)},
             behavioral_meta=base_state.get("behavioral_meta"),
             execution_time_ms=int((time.time() - start_time) * 1000),
+            spf_pass=base_state.get("spf_pass"),
+            dkim_pass=base_state.get("dkim_pass"),
         )
         _analysis_store[email_hash] = final_analysis
     finally:
@@ -725,6 +733,8 @@ async def analyze_email(
         behavioral_meta=payload.behavioral_meta,
         execution_time_ms=execution_time_ms,
         detected_language=payload.detectedLanguage,  # PR-06
+        spf_pass=payload.spfPass,
+        dkim_pass=payload.dkimPass,
     )
 
     if vt_status == "completed":
@@ -740,6 +750,8 @@ async def analyze_email(
             "behavioral_meta": payload.behavioral_meta,
             "ensemble_used": heuristics.get("ensemble_used", False),
             "s_ensemble": heuristics.get("s_ensemble", 0),
+            "spf_pass": payload.spfPass,
+            "dkim_pass": payload.dkimPass,
         }
         _in_flight_scans[email_hash] = {
             "status": "pending",
@@ -849,27 +861,57 @@ class FeedbackPayload(BaseModel):
     reportedAt:   Optional[str] = Field(default=None, description="ISO-8601 report timestamp")
 
 
+# Global telemetry logging configuration (Post-Defense Item 3)
+_logging_enabled: bool = True
+
+def extract_sender_domain(sender: str) -> str:
+    """Extracts only the domain component from sender email string for telemetry privacy."""
+    if not sender:
+        return "[DOMAIN]"
+    match = re.search(r'@([a-zA-Z0-9.\-]+)', sender)
+    if match:
+        return match.group(1).lower().rstrip('>').strip()
+    return sender.split('@')[-1].lower().rstrip('>').strip()
+
+def scrub_subject_text(subject: str) -> str:
+    """Sanitizes PII (emails, phone numbers, numeric IDs) from email subject before telemetry storage."""
+    if not subject:
+        return "[SUBJECT]"
+    s = str(subject).strip()
+    s = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '[EMAIL]', s)
+    s = re.sub(r'\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b', '[PHONE]', s)
+    s = re.sub(r'\b\d{7,16}\b', '[NUMBER]', s)
+    return s or "[SUBJECT]"
+
+
 @router.post(
     "/log-result",
     summary="Log a completed analysis result to the detection store",
     description=(
         "Called by the Chrome extension after each analysis completes. "
         "Stores a scrubbed summary in memory for the /stats and SME dashboard. "
-        "No raw email body or PII is stored."
+        "Sender is scrubbed to domain only and subject is PII-scrubbed."
     ),
 )
 async def log_result(payload: LogResultPayload) -> Dict[str, Any]:
-    """Append one detection result entry to the in-memory log."""
+    """Append one detection result entry to the in-memory log with domain-only sender and scrubbed subject."""
+    global _logging_enabled
+    if not _logging_enabled:
+        return {"ok": False, "disabled": True, "total_logged": len(_detection_log)}
+
     import datetime as _dt
+
+    sanitized_sender = extract_sender_domain(payload.sender)
+    sanitized_subject = scrub_subject_text(payload.subject)
 
     entry: Dict[str, Any] = {
         "emailHash": payload.emailHash,
         "score":     payload.score,
         "riskLevel": payload.riskLevel,
-        "sender":    payload.sender,
-        "subject":   payload.subject,
+        "sender":    sanitized_sender,
+        "subject":   sanitized_subject,
         "source":    payload.source,
-        "analyzedAt": payload.analyzedAt or _dt.datetime.utcnow().isoformat() + "Z",
+        "analyzedAt": payload.analyzedAt or _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
     _detection_log.insert(0, entry)
@@ -879,8 +921,8 @@ async def log_result(payload: LogResultPayload) -> Dict[str, Any]:
         del _detection_log[_DETECTION_LOG_MAX:]
 
     logger.info(
-        "Detection logged | hash=%s score=%d tier=%s",
-        payload.emailHash[:12], payload.score, payload.riskLevel,
+        "Detection logged (sanitized) | hash=%s score=%d tier=%s domain=%s",
+        payload.emailHash[:12], payload.score, payload.riskLevel, sanitized_sender,
     )
     return {"ok": True, "total_logged": len(_detection_log)}
 
@@ -947,7 +989,7 @@ async def submit_feedback(payload: FeedbackPayload) -> Dict[str, Any]:
         "notes":       payload.notes,
         "sender":      payload.sender,
         "subject":     payload.subject,
-        "reportedAt":  payload.reportedAt or _dt.datetime.utcnow().isoformat() + "Z",
+        "reportedAt":  payload.reportedAt or _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
     _feedback_log.append(record)
 

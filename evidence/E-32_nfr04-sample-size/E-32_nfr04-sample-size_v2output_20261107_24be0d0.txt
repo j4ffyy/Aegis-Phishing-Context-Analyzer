@@ -1,0 +1,90 @@
+================================================================================
+AEGIS PHISHING ANALYZER -- NFR04 SAMPLE SIZE & CI VALIDATION (E-32 v2)
+Phase C Post-Defense Update | Script Commit: 24be0d0
+Generated (UTC): 2026-11-07T16:27:54.722216+00:00
+E-08 Source File: E-08_phishing-corpus-metrics_report_20261107_c0b7648.json
+E-08 Eval Commit: c0b7648 | Model: phishing_distilbert_onnx_4cls | Seed: 42
+Dataset SHA-256:  e278c6004a02e2935d83895d5e8242fcd8df50bc9b46641a10dc9ac6721f9254
+================================================================================
+
+PURPOSE OF THIS DOCUMENT
+--------------------------------------------------------------------------------
+This v2 report updates E-32 (produced at commit 91e1e8d, eval-freeze tag)
+to reflect completed Phase C evaluation results from E-08.
+
+The original E-32 conclusion stated NFR04 'cannot be formally validated as met'
+because it was written before Phase C benchmarks were finalized. At eval-freeze,
+working recall figures were 66.0% (Neutral Auth) and 86.0% (Synthetic Auth).
+Both figures failed the Wilson lower-bound threshold.
+
+The Phase C pipeline (E-08) incorporates all post-defense architecture fixes
+(Items I-01 through I-06), achieving 100.0% recall on the same dataset.
+This report re-applies the identical Wilson CI methodology to the actual E-08 outcome.
+No values in this report are hardcoded; all numbers are read from the E-08 JSON.
+
+1. NFR04 SPECIFICATION
+--------------------------------------------------------------------------------
+  'The system shall achieve a minimum threat recall of 90.0% on phishing vectors.'
+
+Statistical confirmation criterion (carried forward from E-32 v1):
+  The 95% Wilson score CI lower bound must satisfy L_95(Recall) >= 90.0%,
+  ensuring NFR04 is confirmed at alpha = 0.05 (not merely by point estimate).
+
+2. ACTUAL PHASE C RESULTS (LOADED FROM E-08 NEUTRAL AUTH JSON)
+--------------------------------------------------------------------------------
+  Total Test Samples (N):    100  (50 phishing / 50 legitimate)
+  True Positives (TP):       50
+  False Negatives (FN):      0
+  Observed Recall:           100.0%  (50/50)
+  Wilson 95% CI Lower Bound: 92.8652%  [computed: wilson(50, 50)]
+  Wilson 95% CI Upper Bound: 100.0000%
+  NFR04 Threshold:           90.0%
+  NFR04 Status:              FORMALLY MET
+  Decision:                  92.8652% >= 90.0%
+
+3. MINIMUM SAMPLE SIZE REQUIRED BY OBSERVED RECALL RATE
+--------------------------------------------------------------------------------
+  Observed Recall    | Min N (Phishing)   | TPs Needed   | Wilson 95% Lower
+--------------------------------------------------------------------------------
+   91.0%             | 3361               | 3059         | 90.00%
+   92.0%             | 830                | 764          | 90.01%
+   93.0%             | 362                | 337          | 90.00%
+   94.0%             | 204                | 192          | 90.00%
+   95.0%             | 127                | 121          | 90.08%
+   96.0%             | 84                 | 81           | 90.02%
+   97.0%             | 69                 | 67           | 90.03%
+   98.0%             | 53                 | 52           | 90.06%
+   99.0%             | 35                 | 35           | 90.11%
+  100.0%             | 35                 | 35           | 90.11%  <-- ACTUAL RESULT
+--------------------------------------------------------------------------------
+  At 100.0% observed recall, minimum N to pass NFR04 = 35.
+  This study used N=50, which exceeds the minimum of 35.
+
+4. HISTORICAL CONTEXT (PRE-PHASE C BENCHMARKS, RETAINED FOR TRANSPARENCY)
+--------------------------------------------------------------------------------
+  These figures are from development-phase runs before architecture completion.
+  They are NOT the evidence submitted for NFR04 confirmation.
+
+  Placeholder – Synthetic Auth, pre-Phase C (43/50)
+    Recall 86.0% (43/50) | Wilson CI: [73.81%, 93.05%] | NFR04: FAILS
+  Initial Neutral Auth – pre-Phase C pipeline (33/50)
+    Recall 66.0% (33/50) | Wilson CI: [52.15%, 77.56%] | NFR04: FAILS
+
+5. CONCLUSION
+--------------------------------------------------------------------------------
+  Under Phase C Neutral Auth evaluation (E-08, commit c0b7648):
+    - N = 50 phishing samples evaluated
+    - 50 out of 50 detected (Recall = 100.0%)
+    - Wilson 95% CI: [92.87%, 100.00%]
+    - Lower bound 92.87% >= NFR04 target 90.0%
+
+  NFR04 IS FORMALLY MET under the Phase C Neutral Auth evaluation.
+
+  Statistical note on generalizability:
+  At 100% observed recall, N=35 is the theoretical minimum for the Wilson lower
+  bound to clear 90%. This study's N=50 comfortably exceeds that minimum.
+  However, if true operational recall were 95%, a minimum of N=127 phishing
+  samples would be required (per the minimum-N table in Section 3 above).
+  The N=50 dataset is therefore sufficient for the 100% observed result, but
+  would not support formal NFR04 confirmation at lower observed recall rates.
+================================================================================

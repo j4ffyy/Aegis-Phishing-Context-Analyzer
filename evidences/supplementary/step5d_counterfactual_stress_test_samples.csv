@@ -1,0 +1,101 @@
+id,label,perturbation,orig_sender,pert_sender,subject,score_full,pred_full,result,commit_hash
+24,1,phish_tld_to_ph,helpdesk@microsoft-account-reset.click,helpdesk@microsoft-account-reset.ph,Lazada: Your order is on hold - confirm payment details,72,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+37,1,phish_tld_to_ph,sss-notification@sss-gov-ph.click,sss-notification@sss-gov-ph.ph,URGENT: Your GCash account has been suspended,67,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+59,0,legit_tld_to_xyz,gcash@gcash.com,gcash@gcash.xyz,Globe: Your October 2026 statement is available,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+83,0,legit_tld_to_xyz,billing@lazada.com.ph,billing@lazada.com.xyz,Receipt: GCash transfer to Juan dela Cruz,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+89,0,legit_tld_to_xyz,newsletter@aegis-security.ph,newsletter@aegis-security.xyz,Re: Budget approval for Q4 marketing campaign,6,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+33,1,phish_tld_to_ph,sss-notification@sss-gov-ph.click,sss-notification@sss-gov-ph.ph,Your Shopee account has been locked - verify now,72,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+63,0,legit_tld_to_xyz,sss@sss.gov.ph,sss@sss.gov.xyz,Shopee Order Confirmation - Order #SHP-2026-12345,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+44,1,phish_tld_to_ph,noreply@bpi-secure-login.xyz,noreply@bpi-secure-login.ph,Babala: Na-lock ang iyong BDO account - mag-login na,63,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+78,0,legit_tld_to_xyz,billing@lazada.com.ph,billing@lazada.com.xyz,Welcome to the Aegis SME Security Newsletter,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+9,1,phish_tld_to_ph,security@metrobank-ph.gq,security@metrobank-ph.ph,Microsoft Account: Unusual sign-in activity detected,58,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+53,0,legit_tld_to_xyz,contributions@philhealth.gov.ph,contributions@philhealth.gov.xyz,Team lunch - please confirm attendance,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+95,0,legit_tld_to_xyz,billing@globe.com.ph,billing@globe.com.xyz,Re: Budget approval for Q4 marketing campaign,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+90,0,legit_tld_to_xyz,gcash@gcash.com,gcash@gcash.xyz,Receipt: GCash transfer to Juan dela Cruz,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+15,1,phish_tld_to_ph,security@metrobank-ph.gq,security@metrobank-ph.ph,Microsoft Account: Unusual sign-in activity detected,67,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+88,0,legit_tld_to_xyz,projectlead@consultancy.ph,projectlead@consultancy.xyz,Re: Budget approval for Q4 marketing campaign,8,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+68,0,legit_tld_to_xyz,orders@shopee.ph,orders@shopee.xyz,FWD: MMDC academic calendar update,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+0,1,phish_tld_to_ph,finance@acme-enterprise.xyz,finance@acme-enterprise.ph,Final Notice: Your account will be deactivated in 24 hours,51,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+86,0,legit_tld_to_xyz,projectlead@consultancy.ph,projectlead@consultancy.xyz,SSS PRN for Q4 2026 - Payment Reference,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+38,1,phish_tld_to_ph,support@bdo-reset-now.loan,support@bdo-reset-now.ph,RCBC Online Banking: Account verification required,68,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+8,1,phish_tld_to_ph,noreply@bpi-secure-login.xyz,noreply@bpi-secure-login.ph,SSS: Important notice regarding your contribution records,63,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+51,0,legit_tld_to_xyz,sss@sss.gov.ph,sss@sss.gov.xyz,Your monthly Lazada invoice is ready,52,1,ERROR,8c42233da6027148ccf0f735d7217b991d18bc3c
+94,0,legit_tld_to_xyz,billing@globe.com.ph,billing@globe.com.xyz,Welcome to the Aegis SME Security Newsletter,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+93,0,legit_tld_to_xyz,projectlead@consultancy.ph,projectlead@consultancy.xyz,Globe: Your October 2026 statement is available,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+96,0,legit_tld_to_xyz,billing@meralco.com.ph,billing@meralco.com.xyz,Your OTP for BDO Online Banking,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+40,1,phish_tld_to_ph,alerts@paypal-verify.top,alerts@paypal-verify.ph,IMPORTANT: Update your BDO Online Banking credentials now,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+57,0,legit_tld_to_xyz,projectlead@consultancy.ph,projectlead@consultancy.xyz,Your monthly Lazada invoice is ready,36,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+67,0,legit_tld_to_xyz,billing@meralco.com.ph,billing@meralco.com.xyz,FWD: MMDC academic calendar update,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+10,1,phish_tld_to_ph,noreply@bpi-secure-login.xyz,noreply@bpi-secure-login.ph,Google: Security alert for your connected account,58,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+43,1,phish_tld_to_ph,ceo.office@globalcorp-ph.com,ceo.office@globalcorp-ph.ph,PhilHealth: Update your member information immediately,61,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+23,1,phish_tld_to_ph,support@bdo-reset-now.loan,support@bdo-reset-now.ph,Lazada: Your order is on hold - confirm payment details,80,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+35,1,phish_tld_to_ph,security@metrobank-ph.gq,security@metrobank-ph.ph,Metrobank: Suspicious transaction detected on your account,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+27,1,phish_tld_to_ph,alerts@maya-security.click,alerts@maya-security.ph,IMPORTANT: Update your BDO Online Banking credentials now,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+6,1,phish_tld_to_ph,promo@shopee-ph-promo.tk,promo@shopee-ph-promo.ph,Lazada: Your order is on hold - confirm payment details,52,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+2,1,phish_tld_to_ph,helpdesk@microsoft-account-reset.click,helpdesk@microsoft-account-reset.ph,Kailangan mong i-update ang iyong Maya account ngayon,68,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+36,1,phish_tld_to_ph,security@gcash-verify.top,security@gcash-verify.ph,Babala: Na-lock ang iyong BDO account - mag-login na,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+11,1,phish_tld_to_ph,promo@shopee-ph-promo.tk,promo@shopee-ph-promo.ph,Kailangan mong i-update ang iyong Maya account ngayon,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+92,0,legit_tld_to_xyz,billing@lazada.com.ph,billing@lazada.com.xyz,FWD: MMDC academic calendar update,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+7,1,phish_tld_to_ph,admin@rcbc-online.tk,admin@rcbc-online.ph,Amazon: Your account has been compromised - act now,68,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+56,0,legit_tld_to_xyz,billing@globe.com.ph,billing@globe.com.xyz,Team lunch - please confirm attendance,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+66,0,legit_tld_to_xyz,sss@sss.gov.ph,sss@sss.gov.xyz,Your Meralco bill for September 2026,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+99,0,legit_tld_to_xyz,registrar@mmdc.edu.ph,registrar@mmdc.edu.xyz,Receipt: GCash transfer to Juan dela Cruz,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+49,1,phish_tld_to_ph,security@amazon-account-verify.xyz,security@amazon-account-verify.ph,URGENT: I-verify ang iyong GCash account agad na,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+32,1,phish_tld_to_ph,finance@acme-enterprise.xyz,finance@acme-enterprise.ph,Google: Security alert for your connected account,64,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+41,1,phish_tld_to_ph,promo@shopee-ph-promo.tk,promo@shopee-ph-promo.ph,Lazada: Your order is on hold - confirm payment details,58,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+64,0,legit_tld_to_xyz,newsletter@aegis-security.ph,newsletter@aegis-security.xyz,Globe: Your October 2026 statement is available,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+97,0,legit_tld_to_xyz,registrar@mmdc.edu.ph,registrar@mmdc.edu.xyz,Meeting agenda for tomorrow's sync,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+65,0,legit_tld_to_xyz,contributions@philhealth.gov.ph,contributions@philhealth.gov.xyz,Your PhilHealth contribution receipt for October 2026,46,1,ERROR,8c42233da6027148ccf0f735d7217b991d18bc3c
+17,1,phish_tld_to_ph,finance@acme-enterprise.xyz,finance@acme-enterprise.ph,Your Shopee account has been locked - verify now,46,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+21,1,phish_tld_to_ph,sss-notification@sss-gov-ph.click,sss-notification@sss-gov-ph.ph,Security Alert: Unauthorized login detected on your Maya account,67,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+25,1,phish_tld_to_ph,support@bdo-reset-now.loan,support@bdo-reset-now.ph,PayPal: Your account access has been limited,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+62,0,legit_tld_to_xyz,billing@meralco.com.ph,billing@meralco.com.xyz,Receipt: GCash transfer to Juan dela Cruz,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+72,0,legit_tld_to_xyz,noreply@bdo.com.ph,noreply@bdo.com.xyz,Project update: Phase 2 deliverables,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+1,1,phish_tld_to_ph,finance@acme-enterprise.xyz,finance@acme-enterprise.ph,RCBC Online Banking: Account verification required,64,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+54,0,legit_tld_to_xyz,finance@legitcorp.com.ph,finance@legitcorp.com.xyz,FWD: MMDC academic calendar update,36,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+14,1,phish_tld_to_ph,admin@rcbc-online.tk,admin@rcbc-online.ph,Final Notice: Your account will be deactivated in 24 hours,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+50,0,legit_tld_to_xyz,mreyes@businesspartner.com.ph,mreyes@businesspartner.com.xyz,Welcome to the Aegis SME Security Newsletter,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+61,0,legit_tld_to_xyz,billing@globe.com.ph,billing@globe.com.xyz,Re: Budget approval for Q4 marketing campaign,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+80,0,legit_tld_to_xyz,jdelacruz@company.com.ph,jdelacruz@company.com.xyz,Re: Budget approval for Q4 marketing campaign,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+73,0,legit_tld_to_xyz,orders@shopee.ph,orders@shopee.xyz,Receipt: GCash transfer to Juan dela Cruz,26,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+29,1,phish_tld_to_ph,promo@shopee-ph-promo.tk,promo@shopee-ph-promo.ph,Lazada: Your order is on hold - confirm payment details,68,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+58,0,legit_tld_to_xyz,jdelacruz@company.com.ph,jdelacruz@company.com.xyz,Your PhilHealth contribution receipt for October 2026,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+82,0,legit_tld_to_xyz,mreyes@businesspartner.com.ph,mreyes@businesspartner.com.xyz,SSS PRN for Q4 2026 - Payment Reference,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+12,1,phish_tld_to_ph,noreply@bpi-secure-login.xyz,noreply@bpi-secure-login.ph,Metrobank: Suspicious transaction detected on your account,72,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+28,1,phish_tld_to_ph,noreply@shopee-promo.icu,noreply@shopee-promo.ph,Security Alert: Unauthorized login detected on your Maya account,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+60,0,legit_tld_to_xyz,projectlead@consultancy.ph,projectlead@consultancy.xyz,Globe: Your October 2026 statement is available,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+98,0,legit_tld_to_xyz,projectlead@consultancy.ph,projectlead@consultancy.xyz,FWD: MMDC academic calendar update,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+48,1,phish_tld_to_ph,support@bdo-reset-now.loan,support@bdo-reset-now.ph,Security Alert: Unauthorized login detected on your Maya account,72,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+84,0,legit_tld_to_xyz,hr@mmdc.edu.ph,hr@mmdc.edu.xyz,Shopee Order Confirmation - Order #SHP-2026-12345,36,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+77,0,legit_tld_to_xyz,mreyes@businesspartner.com.ph,mreyes@businesspartner.com.xyz,Re: Budget approval for Q4 marketing campaign,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+34,1,phish_tld_to_ph,ceo.office@globalcorp-ph.com,ceo.office@globalcorp-ph.ph,PhilHealth: Update your member information immediately,66,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+85,0,legit_tld_to_xyz,hr@mmdc.edu.ph,hr@mmdc.edu.xyz,Welcome to the Aegis SME Security Newsletter,36,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+75,0,legit_tld_to_xyz,mreyes@businesspartner.com.ph,mreyes@businesspartner.com.xyz,Receipt: GCash transfer to Juan dela Cruz,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+42,1,phish_tld_to_ph,finance@acme-enterprise.xyz,finance@acme-enterprise.ph,Kailangan mong i-update ang iyong Maya account ngayon,60,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+76,0,legit_tld_to_xyz,mreyes@businesspartner.com.ph,mreyes@businesspartner.com.xyz,Follow-up: Contract renewal discussion,36,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+3,1,phish_tld_to_ph,support@bdo-reset-now.loan,support@bdo-reset-now.ph,URGENT: Your GCash account has been suspended,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+81,0,legit_tld_to_xyz,newsletter@aegis-security.ph,newsletter@aegis-security.xyz,Welcome to the Aegis SME Security Newsletter,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+22,1,phish_tld_to_ph,sss-notification@sss-gov-ph.click,sss-notification@sss-gov-ph.ph,URGENT: I-verify ang iyong GCash account agad na,68,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+20,1,phish_tld_to_ph,security@metrobank-ph.gq,security@metrobank-ph.ph,Action Required: Verify your BPI account immediately,63,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+30,1,phish_tld_to_ph,sss-notification@sss-gov-ph.click,sss-notification@sss-gov-ph.ph,Final Notice: Your account will be deactivated in 24 hours,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+19,1,phish_tld_to_ph,billing@lazada-confirm.top,billing@lazada-confirm.ph,SSS: Important notice regarding your contribution records,58,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+79,0,legit_tld_to_xyz,jdelacruz@company.com.ph,jdelacruz@company.com.xyz,Team lunch - please confirm attendance,35,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+52,0,legit_tld_to_xyz,gcash@gcash.com,gcash@gcash.xyz,Your monthly Lazada invoice is ready,52,1,ERROR,8c42233da6027148ccf0f735d7217b991d18bc3c
+71,0,legit_tld_to_xyz,projectlead@consultancy.ph,projectlead@consultancy.xyz,Follow-up: Contract renewal discussion,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+87,0,legit_tld_to_xyz,finance@legitcorp.com.ph,finance@legitcorp.com.xyz,Follow-up: Contract renewal discussion,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+13,1,phish_tld_to_ph,admin@rcbc-online.tk,admin@rcbc-online.ph,RCBC Online Banking: Account verification required,58,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+31,1,phish_tld_to_ph,admin@rcbc-online.tk,admin@rcbc-online.ph,SSS: Important notice regarding your contribution records,63,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+26,1,phish_tld_to_ph,billing@lazada-confirm.top,billing@lazada-confirm.ph,URGENT: I-verify ang iyong GCash account agad na,68,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+45,1,phish_tld_to_ph,security@gcash-verify.top,security@gcash-verify.ph,Security Alert: Unauthorized login detected on your Maya account,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+91,0,legit_tld_to_xyz,jdelacruz@company.com.ph,jdelacruz@company.com.xyz,Shopee Order Confirmation - Order #SHP-2026-12345,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+46,1,phish_tld_to_ph,security@gcash-verify.top,security@gcash-verify.ph,I-confirm ang iyong Shopee order para maiwasan ang pagkansela,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+39,1,phish_tld_to_ph,noreply@bpi-secure-login.xyz,noreply@bpi-secure-login.ph,URGENT: I-verify ang iyong GCash account agad na,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+5,1,phish_tld_to_ph,support@bdo-reset-now.loan,support@bdo-reset-now.ph,Kailangan mong i-update ang iyong Maya account ngayon,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+16,1,phish_tld_to_ph,sss-notification@sss-gov-ph.click,sss-notification@sss-gov-ph.ph,Lazada: Your order is on hold - confirm payment details,72,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+55,0,legit_tld_to_xyz,noreply@bdo.com.ph,noreply@bdo.com.xyz,Re: Budget approval for Q4 marketing campaign,23,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+18,1,phish_tld_to_ph,admin@rcbc-online.tk,admin@rcbc-online.ph,Google: Security alert for your connected account,69,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+70,0,legit_tld_to_xyz,hr@mmdc.edu.ph,hr@mmdc.edu.xyz,Your OTP for BDO Online Banking,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+74,0,legit_tld_to_xyz,billing@globe.com.ph,billing@globe.com.xyz,Receipt: GCash transfer to Juan dela Cruz,9,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+47,1,phish_tld_to_ph,noreply@bpi-secure-login.xyz,noreply@bpi-secure-login.ph,Action Required: Verify your BPI account immediately,68,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+4,1,phish_tld_to_ph,security@amazon-account-verify.xyz,security@amazon-account-verify.ph,SSS: Kailangan mong i-verify ang iyong impormasyon agad,74,1,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c
+69,0,legit_tld_to_xyz,mreyes@businesspartner.com.ph,mreyes@businesspartner.com.xyz,Your monthly Lazada invoice is ready,36,0,CORRECT,8c42233da6027148ccf0f735d7217b991d18bc3c

@@ -1,0 +1,7 @@
+respondent_id,company_id,business_type,enterprise_size,role_category,role_title,q1_speed_score,q2_accuracy_score,q3_comprehension_score,q4_workflow_score,mean_score
+R01,SME-01,Mini Grocery / Retail,Micro-enterprise (< 10 employees),Owner,Mini Grocery Owner,5,5,5,5,5.0
+R02,SME-02,Dental Clinic & Gym Facility,Small Business (< 50 employees),Owner,Dentist / Gym Owner / Businessman,4,4,4,4,4.0
+R03,SME-03,Commercial Trading & Services,Small Business (< 50 employees),Owner,Businessman,4,4,4,4,4.0
+R04,SME-01,Mini Grocery / Retail,Micro-enterprise (< 10 employees),Staff,Grocery Staff,5,5,5,5,5.0
+R05,SME-02,Dental Clinic & Gym Facility,Small Business (< 50 employees),Staff,Dental / Gym Staff,5,5,5,5,5.0
+R06,SME-03,Commercial Trading & Services,Small Business (< 50 employees),Staff,Office / Administrative Staff,5,5,5,5,5.0

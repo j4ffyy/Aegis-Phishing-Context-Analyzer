@@ -1,0 +1,145 @@
+================================================================================
+AEGIS PHISHING ANALYZER -- POST-DEFENSE UI & SYSTEM COMMIT AUDIT (E-17)
+Items: I-12 (Post-defense UI confirm/build), I-13 (String audit), I-01 (Auth state)
+Target: Repository commit audit verifying introduction dates of UI features
+Generated: 2026-11-07T14:33:48.808826+00:00
+HEAD Commit: a824a4e
+================================================================================
+
+1. FEATURE PROVENANCE MATRIX
+--------------------------------------------------------------------------------
+Feature 1: Two-Tier XAI Interface (Plain-Language Top Layer + Advanced Drawer)
+  - Overlay floating banner & FAM modal structure: bef94c6 (Sep 2026), fc0ea76 (Sep 2026)
+  - Plain-language multi-factor XAI generator: d990bdd (Sep 24, 2026)
+  - Full-tab overlay integration & FAM zoom controls: 326b02d (Oct 2026)
+  - Degraded mode fallback banner: a6925ff (Oct 23, 2026)
+
+Feature 2: VirusTotal Reasons in XAI & Indicators Panel
+  - Asynchronous background VT scan dispatch & UI fold-in: 8947afe (Sep 21, 2026)
+  - Plain-language VT rationale synthesis: d990bdd (Sep 24, 2026)
+  - PR-09 VT cryptographic attachment hash analysis & reasons: 56a8819 (Oct 23, 2026)
+
+Feature 3: Conservative / Standard / Aggressive Presets with Tooltips (Row 21)
+  - Initial numeric threshold sliders in SME dashboard: 5357495 (Oct 22, 2026)
+  - Post-defense guided protection profiles & tooltips: a824a4e (Nov 07, 2026)
+
+Feature 4: SPF/DKIM Tri-State Drawer Logic (Fail / Pass / Not Verified) (Row 13 / I-01)
+  - Initial DOM auth extraction & collapsed header handling: PR-02 (Oct 2026)
+  - Post-defense null-state fix (showing 'Not verified'): 799f152 (Nov 07, 2026)
+
+Feature 5: String Audit & Jargon Cleanup (Row 16 / I-13)
+  - Removal of DMARC labels from extension UI: 74f3086 (Nov 07, 2026)
+  - Audit verifying absence of 'High' tier, URL masking, Gmail API: 320e9b3 (Nov 07, 2026)
+
+
+2. RECENT POST-DEFENSE COMMIT LOG (post-submission-eval branch)
+--------------------------------------------------------------------------------
+
+* a824a4e (HEAD -> post-submission-eval) feat(dashboard): add Conservative/Standard/Aggressive sensitivity presets with tooltips (I-12)
+* ef29590 evidence: E-14 spf-dkim-drawer-states (I-01)
+* 799f152 feat(auth): fix SPF/DKIM null auth state to show 'Not verified' (I-01)
+* aeaad62 evidence: E-19 scan-trigger-ratelimit (I-10)
+* 6a6ba94 evidence: E-03, E-04, E-28 data-handling audit (I-09)
+* 85e8e3a evidence: E-21 model-provenance (I-07)
+* 320e9b3 evidence: E-36 string-audit (I-13)
+* fca8158 feat(evidence): allow evidence logs in .gitignore + commit E-06 run log
+* a8a5c7c evidence: E-06 full-pipeline-rerun (I-02)
+* 160d746 feat(I-02): model-loaded guard in health endpoint + evaluation report provenance
+* 74f3086 (origin/post-submission-eval) fix(overlay): remove DMARC label — DMARC not implemented in extension (Row 16 / E-17 post-defense correction)
+* b192365 Post-submission supplementary evaluation (DistilBERT loaded, baselines, stress tests)
+* 8c42233 (tag: submitted-final, main) docs(evidences): commit empirical benchmark evidences, neutral-auth control, and live API telemetry
+* 89e4948 feat(evaluation): add empirical testbed evidences, model evaluation reports, and extension connectivity fixes
+* c766732 chore(deploy): link live Render production URL https://aegis-backend-oybm.onrender.com
+* a6925ff feat(ui): PR-10 graceful degraded mode banner and popup live health indicator (#25)
+* 56a8819 feat(intelligence): PR-09 VirusTotal attachment cryptographic file hash lookup (#24)
+* 74fc9af Feat/w8 8 model evaluation metrics (#23)
+* 45cfab5 Feat/w7 7 cors production lockdown (#22)
+* 7f434ac Feat/w6 6 multilingual ph support (#21)
+
+
+3. DETAILED COMMIT AUDIT FOR TARGET FEATURES
+--------------------------------------------------------------------------------
+
+Commit:  a824a4e
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 22:33:13 2026 +0800
+Subject: feat(dashboard): add Conservative/Standard/Aggressive sensitivity presets with tooltips (I-12)
+
+
+Commit:  ef29590
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 22:22:51 2026 +0800
+Subject: evidence: E-14 spf-dkim-drawer-states (I-01)
+
+
+Commit:  799f152
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 22:19:42 2026 +0800
+Subject: feat(auth): fix SPF/DKIM null auth state to show 'Not verified' (I-01)
+
+
+Commit:  aeaad62
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 21:57:15 2026 +0800
+Subject: evidence: E-19 scan-trigger-ratelimit (I-10)
+
+
+Commit:  6a6ba94
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 21:22:49 2026 +0800
+Subject: evidence: E-03, E-04, E-28 data-handling audit (I-09)
+
+
+Commit:  85e8e3a
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 21:18:21 2026 +0800
+Subject: evidence: E-21 model-provenance (I-07)
+
+
+Commit:  320e9b3
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 21:17:19 2026 +0800
+Subject: evidence: E-36 string-audit (I-13)
+
+
+Commit:  fca8158
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 21:15:33 2026 +0800
+Subject: feat(evidence): allow evidence logs in .gitignore + commit E-06 run log
+
+
+Commit:  160d746
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Sat Nov 7 21:12:02 2026 +0800
+Subject: feat(I-02): model-loaded guard in health endpoint + evaluation report provenance
+
+
+Commit:  74f3086
+Author:  j4ffyy <jafgrengia@gmail.com>
+Date:    Fri Nov 6 23:38:42 2026 +0800
+Subject: fix(overlay): remove DMARC label — DMARC not implemented in extension (Row 16 / E-17 post-defense correction)
+
+
+Commit:  56a8819
+Author:  Jafphet Grengia <jafgrengia@gmail.com>
+Date:    Fri Oct 23 00:20:05 2026 +0800
+Subject: feat(intelligence): PR-09 VirusTotal attachment cryptographic file hash lookup (#24)
+
+
+Commit:  5357495
+Author:  Jafphet Grengia <jafgrengia@gmail.com>
+Date:    Thu Oct 22 22:37:34 2026 +0800
+Subject: Feat/w4 4 sme analytics dashboard (#19)
+
+
+Commit:  a6925ff
+Author:  Jafphet Grengia <jafgrengia@gmail.com>
+Date:    Fri Oct 23 00:56:49 2026 +0800
+Subject: feat(ui): PR-10 graceful degraded mode banner and popup live health indicator (#25)
+
+
+Commit:  d990bdd
+Author:  Jafphet Grengia <jafgrengia@gmail.com>
+Date:    Thu Sep 24 06:24:40 2026 +0800
+Subject: feat(backend): implement meta_classifier risk synthesis and plain-language XAI generator (#14)
+

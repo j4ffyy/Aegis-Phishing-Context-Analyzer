@@ -1,0 +1,25 @@
+================================================================================
+AEGIS REPRODUCIBILITY PACKAGE CRYPTOGRAPHIC HASH REGISTER (E-31 v2)
+Commit: 24be0d0 | Algorithm: SHA-256
+================================================================================
+
+CORRECTION NOTE (v2):
+  The original E-31 hashes file (a482063) recorded the DistilBERT model under
+  the path 'aegis-backend/models/phishing_distilbert_onnx_4cls/model.onnx', which
+  reflected an earlier folder name that was renamed before final submission.
+  The file is at 'aegis-backend/models/phishing_distilbert/model.onnx'.
+  The hash itself was also recorded incorrectly in the original. This v2 file
+  provides the verified SHA-256 for the actual model file on disk.
+  All other entries are carried forward unchanged from the original.
+
+e278c6004a02e2935d83895d5e8242fcd8df50bc9b46641a10dc9ac6721f9254  aegis-backend/data/test_dataset.csv
+361ebc80a1aa7f48778ad007abed802f93fc807ffbd741e8661cf3837c200db0  aegis-backend/models/phishing_distilbert/model.onnx
+9de8517fdfd9c62d6b2c59125ba5c6c8457b0e19437f67d86dd3b4459c7f0c45  aegis-backend/models/ensemble_rf.pkl
+98bb8d927ccf54d1ec10e613ac05a541184d60845de4c99e1709e0fd528c50d1  aegis-backend/models/ensemble_xgb.pkl
+cab5c5308dcf3ba9ec2dbf89145f92cc7437bcad8738d3b8874ab8d5a066ba3a  tools/run_phase_c_evaluations.py
+1c8f584a5c333f2e5fe63480b37d858fb750151c100072c7de4d58e8591a76cd  tools/evidence_manifest.py
+e7916566554b21b49a0c335161e0099cde179a5a25989c05e037397ffb845e92  tools/generate_e20_composition.py
+c1c5eff3eb69f4c152bfd97432569209d83d77ab45e381dbbf020b93e9ebdbfc  tools/generate_e23_uat.py
+f40a3f0f652e241cc3e097f69996d36af8b38df5816d536b9262f932590ad044  tools/audit_manuscript_figures.py
+786c91c927af7287ca1349daff16edf8cfc50c86f55943b000193c89c2630067  tools/calculate_nfr04_sample_size.py
+

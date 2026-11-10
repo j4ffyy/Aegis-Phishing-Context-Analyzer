@@ -140,6 +140,9 @@
         links.push({ url: href, text: (a.textContent || '').trim(), isExternal: !href.includes('mail.google.com') });
       }
     });
+    links.sort(function (a, b) {
+      return a.url.localeCompare(b.url);
+    });
     return links;
   }
 

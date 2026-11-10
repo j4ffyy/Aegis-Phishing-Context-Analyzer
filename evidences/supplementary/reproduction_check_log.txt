@@ -1,0 +1,11 @@
+AEGIS Reproduction Check Log
+Commit Hash: 8c42233da6027148ccf0f735d7217b991d18bc3c
+Timestamp: 2026-10-24 23:22:24
+
+--- (a) Synthetic Auth Benchmark ---
+Confusion Matrix: TP=43, TN=50, FP=0, FN=7
+Accuracy: 93.00%, Precision: 100.00%, Recall: 86.00%, FPR: 0.00%, F1: 92.47%
+
+--- (b) Neutral Auth Benchmark ---
+Confusion Matrix: TP=33, TN=50, FP=0, FN=17
+Accuracy: 83.00%, Precision: 100.00%, Recall: 66.00%, FPR: 0.00%, F1: 79.52%

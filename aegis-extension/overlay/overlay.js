@@ -116,10 +116,19 @@
           </div>
 
           <div class="aegis-layer-analysis">
-            <h4>Multi-Layered Defense Status</h4>
+            <div class="aegis-layer-header-row">
+              <h4>Multi-Layered Defense Status</h4>
+              <label class="aegis-toggle-container" id="aegis-view-toggle-wrap" title="Toggle between Plain Language and Technical Details">
+                <span class="aegis-toggle-label" id="aegis-view-toggle-text">Technical View</span>
+                <span class="aegis-toggle-switch">
+                  <input type="checkbox" id="aegis-view-toggle-cb" aria-label="Toggle Technical Details">
+                  <span class="aegis-toggle-slider"></span>
+                </span>
+              </label>
+            </div>
             <ul class="aegis-layers-list" id="aegis-layers-list">
               <li id="aegis-layer-sanitization"><i class="fas fa-minus-circle aegis-icon-skip"></i> Pre-processing: HTML Sanitization</li>
-              <li id="aegis-layer-auth"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 1: Auth (SPF/DKIM/DMARC)</li>
+              <li id="aegis-layer-auth"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 1: Auth (SPF/DKIM)</li>
               <li id="aegis-layer-attach"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 2: Attachment Check</li>
               <li id="aegis-layer-behavior"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 3: Behavioral Analysis</li>
               <li id="aegis-layer-nlp"><i class="fas fa-minus-circle aegis-icon-skip"></i> Layer 4: Deep NLP Context</li>
@@ -417,6 +426,9 @@
     get scoreValue()       { return document.getElementById('aegis-score-value'); },
     get riskLevel()        { return document.getElementById('aegis-risk-level'); },
     get riskDesc()         { return document.getElementById('aegis-risk-desc'); },
+    get viewToggleWrap()   { return document.getElementById('aegis-view-toggle-wrap'); },
+    get viewToggleCb()     { return document.getElementById('aegis-view-toggle-cb'); },
+    get viewToggleText()   { return document.getElementById('aegis-view-toggle-text'); },
     get layerSanitization(){ return document.getElementById('aegis-layer-sanitization'); },
     get layerAuth()        { return document.getElementById('aegis-layer-auth'); },
     get layerAttach()      { return document.getElementById('aegis-layer-attach'); },
@@ -553,7 +565,7 @@
       desc,
       layers: {
         sanitization: { text: 'Pre-filter: Sanitization', detail: 'HTML Stripped â€” Plain Text Only', icon: 'fa-check-circle' },
-        auth:         { text: 'Layer 1: Auth (SPF/DKIM/DMARC)', detail: 'Pending â€” Auth headers not available client-side', icon: 'fa-minus-circle' },
+        auth:         { text: 'Layer 1: Auth (SPF/DKIM)', detail: 'Pending â€” Auth headers not available client-side', icon: 'fa-minus-circle' },
         attach:       { text: 'Layer 2: Attachment Intelligence', detail: attachDetail, icon: attachIcon },
         behavior:     { text: 'Layer 3: Behavioral Analysis', detail: 'Baseline: Pending sender history', icon: 'fa-minus-circle' },
         nlp:          { text: 'Layer 4: Deep NLP Context', detail: hasSuspiciousKeywords ? 'Urgency/Financial keywords detected' : 'Context appears normal', icon: hasSuspiciousKeywords ? 'fa-exclamation-triangle' : 'fa-check-circle' },
@@ -659,14 +671,260 @@
     }, VT_POLLING_INTERVAL_MS);
   }
 
-  function populateAnalysis(analysis) {
-    if (!currentEmailContext || (currentEmailContext.subject && /^conversations?$/i.test(currentEmailContext.subject.trim()))) {
-      currentEmailContext = null;
-      el.overlay.classList.remove('threat-safe', 'threat-warning', 'threat-critical');
-      showIdle();
-      return;
+  // ─── Literacy-Adaptive UI State (Two-Tier XAI) ─────────────────────────────
+  // Defaults to Simplified Plain-Language View for non-technical retail/office staff
+  let isTechnicalView = false;
+
+  function getSimplifiedLayer(key, rawData) {
+    const isPass = rawData.icon === 'fa-check-circle';
+    const isWarn = rawData.icon === 'fa-exclamation-triangle';
+    const isFail = rawData.icon === 'fa-times-circle';
+
+    switch (key) {
+      case 'sanitization':
+        return {
+          title: 'Privacy Check',
+          detail: isPass
+            ? 'Hidden trackers removed & personal info protected'
+            : 'Personal info sanitized before analysis'
+        };
+
+      case 'auth':
+        return {
+          title: 'Sender Legitimacy',
+          detail: isPass
+            ? 'Confirmed sent by genuine organization (not spoofed)'
+            : (isFail ? 'Warning: Sender address appears fake or spoofed' : 'Sender identity could not be fully verified')
+        };
+
+      case 'attach':
+        return {
+          title: 'File Attachments',
+          detail: isPass
+            ? (rawData.detail && rawData.detail.toLowerCase().includes('no attach')
+                ? 'No files attached'
+                : 'Attached files safe & verified')
+            : (isFail ? 'Warning: Dangerous attachment detected' : 'Attachment contains suspicious features')
+        };
+
+      case 'behavior':
+        return {
+          title: 'Sender Routine',
+          detail: isPass
+            ? 'Routine sender during normal business hours'
+            : (isFail ? 'First-time sender at unusual off-hours' : 'Unfamiliar sender or atypical timing')
+        };
+
+      case 'nlp':
+        return {
+          title: 'Message Tone',
+          detail: isPass
+            ? 'Normal context without fake urgency or threats'
+            : (isFail ? 'High-pressure urgency or deceptive links detected' : 'Urgent tone or promotional links detected')
+        };
+
+      default:
+        return {
+          title: rawData.text || key,
+          detail: rawData.detail || ''
+        };
+    }
+  }
+
+  function renderLayerList(analysis) {
+    if (!analysis || !analysis.layers) return;
+
+    const layerEls = {
+      sanitization: el.layerSanitization,
+      auth:         el.layerAuth,
+      attach:       el.layerAttach,
+      behavior:     el.layerBehavior,
+      nlp:          el.layerNlp,
+    };
+
+    const iconClassMap = {
+      'fa-check-circle':        { cls: 'fas fa-check-circle aegis-icon-pass',    liClass: 'layer-pass'    },
+      'fa-times-circle':        { cls: 'fas fa-times-circle aegis-icon-fail',    liClass: 'layer-fail'    },
+      'fa-exclamation-triangle':{ cls: 'fas fa-exclamation-triangle aegis-icon-warn', liClass: 'layer-warn' },
+      'fa-minus-circle':        { cls: 'fas fa-minus-circle aegis-icon-skip',    liClass: 'layer-skip'    },
+      'fa-spinner':             { cls: 'fas fa-spinner fa-spin aegis-icon-pending', liClass: 'layer-pending' },
+    };
+
+    Object.entries(layerEls).forEach(([key, listItem]) => {
+      if (!listItem) return;
+      const data = analysis.layers[key] || { text: key, detail: 'N/A', icon: 'fa-minus-circle' };
+      const icon = iconClassMap[data.icon] || iconClassMap['fa-minus-circle'];
+      listItem.className = icon.liClass;
+
+      if (isTechnicalView) {
+        // Technical engineering view
+        listItem.innerHTML = `
+          <i class="${icon.cls} aegis-layer-icon"></i>
+          <div class="aegis-layer-content">
+            <span class="aegis-layer-title">${data.text}</span>
+            <span class="aegis-layer-detail">${data.detail}</span>
+          </div>`;
+      } else {
+        // Simplified plain-language view for non-technical users
+        const simple = getSimplifiedLayer(key, data);
+        listItem.innerHTML = `
+          <i class="${icon.cls} aegis-layer-icon"></i>
+          <div class="aegis-layer-content">
+            <span class="aegis-layer-title">${simple.title}</span>
+            <span class="aegis-layer-detail">${simple.detail}</span>
+          </div>`;
+      }
+    });
+
+    if (el.xaiText) {
+      if (isTechnicalView) {
+        el.xaiText.textContent = analysis.xai;
+      } else {
+        if (analysis.riskLevel === 'Safe') {
+          el.xaiText.textContent = 'This email passed all security checks. The sender is verified, no fake rush was detected, and there are no dangerous links or attachments.';
+        } else if (analysis.riskLevel === 'Critical') {
+          el.xaiText.textContent = 'HIGH RISK WARNING: Do not click any links or download attachments. This email appears to be an impersonation or fraud attempt.';
+        } else {
+          el.xaiText.textContent = 'CAUTION: Exercise care before responding or opening links. This email contains unfamiliar signals or unverified sender details.';
+        }
+      }
+    }
+  }
+
+  function updateToggleBtnState() {
+    if (el.viewToggleCb) {
+      el.viewToggleCb.checked = isTechnicalView;
+    }
+    if (el.viewToggleWrap) {
+      el.viewToggleWrap.classList.toggle('active-tech', isTechnicalView);
+      el.viewToggleWrap.title = isTechnicalView 
+        ? 'Technical details active — Click to switch back to simplified plain language' 
+        : 'Simplified view active — Click to switch to technical engineering details';
+    }
+    if (el.viewToggleText) {
+      el.viewToggleText.textContent = isTechnicalView ? 'Technical View' : 'Technical View';
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Privacy & Telemetry Sanitization Helpers (Post-Defense Item 3)
+  // ---------------------------------------------------------------------------
+  function extractSenderDomain(sender) {
+    if (!sender) return '[DOMAIN]';
+    const match = sender.match(/@([a-zA-Z0-9.\-]+)/);
+    if (match && match[1]) {
+      return match[1].toLowerCase().replace(/[>\])]+$/, '').trim();
+    }
+    const parts = sender.split('@');
+    if (parts.length > 1) {
+      return parts[1].toLowerCase().replace(/[>\])]+$/, '').trim();
+    }
+    return sender.toLowerCase().trim();
+  }
+
+  function getScrubbedSubject(emailCtx) {
+    if (!emailCtx) return '[SUBJECT]';
+    if (emailCtx.scrubbedSubject) return emailCtx.scrubbedSubject;
+    if (typeof window !== 'undefined' && window.AegisPIIScrubber && typeof window.AegisPIIScrubber.scrubText === 'function') {
+      return window.AegisPIIScrubber.scrubText(emailCtx.subject || '').scrubbedText;
+    }
+    let s = (emailCtx.subject || '').trim();
+    s = s.replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g, '[EMAIL]');
+    s = s.replace(/\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, '[PHONE]');
+    s = s.replace(/\b\d{7,16}\b/g, '[NUMBER]');
+    return s || '[SUBJECT]';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sensitivity Preset-Aware Tier Adjustment (Post-Defense Item 4)
+  // Enforces that backend floors (VT-malicious, attachment) always stay Critical
+  // and explanation text matches the displayed tier.
+  // ---------------------------------------------------------------------------
+  function applyPresetTier(analysis, sensitivity) {
+    if (!analysis || typeof analysis.score !== 'number') return analysis;
+
+    const warn = (sensitivity && typeof sensitivity.warningThreshold === 'number') ? sensitivity.warningThreshold : 45;
+    const crit = (sensitivity && typeof sensitivity.criticalThreshold === 'number') ? sensitivity.criticalThreshold : 75;
+
+    // Hard backend threat floors that MUST ALWAYS remain Critical (§6.5):
+    // 1. VirusTotal confirmed malicious link destination(s)
+    // 2. VirusTotal confirmed malicious attachment file signature(s)
+    // 3. Flags with critical severity
+    // 4. Whitelist auto-revocation triggers
+    const hasCriticalFloor = Boolean(
+      (analysis.flags && analysis.flags.some(f => f.severity === 'critical' || (f.title && f.title.toLowerCase().includes('malicious')))) ||
+      (analysis.s_vt && analysis.s_vt >= 75) ||
+      (analysis.vt_tier === 'malicious') ||
+      (analysis.layers && analysis.layers.attach && analysis.layers.attach.icon === 'fa-times-circle') ||
+      (analysis._whitelist && analysis._whitelist.revoked)
+    );
+
+    // Backend Warning Threat Floor (§6.5, PR-09):
+    // Multi-indicator warning threat floor sets score to 52 when:
+    // (a) both attachment threat and urgency/NLP threat are present, OR
+    // (b) s_heuristic >= 40 (high raw heuristic risk)
+    // If the backend assigned Warning due to a floor, never display below Warning.
+    const backendTier = analysis.riskLevel || analysis.tier;
+    const isWarningFloor = Boolean(
+      (backendTier === 'Warning' || analysis.score === 52) && (
+        (analysis.score === 52) ||
+        (analysis.s_heuristic && analysis.s_heuristic >= 40) ||
+        (
+          analysis.flags &&
+          analysis.flags.some(f => f.title && f.title.toLowerCase().includes('attachment')) &&
+          (
+            analysis.flags.some(f => f.title && f.title.toLowerCase().includes('urgency')) ||
+            (analysis.s_nlp && analysis.s_nlp >= 25)
+          )
+        )
+      )
+    );
+
+    let newTier;
+    let newDesc;
+
+    if (hasCriticalFloor) {
+      newTier = 'Critical';
+      newDesc = analysis.desc || 'High-probability phishing attempt detected (Threat floor enforced).';
+      if (!analysis.xai || !analysis.xai.includes('Threat floor enforced')) {
+        analysis.xai = `CRITICAL SECURITY ALERT (Threat floor enforced: malicious link/attachment confirmed). ${analysis.xai || ''}`.trim();
+      }
+    } else {
+      if (analysis.score >= crit) {
+        newTier = 'Critical';
+        newDesc = 'High-probability phishing attempt detected. Do not click links, send funds, or disclose credentials.';
+        if (!analysis.xai || !analysis.xai.toLowerCase().includes('critical')) {
+          analysis.xai = `CRITICAL ALERT (Sensitivity Preset Cut-off ≥ ${crit}%): ${analysis.xai || newDesc}`;
+        }
+      } else if (analysis.score >= warn || isWarningFloor) {
+        newTier = 'Warning';
+        if (isWarningFloor && analysis.score < warn) {
+          newDesc = analysis.desc || 'Suspicious characteristics detected (Warning floor enforced).';
+          if (!analysis.xai || !analysis.xai.includes('Warning floor enforced')) {
+            analysis.xai = `WARNING (Warning threat floor enforced: multi-indicator threat / heuristic floor). ${analysis.xai || newDesc}`;
+          }
+        } else {
+          newDesc = 'Suspicious characteristics detected. Exercise caution before opening links or attachments.';
+          if (!analysis.xai || (!analysis.xai.toLowerCase().includes('warning') && !analysis.xai.toLowerCase().includes('caution'))) {
+            analysis.xai = `WARNING (Sensitivity Preset Cut-off ≥ ${warn}%): ${analysis.xai || newDesc}`;
+          }
+        }
+      } else {
+        newTier = 'Safe';
+        newDesc = 'No significant threats detected. Standard communication pattern.';
+        if (!analysis.xai || !analysis.xai.toLowerCase().includes('safe')) {
+          analysis.xai = `Aegis evaluated this email as Safe under current sensitivity preset (Warning cut-off: ${warn}%). ${analysis.xai || newDesc}`;
+        }
+      }
     }
 
+    analysis.riskLevel = newTier;
+    analysis.riskClass = `risk-${newTier.toLowerCase()}`;
+    analysis.desc = newDesc;
+    return analysis;
+  }
+
+  function _renderPopulatedAnalysis(analysis) {
     const levelLower = (analysis.riskLevel || 'safe').toLowerCase();
     const threatClass = `threat-${levelLower}`;
     const riskClass = analysis.riskClass || `risk-${levelLower}`;
@@ -709,33 +967,12 @@
       }
     }
 
-    // --- Layer Color-Coded Status ---
-    const layerEls = {
-      sanitization: el.layerSanitization,
-      auth:         el.layerAuth,
-      attach:       el.layerAttach,
-      behavior:     el.layerBehavior,
-      nlp:          el.layerNlp,
-    };
-
-    // Map icon key â†’ { icon class string, li status class }
-    const iconClassMap = {
-      'fa-check-circle':        { cls: 'fas fa-check-circle aegis-icon-pass',    liClass: 'layer-pass'    },
-      'fa-times-circle':        { cls: 'fas fa-times-circle aegis-icon-fail',    liClass: 'layer-fail'    },
-      'fa-exclamation-triangle':{ cls: 'fas fa-exclamation-triangle aegis-icon-warn', liClass: 'layer-warn' },
-      'fa-minus-circle':        { cls: 'fas fa-minus-circle aegis-icon-skip',    liClass: 'layer-skip'    },
-      'fa-spinner':             { cls: 'fas fa-spinner fa-spin aegis-icon-pending', liClass: 'layer-pending' },
-    };
-
-    Object.entries(layerEls).forEach(([key, listItem]) => {
-      const data = analysis.layers[key];
-      const icon = iconClassMap[data.icon] || iconClassMap['fa-minus-circle'];
-      // Apply color-coded class to the <li> itself (replaces any previous status class)
-      listItem.className = icon.liClass;
-      listItem.innerHTML = `<i class="${icon.cls}"></i> ${data.text}: ${data.detail}`;
-    });
-
-    el.xaiText.textContent = analysis.xai;
+    // --- Layer Color-Coded Status & Two-Tier XAI ---
+    if (currentEmailContext) {
+      currentEmailContext._lastAnalysis = analysis;
+    }
+    updateToggleBtnState();
+    renderLayerList(analysis);
 
     if (analysis.riskLevel === 'Safe') {
       el.whitelistBtn.style.display = 'flex';
@@ -745,6 +982,28 @@
       el.whitelistBtn.style.display = 'none';
       el.blockBtn.style.display     = 'flex';
       el.reportBtn.style.display    = 'flex';
+    }
+  }
+
+  function populateAnalysis(analysis) {
+    if (!currentEmailContext || (currentEmailContext.subject && /^conversations?$/i.test(currentEmailContext.subject.trim()))) {
+      currentEmailContext = null;
+      el.overlay.classList.remove('threat-safe', 'threat-warning', 'threat-critical');
+      showIdle();
+      return;
+    }
+
+    // Apply sensitivity preset tiering (strictly preserving backend threat floors)
+    if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['aegis_sensitivity'], (res) => {
+        const sens = res && res.aegis_sensitivity;
+        if (sens) {
+          applyPresetTier(analysis, sens);
+        }
+        _renderPopulatedAnalysis(analysis);
+      });
+    } else {
+      _renderPopulatedAnalysis(analysis);
     }
   }
 
@@ -806,7 +1065,7 @@
     el.famLayers.innerHTML = '';
     const layerMap = [
       { key: 'sanitization', label: 'Pre-processing: HTML Sanitization' },
-      { key: 'auth',         label: 'Layer 1: Email Auth (SPF/DKIM/DMARC)' },
+      { key: 'auth',         label: 'Layer 1: Email Auth (SPF/DKIM)' },
       { key: 'attach',       label: 'Layer 2: Attachment Intelligence' },
       { key: 'behavior',     label: 'Layer 3: Behavioral Analysis' },
       { key: 'nlp',          label: 'Layer 4: Deep NLP Context' },
@@ -825,6 +1084,8 @@
           iconClass = 'fas fa-exclamation'; iconType = 'icon-warn'; statusClass = 'status-warn'; statusText = 'Warn'; break;
         case 'fa-spinner':
           iconClass = 'fas fa-spinner fa-spin'; iconType = 'icon-pending'; statusClass = 'status-pending'; statusText = 'Scanning'; break;
+        case 'fa-minus-circle':
+          iconClass = 'fas fa-minus'; iconType = 'icon-skip'; statusClass = 'status-skip'; statusText = (key === 'auth') ? 'Not verified' : 'Skip'; break;
         default:
           iconClass = 'fas fa-minus'; iconType = 'icon-skip'; statusClass = 'status-skip'; statusText = 'Skip';
       }
@@ -954,50 +1215,64 @@
   // ---------------------------------------------------------------------------
   const DETECTION_LOG_KEY = 'aegis_detection_log';
   const FEEDBACK_LOG_KEY = 'aegis_feedback_log';
+  const SETTINGS_LOGGING_KEY = 'aegis_logging_enabled';
 
   function logDetectionResult(emailCtx, analysis) {
     if (!emailCtx || !analysis) return;
-    const emailHash = analysis.emailHash
-      || emailCtx.emailHash
-      // Fallback: stable dedup key from sender + subject when backend hasn't provided a hash
-      // (offline/fallback path — btoa is always available in extension contexts)
-      || btoa(encodeURIComponent(
-          `${emailCtx.senderEmail || ''}|${emailCtx.subject || ''}`
-        )).slice(0, 40);
-    if (!emailHash) return;
 
-    const entry = {
-      emailHash: emailHash,
-      score: typeof analysis.score === 'number' ? analysis.score : 0,
-      riskLevel: analysis.riskLevel || 'Safe',
-      sender: emailCtx.senderEmail || '[SENDER]',
-      subject: emailCtx.subject || '[SUBJECT]',
-      source: analysis._source || 'local',
-      analyzedAt: new Date().toISOString(),
-      userOverride: !!analysis._userOverride,
+    const performLog = (loggingEnabled) => {
+      if (loggingEnabled === false) {
+        return; // User disabled detection logging
+      }
+
+      const emailHash = analysis.emailHash
+        || emailCtx.emailHash
+        || btoa(encodeURIComponent(
+            `${emailCtx.senderEmail || ''}|${emailCtx.subject || ''}`
+          )).slice(0, 40);
+      if (!emailHash) return;
+
+      const entry = {
+        emailHash: emailHash,
+        score: typeof analysis.score === 'number' ? analysis.score : 0,
+        riskLevel: analysis.riskLevel || 'Safe',
+        sender: extractSenderDomain(emailCtx.senderEmail),
+        subject: getScrubbedSubject(emailCtx),
+        source: analysis._source || 'local',
+        analyzedAt: new Date().toISOString(),
+        userOverride: !!analysis._userOverride,
+      };
+
+      if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get([DETECTION_LOG_KEY], (res) => {
+          let list = (res && res[DETECTION_LOG_KEY]) || [];
+          const existingIdx = list.findIndex(e => e.emailHash === emailHash);
+          if (existingIdx !== -1) {
+            list[existingIdx] = Object.assign({}, list[existingIdx], entry);
+          } else {
+            list.unshift(entry);
+          }
+          if (list.length > 100) list = list.slice(0, 100);
+          chrome.storage.local.set({ [DETECTION_LOG_KEY]: list });
+        });
+      }
+
+      if (isExtensionContextValid() && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage({
+            action: 'AEGIS_LOG_RESULT',
+            payload: entry
+          });
+        } catch (_) {}
+      }
     };
 
     if (isExtensionContextValid() && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get([DETECTION_LOG_KEY], (res) => {
-        let list = (res && res[DETECTION_LOG_KEY]) || [];
-        const existingIdx = list.findIndex(e => e.emailHash === emailHash);
-        if (existingIdx !== -1) {
-          list[existingIdx] = Object.assign({}, list[existingIdx], entry);
-        } else {
-          list.unshift(entry);
-        }
-        if (list.length > 100) list = list.slice(0, 100);
-        chrome.storage.local.set({ [DETECTION_LOG_KEY]: list });
+      chrome.storage.local.get([SETTINGS_LOGGING_KEY], (res) => {
+        performLog(res ? res[SETTINGS_LOGGING_KEY] : true);
       });
-    }
-
-    if (isExtensionContextValid() && chrome.runtime && chrome.runtime.sendMessage) {
-      try {
-        chrome.runtime.sendMessage({
-          action: 'AEGIS_LOG_RESULT',
-          payload: entry
-        });
-      } catch (_) {}
+    } else {
+      performLog(true);
     }
   }
 
@@ -1135,6 +1410,17 @@
 
   function attachEventListeners() {
     el.closeBtn.addEventListener('click', closeAnalyzer);
+
+    if (el.viewToggleCb) {
+      el.viewToggleCb.addEventListener('change', (e) => {
+        e.stopPropagation();
+        isTechnicalView = e.target.checked;
+        updateToggleBtnState();
+        if (currentEmailContext && currentEmailContext._lastAnalysis) {
+          renderLayerList(currentEmailContext._lastAnalysis);
+        }
+      });
+    }
 
     if (el.reloadBtn) {
       el.reloadBtn.addEventListener('click', () => {
@@ -1478,7 +1764,10 @@
     enforceListViewPolicy();
     window.addEventListener('hashchange', enforceListViewPolicy);
     window.addEventListener('popstate', enforceListViewPolicy);
-    setInterval(enforceListViewPolicy, 250);
+    const intervalId = setInterval(enforceListViewPolicy, 250);
+    if (typeof intervalId === 'object' && typeof intervalId.unref === 'function') {
+      intervalId.unref();
+    }
     console.log(`${LOG_PREFIX} Overlay initialized.`);
   }
 
@@ -1493,5 +1782,18 @@
     closeFullAnalysisModal,
     openFullAnalysisModal,
     getCurrentContext: () => currentEmailContext,
+    extractSenderDomain,
+    getScrubbedSubject,
+    applyPresetTier,
+    logDetectionResult,
   };
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      extractSenderDomain,
+      getScrubbedSubject,
+      applyPresetTier,
+      logDetectionResult,
+    };
+  }
 })();

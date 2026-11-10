@@ -1,0 +1,30 @@
+{
+  "live_attempt": {
+    "url": "https://aegis-backend-oybm.onrender.com/api/v1/health",
+    "dns_ip": "216.24.57.18",
+    "dns_resolved": true,
+    "request_timestamp": "2026-11-08T12:36:51.276603+00:00",
+    "status": "HTTP Connection Timed Out (>75s)",
+    "explanation": "Render Free Tier instances automatically spin down to suspended state after 15 minutes of inactivity. In free tier deployments where monthly free active instance hours (750 hours/month) are exhausted or container cold wakeup hangs during container provisioning, Render holds incoming connections until client-side timeout. Live ping timed out after >75s on current execution.",
+    "historical_telemetry_source": "aegis-backend/scripts/measure_live_api.py @ commit c766732",
+    "historical_measurements": {
+      "cold_start_delay_ms": 52538.2,
+      "cold_start_delay_sec": 52.5,
+      "warm_samples_n": 30,
+      "warm_median_ms": 285.0,
+      "warm_p95_ms": 485.6,
+      "warm_min_ms": 142.1,
+      "warm_max_ms": 518.2
+    }
+  },
+  "render_region": {
+    "service_name": "aegis-backend-oybm",
+    "service_url": "https://aegis-backend-oybm.onrender.com",
+    "documented_regions_in_repo": [
+      "Singapore (singapore)",
+      "Oregon, USA (us-west-1)"
+    ],
+    "dashboard_confirmation_status": "Requires Render Web Dashboard Console Access",
+    "notes": "Render Free Tier Web Services are provisioned in Oregon (us-west-1), Frankfurt (eu-central-1), Ohio (us-east-2), or Singapore. The repository environment configuration (evidences/06_live_health_ping.json) records the region as 'Singapore/Oregon'. Actual active instance region must be confirmed via the Region field in the Render dashboard service settings under Service Overview."
+  }
+}

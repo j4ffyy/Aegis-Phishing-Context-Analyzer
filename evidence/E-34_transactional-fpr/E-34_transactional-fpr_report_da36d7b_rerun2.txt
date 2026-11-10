@@ -1,0 +1,17 @@
+================================================================================
+AEGIS TRANSACTIONAL EMAIL FALSE-POSITIVE AUDIT REPORT (E-34)
+Commit: da36d7b | Timestamp: 2026-11-09T10:13:42.917777+00:00
+================================================================================
+
+1. SUMMARY OF FINDINGS
+  Total Transactional Samples Audited: 46
+  Legitimate Transactional Samples:    33
+  Standalone DistilBERT False Positives: 8 of 33 (24.2% FPR)
+  Composite Multi-Layer False Positives:  0 of 33 (0.0% FPR)
+
+2. ARCHITECTURAL FINDINGS
+  - DistilBERT alone exhibits a false positive rate on legitimate transactional receipts and bills
+    due to sub-token overlap with payment and account keywords ('payment', 'order', 'statement').
+  - The Aegis multi-layer scoring engine resolves these errors when sender domain and behavioral
+    signals are evaluated in combination, eliminating the false alarms.
+================================================================================

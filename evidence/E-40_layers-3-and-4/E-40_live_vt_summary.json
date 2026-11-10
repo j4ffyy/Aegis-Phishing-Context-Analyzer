@@ -1,0 +1,11 @@
+{
+  "evaluation_title": "Layer 4 Live VirusTotal API Telemetry on Link-Bearing Subset",
+  "timestamp": "2026-11-08 16:34:37 UTC",
+  "api_key_redacted": "cac91e1d...562b26",
+  "total_link_bearing_emails": 25,
+  "phishing_emails_count": 13,
+  "legitimate_emails_count": 12,
+  "total_unique_urls_queried": 20,
+  "live_tier_changes_observed": 0,
+  "round2_vs_round3_explanation": "In Round 2, because VT_API_KEY was unexported in that run's shell environment, the evaluation script fell back to a synthetic simulation branch (assigning s_vt=60 to all phishing emails), producing 13 simulated tier changes that were incorrectly attributed to 'seed cache' and 'Warning to Critical'. In Round 3 live execution with the authenticated API key, live VirusTotal lookups were conducted across the historical URLs. Because these historical URLs (from 2002-2005 corpora) are either legacy corporate domains (e.g., wamu.com rated harmless) or expired unrated endpoints, live security engines return 0 malicious hits. Consequently, live Layer 4 lookups on historical 2005 corpora produce exactly 0 tier changes. The prior Round 2 seed-cache claim is formally retracted and replaced by this empirical live audit."
+}

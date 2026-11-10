@@ -1,0 +1,38 @@
+[
+  {
+    "test_case_id": "TC-01",
+    "name": "Legitimate business correspondence template",
+    "sample_id": 50,
+    "dataset_csv": "aegis-backend/data/test_dataset.csv",
+    "subject": "Routine Monthly Team Sync & Agenda Review",
+    "senderEmail": "colleague@company.com",
+    "composite_score": 14,
+    "assigned_tier": "Safe",
+    "threshold_rule": "Score <= 44 -> Safe",
+    "outcome": "PASS (TN=50/50, 0.0% FPR)"
+  },
+  {
+    "test_case_id": "TC-02",
+    "name": "Template-generated BEC financial wire archetype",
+    "sample_id": 37,
+    "dataset_csv": "aegis-backend/data/test_dataset.csv",
+    "subject": "URGENT: Executive Wire Transfer Authorization Required Immediately",
+    "senderEmail": "ceo@external-holding-corp.org",
+    "composite_score": 53,
+    "assigned_tier": "Warning",
+    "threshold_rule": "Score >= 45 -> Warning or Critical",
+    "outcome": "PASS (Detected at composite score 53)"
+  },
+  {
+    "test_case_id": "TC-03",
+    "name": "Template-generated account lock & login lure archetype",
+    "sample_id": 24,
+    "dataset_csv": "aegis-backend/data/test_dataset.csv",
+    "subject": "URGENT: Your account has been suspended - verify credentials",
+    "senderEmail": "security@bdo-reset-now.loan",
+    "composite_score": 51,
+    "assigned_tier": "Warning",
+    "threshold_rule": "Score >= 45 -> Warning or Critical",
+    "outcome": "PASS (Detected at composite score 51)"
+  }
+]

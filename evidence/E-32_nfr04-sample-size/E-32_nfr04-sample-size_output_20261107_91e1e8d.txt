@@ -1,0 +1,58 @@
+================================================================================
+AEGIS PHISHING ANALYZER -- STATISTICAL SAMPLE SIZE CALCULATION (E-32)
+Item: I-03 (Full-Pipeline Evaluation & NFR04 Sample Size Justification)
+Generated: 2026-11-07T15:00:02.729100+00:00
+Reference Standard: Wilson Score Confidence Interval (95% Two-Sided, z=1.95996)
+================================================================================
+
+1. BACKGROUND & REQUIREMENT SPECIFICATION
+--------------------------------------------------------------------------------
+Non-Functional Requirement 04 (NFR04) specifies:
+  'The system shall achieve a minimum threat recall of 90.0% on phishing vectors.'
+
+In empirical hypothesis testing, achieving a point estimate recall >= 90% is
+insufficient if the confidence interval lower bound spans below 90.0%.
+To rigorously confirm NFR04 at alpha = 0.05, the lower bound of the 95% Wilson
+score interval must satisfy: L_95(Recall) >= 90.0%.
+
+2. MINIMUM PHISHING SAMPLES NEEDED BY OBSERVED RECALL RATE
+--------------------------------------------------------------------------------
+Observed Recall    | Min N Phishing   | True Positives (k)   | Wilson 95% CI       
+--------------------------------------------------------------------------------
+ 91.0%             | 3361             | 3059                 | [90.00%, 91.94%]
+ 92.0%             | 830              | 764                  | [90.01%, 93.70%]
+ 93.0%             | 362              | 337                  | [90.00%, 95.28%]
+ 94.0%             | 204              | 192                  | [90.00%, 96.60%]
+ 95.0%             | 127              | 121                  | [90.08%, 97.82%]
+ 96.0%             | 84               | 81                   | [90.02%, 98.78%]
+ 97.0%             | 69               | 67                   | [90.03%, 99.20%]
+ 98.0%             | 53               | 52                   | [90.06%, 99.67%]
+ 99.0%             | 35               | 35                   | [90.11%, 100.00%]
+100.0%             | 35               | 35                   | [90.11%, 100.00%]
+--------------------------------------------------------------------------------
+
+3. EVALUATION OF CAPSTONE 2 TEST DATASET (N = 50 Phishing Emails)
+--------------------------------------------------------------------------------
+The Capstone 2 offline test dataset evaluates 50 curated phishing emails.
+Below are the exact Wilson 95% confidence intervals for observed outcomes:
+
+a) Perfect Detection (Hypothetical Upper Bound, 50/50, 100.0%):
+   Recall: 100.0% -> Wilson 95% CI: [92.87%, 100.00%] (Lower bound >= 90% PASSES)
+
+b) Placeholder Benchmark with Synthetic Auth Cues (43/50, 86.0% Recall):
+   Recall:  86.0% -> Wilson 95% CI: [73.81%, 93.05%] (Lower bound < 90% FAILS NFR04)
+
+c) Neutralized Auth Pipeline Benchmark (33/50, 66.0% Recall):
+   Recall:  66.0% -> Wilson 95% CI: [52.15%, 77.56%] (Lower bound < 90% FAILS NFR04)
+
+4. METHODOLOGICAL FINDING & AUDIT CONCLUSION
+--------------------------------------------------------------------------------
+1. If true operational recall is 95.0%, a minimum of N = 127 phishing emails
+   is mathematically necessary for the 95% lower bound to clear 90.0%.
+2. At N = 50 phishing emails, any observed recall below 98.0% (k <= 48/50)
+   yields a Wilson lower bound strictly below 90.0%.
+3. Therefore, with N = 50 samples, NFR04 cannot be formally validated as met
+   under neutral authentication conditions. As required by Plan §7 (Item I-03),
+   the manuscript must honestly report that NFR04 was NOT formally met under
+   neutral authentication, and the sample size was statistically constrained.
+================================================================================

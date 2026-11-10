@@ -1,0 +1,20 @@
+# AEGIS Supplementary Evaluation: Steps 3 & 4 (DistilBERT ONNX Loaded)
+
+- **Evaluated Git Commit Hash:** `8c42233da6027148ccf0f735d7217b991d18bc3c`
+- **Evaluation Dataset:** `aegis-backend/data/test_dataset.csv` (N=100: 50 phishing / 50 legitimate)
+- **Execution Timestamp:** 2026-10-24 23:52:41
+
+## DistilBERT Pure P_phish Distribution
+- **Phishing Rows (N=50):** Min = `0.9959` | Median = `1.0000` | Max = `1.0000`
+- **Legitimate Rows (N=50):** Min = `0.0000` | Median = `0.0008` | Max = `1.0000`
+
+| Experiment / Configuration | Accuracy (%) | Precision (%) | Recall (%) | FPR (%) | F1-Score (%) | ROC-AUC [95% Boot CI] | Latency (Med / p95) | Notes / Protocol |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Step 3 (a): Full Pipeline (Synthetic Auth, ONNX Loaded) | 100.00% [96.3%, 100.0%] | 100.00% | 100.00% [92.9%, 100.0%] | 0.00% [0.0%, 7.1%] | 100.00% | 1.0000 [1.0000, 1.0000] | 126.4 ms / 161.3 ms | DistilBERT ONNX active; synthetic auth flags (TP=50, TN=50) |
+| Step 3 (b): Full Pipeline (Neutral Auth, ONNX Loaded) | 100.00% [96.3%, 100.0%] | 100.00% | 100.00% [92.9%, 100.0%] | 0.00% [0.0%, 7.1%] | 100.00% | 1.0000 [1.0000, 1.0000] | 127.0 ms / 159.9 ms | DistilBERT ONNX active; neutral auth flags (TP=50, TN=50) |
+| Step 4: 1. Heuristics only (ensemble off) | 92.00% [85.0%, 95.9%] | 100.00% | 84.00% [71.5%, 91.7%] | 0.00% [0.0%, 7.1%] | 91.30% | 0.9980 [0.9925, 1.0000] | N/A (Component slice) | Ablation run under neutral auth with loaded DistilBERT ONNX |
+| Step 4: 2. Heuristics + ensemble | 79.00% [70.0%, 85.8%] | 100.00% | 58.00% [44.2%, 70.6%] | 0.00% [0.0%, 7.1%] | 73.42% | 0.9976 [0.9904, 1.0000] | N/A (Component slice) | Ablation run under neutral auth with loaded DistilBERT ONNX |
+| Step 4: 3. DistilBERT pure (S_base only) | 90.00% [82.6%, 94.5%] | 83.33% | 100.00% [92.9%, 100.0%] | 20.00% [11.2%, 33.0%] | 90.91% | 0.9200 [0.8667, 0.9674] | N/A (Component slice) | Ablation run under neutral auth with loaded DistilBERT ONNX |
+| Step 4: 4. NLP incl. adjustments | 90.00% [82.6%, 94.5%] | 83.33% | 100.00% [92.9%, 100.0%] | 20.00% [11.2%, 33.0%] | 90.91% | 1.0000 [1.0000, 1.0000] | N/A (Component slice) | Ablation run under neutral auth with loaded DistilBERT ONNX |
+| Step 4: 5. Heuristics + NLP (ensemble off) | 100.00% [96.3%, 100.0%] | 100.00% | 100.00% [92.9%, 100.0%] | 0.00% [0.0%, 7.1%] | 100.00% | 1.0000 [1.0000, 1.0000] | N/A (Component slice) | Ablation run under neutral auth with loaded DistilBERT ONNX |
+| Step 4: 6. Full pipeline as submitted | 100.00% [96.3%, 100.0%] | 100.00% | 100.00% [92.9%, 100.0%] | 0.00% [0.0%, 7.1%] | 100.00% | 1.0000 [1.0000, 1.0000] | N/A (Component slice) | Ablation run under neutral auth with loaded DistilBERT ONNX |

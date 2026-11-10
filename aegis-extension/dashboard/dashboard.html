@@ -38,12 +38,6 @@
           Analysis Log
         </a>
       </li>
-      <li>
-        <a href="#section-metrics" class="nav-link" id="nav-metrics" data-section="metrics" role="link">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-          Model Metrics
-        </a>
-      </li>
     </ul>
 
     <div class="sidebar-footer">
@@ -191,6 +185,43 @@
       </div>
 
       <div class="sensitivity-card">
+        <!-- Guided Sensitivity Presets (Row 21 / I-12) -->
+        <div class="sens-presets-wrap" id="sens-presets-wrap">
+          <div class="sens-presets-header">
+            <span class="sens-tier-name">Guided Protection Profiles</span>
+            <span class="sens-tier-desc">Select an operational preset or fine-tune thresholds below. Hover over each preset for risk guidance.</span>
+          </div>
+          <div class="sens-presets-group" role="group" aria-label="Guided Protection Profiles">
+            <button type="button" class="preset-btn" id="preset-conservative"
+              title="Conservative (High Protection): Warning ≥ 35%, Critical ≥ 65%. Prioritizes maximum threat interception. Recommended for financial, executive, or wire-transfer inboxes."
+              data-warn="35" data-crit="65">
+              <span class="preset-btn-icon">🛡️</span>
+              <div class="preset-btn-text">
+                <span class="preset-btn-title">Conservative</span>
+                <span class="preset-btn-sub">35% / 65% · High Protection</span>
+              </div>
+            </button>
+            <button type="button" class="preset-btn preset-btn--active" id="preset-standard"
+              title="Standard (Default): Warning ≥ 45%, Critical ≥ 75%. Balanced sensitivity for standard operational SME workflows."
+              data-warn="45" data-crit="75">
+              <span class="preset-btn-icon">⚖️</span>
+              <div class="preset-btn-text">
+                <span class="preset-btn-title">Standard</span>
+                <span class="preset-btn-sub">45% / 75% · Balanced (Default)</span>
+              </div>
+            </button>
+            <button type="button" class="preset-btn" id="preset-aggressive"
+              title="Aggressive (Low Alert Volume): Warning ≥ 55%, Critical ≥ 85%. Requires stronger multi-layer corroboration before alerting. Minimizes false alerts in high-volume environments."
+              data-warn="55" data-crit="85">
+              <span class="preset-btn-icon">⚡</span>
+              <div class="preset-btn-text">
+                <span class="preset-btn-title">Aggressive</span>
+                <span class="preset-btn-sub">55% / 85% · Low Alert Volume</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <div class="sens-row" id="sens-row-warning">
           <div class="sens-label-group">
             <span class="sens-tier-dot sens-tier-dot--amber"></span>
@@ -255,6 +286,14 @@
         <p class="section-desc">The last 100 email analyses processed by Aegis on this device. Data is stored locally and never transmitted.</p>
       </div>
 
+      <div class="log-toggle-container" style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+        <input type="checkbox" id="toggle-detection-logging" checked style="cursor: pointer; width: 16px; height: 16px;">
+        <label for="toggle-detection-logging" style="font-size: 13px; color: var(--text-secondary); cursor: pointer; user-select: none;">
+          Enable Detection Log (store scan history locally on this device)
+        </label>
+        <span id="logging-status-text" style="margin-left: auto; font-size: 12px; color: #10b981; font-weight: 500;">Active</span>
+      </div>
+
       <div class="log-filter-bar">
         <button class="log-filter-btn active" data-filter="all" id="filter-all">All</button>
         <button class="log-filter-btn" data-filter="Critical" id="filter-critical">Critical</button>
@@ -293,156 +332,6 @@
         <button class="page-btn" id="page-next" aria-label="Next page">Next ›</button>
       </div>
     </section><!-- /#section-log -->
-
-    <!-- ══ SECTION: Model Metrics ══ -->
-    <section class="dash-section" id="section-metrics" aria-labelledby="nav-metrics">
-      <div class="section-header">
-        <h2 class="section-title">Model Evaluation Metrics</h2>
-        <p class="section-desc">Benchmark performance of the Aegis 4-layer pipeline on the PhishTank + Enron held-out evaluation corpus (n = 2,000 emails, 50/50 split).</p>
-      </div>
-
-      <div class="metrics-grid">
-        <div class="metric-card" id="metric-accuracy">
-          <span class="metric-label">Accuracy</span>
-          <div class="metric-gauge-ring" data-pct="94.3" data-color="#1a73e8">
-            <svg class="gauge-svg" viewBox="0 0 80 80">
-              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
-              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-accuracy"/>
-            </svg>
-            <span class="gauge-val" id="val-accuracy">94.3%</span>
-          </div>
-          <span class="metric-sub">Overall correct classifications</span>
-        </div>
-
-        <div class="metric-card" id="metric-precision">
-          <span class="metric-label">Precision</span>
-          <div class="metric-gauge-ring" data-pct="93.1" data-color="#b06000">
-            <svg class="gauge-svg" viewBox="0 0 80 80">
-              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
-              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-precision"/>
-            </svg>
-            <span class="gauge-val" id="val-precision">93.1%</span>
-          </div>
-          <span class="metric-sub">Correct positive identifications</span>
-        </div>
-
-        <div class="metric-card" id="metric-recall">
-          <span class="metric-label">Recall</span>
-          <div class="metric-gauge-ring" data-pct="95.8" data-color="#7b3f9e">
-            <svg class="gauge-svg" viewBox="0 0 80 80">
-              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
-              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-recall"/>
-            </svg>
-            <span class="gauge-val" id="val-recall">95.8%</span>
-          </div>
-          <span class="metric-sub">Phishing emails caught</span>
-        </div>
-
-        <div class="metric-card" id="metric-f1">
-          <span class="metric-label">F1-Score</span>
-          <div class="metric-gauge-ring" data-pct="94.4" data-color="#188038">
-            <svg class="gauge-svg" viewBox="0 0 80 80">
-              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
-              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-f1"/>
-            </svg>
-            <span class="gauge-val" id="val-f1">94.4%</span>
-          </div>
-          <span class="metric-sub">Harmonic mean of P &amp; R</span>
-        </div>
-
-        <div class="metric-card" id="metric-fpr">
-          <span class="metric-label">False Positive Rate</span>
-          <div class="metric-gauge-ring" data-pct="5.7" data-color="#d93025" data-invert="true">
-            <svg class="gauge-svg" viewBox="0 0 80 80">
-              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
-              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-fpr"/>
-            </svg>
-            <span class="gauge-val" id="val-fpr">5.7%</span>
-          </div>
-          <span class="metric-sub">Legitimate emails flagged</span>
-        </div>
-
-        <div class="metric-card" id="metric-latency">
-          <span class="metric-label">Avg. Latency</span>
-          <div class="metric-gauge-ring" data-pct="72" data-color="#000000">
-            <svg class="gauge-svg" viewBox="0 0 80 80">
-              <circle class="gauge-bg" cx="40" cy="40" r="32"/>
-              <circle class="gauge-fill" cx="40" cy="40" r="32" id="ring-latency"/>
-            </svg>
-            <span class="gauge-val" id="val-latency">280ms</span>
-          </div>
-          <span class="metric-sub">End-to-end analysis time</span>
-        </div>
-      </div>
-
-      <!-- Benchmark Comparison Table -->
-      <div class="bench-card">
-        <h3 class="bench-title">Comparative Benchmark — Platform Analysis</h3>
-        <div class="bench-table-wrap">
-          <table class="bench-table" role="table">
-            <thead>
-              <tr>
-                <th scope="col">Platform</th>
-                <th scope="col">Accuracy</th>
-                <th scope="col">Precision</th>
-                <th scope="col">Recall</th>
-                <th scope="col">F1</th>
-                <th scope="col">FPR</th>
-                <th scope="col">XAI</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="bench-row bench-row--highlight">
-                <td><strong>Aegis (Ours)</strong></td>
-                <td class="bench-val--good">94.3%</td>
-                <td class="bench-val--good">93.1%</td>
-                <td class="bench-val--good">95.8%</td>
-                <td class="bench-val--good">94.4%</td>
-                <td class="bench-val--good">5.7%</td>
-                <td><span class="bench-badge bench-badge--yes">Yes</span></td>
-              </tr>
-              <tr class="bench-row">
-                <td>Gmail (Built-in)</td>
-                <td>88.4%</td>
-                <td>85.2%</td>
-                <td>90.1%</td>
-                <td>87.6%</td>
-                <td>11.6%</td>
-                <td><span class="bench-badge bench-badge--no">No</span></td>
-              </tr>
-              <tr class="bench-row">
-                <td>Microsoft Outlook</td>
-                <td>87.1%</td>
-                <td>84.8%</td>
-                <td>88.9%</td>
-                <td>86.8%</td>
-                <td>12.9%</td>
-                <td><span class="bench-badge bench-badge--no">No</span></td>
-              </tr>
-              <tr class="bench-row">
-                <td>ProtonMail</td>
-                <td>82.3%</td>
-                <td>80.1%</td>
-                <td>84.7%</td>
-                <td>82.3%</td>
-                <td>17.7%</td>
-                <td><span class="bench-badge bench-badge--no">No</span></td>
-              </tr>
-              <tr class="bench-row">
-                <td>SpamAssassin</td>
-                <td>79.5%</td>
-                <td>76.3%</td>
-                <td>83.2%</td>
-                <td>79.6%</td>
-                <td>20.5%</td>
-                <td><span class="bench-badge bench-badge--no">No</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </section><!-- /#section-metrics -->
 
   </main><!-- /#main-content -->
 

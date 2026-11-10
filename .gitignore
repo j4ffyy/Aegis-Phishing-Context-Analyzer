@@ -74,6 +74,7 @@ wheels/
 
 # Temporary files & Logs
 *.log
+!evidence/**
 *.tmp
 *.temp
 tmp/
@@ -82,3 +83,20 @@ Mentor_Feedback_Required_Changes.md
 MO-IT200D1 _ S3102 Group 1 Revised Capstone 1 Final Paper.md
 docs/presentation_guide_and_qa_defense.md
 RUN_GUIDE.md
+
+# Large binary / data files — never commit
+*.xlsx
+*.xls
+data/external_corpora/*.tar.bz2
+data/external_corpora/*.tar.gz
+data/external_corpora/*.zip
+
+# Scratch scripts (temporary analysis helpers)
+scratch/
+
+# Raw corpus mbox files (large binary)
+data/external_corpora/*.mbox
+
+extracted_media/
+final docs/
+pyrightconfig.json

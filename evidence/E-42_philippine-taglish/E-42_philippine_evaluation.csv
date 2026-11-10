@@ -1,0 +1,61 @@
+id,brand,label,subject,heur_score,heur_pred,full_score,full_pred,full_tier,s_heuristic,s_nlp
+PH_01,BDO,1,BDO Alert: Account blocked. Mag-login agad,65,1,68,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",42,100
+PH_02,BDO,1,Babala: May unauthorized transaction sa iyong BDO account,65,1,68,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",42,100
+PH_03,BDO,0,BDO Electronic Statement of Account,35,0,52,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",25,80
+PH_04,BDO,0,Special Dining Discounts for BDO Cardholders,35,0,52,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",25,80
+PH_05,BPI,1,BPI Express Online: Mandatory update required,59,1,67,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",38,100
+PH_06,BPI,1,"Claim your BPI Rewards Points worth 5,000 PHP",51,1,63,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",33,96
+PH_07,BPI,0,BPI OTP Confirmation for Fund Transfer,35,0,26,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",25,30
+PH_08,BPI,0,Notice of Scheduled System Maintenance,35,0,26,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",25,30
+PH_09,Metrobank,1,Metrobank Account Locked - Action Required,51,1,63,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",33,96
+PH_10,Metrobank,1,URGENT: Re-activate your Metrobank Credit Card,65,1,68,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",41,100
+PH_11,Metrobank,0,Your Metrobank Monthly Banking Summary,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_12,Metrobank,0,Security Advisory: Beware of Fake Customer Care Callers,8,0,41,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",9,68
+PH_13,GCash,1,Babala: Hindi registered ang iyong GCash SIM,59,1,67,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",38,100
+PH_14,GCash,1,"May natanggap kang PHP 1,500 Ayuda sa GCash",51,1,63,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",33,96
+PH_15,GCash,1,Temporary Deactivation of GCash Account,43,0,58,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",29,88
+PH_16,GCash,0,GCash Transaction Receipt: Express Send,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_17,GCash,0,Pay Bills easily with GCash this month,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_18,GCash,0,Your GSave Monthly Interest Credit Notice,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_19,Maya,1,Kailangan i-update ang iyong Maya account ngayon na,65,1,68,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",41,100
+PH_20,Maya,1,"Maya Special Anniversary Bonus - Claim 1,000 PHP",43,0,58,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",29,88
+PH_21,Maya,0,Maya Payment Receipt - Convenience Store,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_22,Maya,0,Your Maya Card has been successfully linked,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_23,Shopee,1,Babala: Hindi ma-deliver ang iyong Shopee parcel,43,0,58,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",29,88
+PH_24,Shopee,1,Huling Paalala: Overdue SPayLater Account,65,1,68,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",42,100
+PH_25,Shopee,0,Parcel Out for Delivery: Order #261108SHP492,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_26,Shopee,0,11.11 Mega Sale Vouchers are waiting in your wallet,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_27,Lazada,1,Lazada Wallet Deactivation Notice,51,1,63,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",33,96
+PH_28,Lazada,1,PHP 500 Lazada Credit Voucher Expiring Today,51,1,63,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",33,96
+PH_29,Lazada,0,Your Lazada order has been delivered,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_30,Lazada,0,Flash Deals Starting at 12 Noon,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_31,BIR,1,Huling paalala mula sa BIR: Magbayad bago ang deadline,99,1,63,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",62,80
+PH_32,BIR,1,BIR Audit Investigation: Subpoena Duces Tecum Notice,24,0,24,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",17,30
+PH_33,BIR,1,Mandatory Online TIN Re-validation,8,0,41,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",8,68
+PH_34,BIR,0,BIR Revenue Memorandum Circular No. 102-2026,0,0,13,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",16,10
+PH_35,BIR,0,eFPS Tax Return Filing Confirmation (Form 2551Q),0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_36,BIR,0,Reminders on Quarterly Income Tax Deadlines,0,0,13,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",16,10
+PH_37,NBI,1,Babala: May warrant of arrest / NBI record hit,16,0,46,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",12,76
+PH_38,NBI,1,Rush NBI Clearance Processing Confirmation,16,0,46,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",12,76
+PH_39,NBI,1,NBI Cybercrime Division: Notice to Explain,33,0,52,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",24,68
+PH_40,NBI,0,NBI Clearance Online Application Confirmation,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_41,NBI,0,Official Receipt: NBI Clearance Fee,8,0,41,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",9,68
+PH_42,NBI,0,Public Advisory: Authorized NBI Clearance Outlets,0,0,39,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",16,60
+PH_43,PSA,1,PSA Serbilis: Hindi maiproseso ang iyong birth certificate,16,0,46,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",12,76
+PH_44,PSA,1,PhilSys National ID Dispatch Notification,24,0,47,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",17,75
+PH_45,PSA,1,Urgent: CENOMAR Verification Required,16,0,46,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",12,76
+PH_46,PSA,0,PSA Serbilis Order Confirmation: #2026-94812,0,0,13,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",16,10
+PH_47,PSA,0,PhilSys ePhilID Availability Advisory,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_48,PSA,0,2026 Census of Population and Community Feedback,35,0,26,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",25,30
+PH_49,DFA,1,DFA Passport Appointment: Kumpirmahin ang booking agad,16,0,19,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",12,25
+PH_50,DFA,1,Apostille Authentication Notice - Payment Pending,16,0,46,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",12,76
+PH_51,DFA,1,Warning: Passport Cancellation Alert,91,1,60,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",57,76
+PH_52,DFA,0,DFA Passport Appointment Schedule Confirmation,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_53,DFA,0,DFA Consular Advisory: Holiday Office Hours,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_54,DFA,0,Official Receipt for Passport Processing,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60
+PH_55,Palawan Pawnshop,1,Pera Padala Unclaimed Remittance - Paki-claim,8,0,41,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",8,68
+PH_56,Security Bank,1,Security Bank: Suspicious Login Detected,51,1,63,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",33,96
+PH_57,UnionBank,1,UnionBank Business Banking KYC Update,78,1,64,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",50,88
+PH_58,Security Bank,0,Security Bank DigiBanker Transaction Confirmation,35,0,52,1,"('Warning', 'risk-warning', 'Suspicious characteristics detected. Exercise caution before opening links or attachments.')",25,80
+PH_59,UnionBank,0,The Portal: Monthly Payroll Processing Complete,0,0,9,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,10
+PH_60,Palawan Pawnshop,0,PalawanPay Cash-In Notification,0,0,36,0,"('Safe', 'risk-safe', 'No significant threats detected. Standard communication pattern.')",4,60

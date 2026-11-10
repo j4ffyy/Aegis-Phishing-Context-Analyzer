@@ -1,0 +1,35 @@
+{
+  "dataset_name": "Jose Nazario Pure Phishing Positive Class (125 Samples)",
+  "extraction_date": "2026-11-09",
+  "sample_count": 125,
+  "source_repository": "https://monkey.org/~jose/phishing/",
+  "canonical_archive": "phishing0.mbox",
+  "raw_archive_sha256": "6184b0a34ed8cbbb252676e21c1eab9eac5fa4be89c61e30cc9954ebbb25d848",
+  "raw_archive_bytes": 3119972,
+  "raw_archive_total_messages": 414,
+  "deduplicated_messages": 84,
+  "output_csv": "evidence\\E-39_independent-corpus\\E-39_nazario_pure_phishing_125.csv",
+  "output_csv_sha256": "a8c31320a4438e20dcd37d2de92219e25df525927d4a36b352bca4dbf4257217",
+  "recent_phishing_sources_documented": [
+    {
+      "name": "Zenodo Phishing Validation Emails Dataset",
+      "doi": "10.5281/zenodo.13474745",
+      "year": 2024,
+      "url": "https://doi.org/10.5281/zenodo.13474745",
+      "description": "Curated benchmark of 2,000 real-world and synthetic phishing/legitimate emails for ML/NLP validation."
+    },
+    {
+      "name": "Mendeley Data Spam & Phishing Detection Dataset",
+      "doi": "10.17632/shj94nrczy.1",
+      "year": 2025,
+      "url": "https://doi.org/10.17632/shj94nrczy.1",
+      "description": "Cybersecurity email classification dataset containing raw RFC822 and preprocessed phishing samples."
+    },
+    {
+      "name": "Jose Nazario Extended Phishing Archives (phishing1-3.mbox)",
+      "source": "https://monkey.org/~jose/phishing/",
+      "date": "2005-2007",
+      "description": "Canonical multi-gigabyte raw mailbox archives (phishing1: 4.19 MB, phishing2: 10.42 MB, phishing3: 20.07 MB)."
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "test_case_id": "TC-01",
+    "sample_id": 50,
+    "description": "Legitimate Workplace Newsletter",
+    "provenance_file": "evidence/E-08_phishing-corpus-metrics/E-08_phishing-corpus-metrics_predictions_20261108_0c541f5.csv",
+    "model_state": "DistilBERT ONNX Loaded (Warm)",
+    "subject": "Welcome to the Aegis SME Security Newsletter",
+    "senderEmail": "mreyes@businesspartner.com.ph",
+    "true_label": 0,
+    "true_label_name": "Legitimate",
+    "composite_score": 9,
+    "assigned_risk_tier": "Safe",
+    "distilbert_p_phish": 0.0008,
+    "layer2_s_nlp": 10,
+    "inference_latency_ms": 79.75,
+    "predicted_phishing": 0,
+    "body_snippet": "Welcome to the Aegis SME Security Newsletter! This month: 5 common phishing tactics targeting Filipino businesses and ho",
+    "links": [],
+    "attachments": [],
+    "spf_pass": "True",
+    "dkim_pass": "True",
+    "test_verdict": "PASS (Correctly Classified)"
+  },
+  {
+    "test_case_id": "TC-02",
+    "sample_id": 37,
+    "description": "Phishing Urgent Suspension Lure",
+    "provenance_file": "evidence/E-08_phishing-corpus-metrics/E-08_phishing-corpus-metrics_predictions_20261108_0c541f5.csv",
+    "model_state": "DistilBERT ONNX Loaded (Warm)",
+    "subject": "URGENT: Your GCash account has been suspended",
+    "senderEmail": "sss-notification@sss-gov-ph.click",
+    "true_label": 1,
+    "true_label_name": "Phishing",
+    "composite_score": 67,
+    "assigned_risk_tier": "Warning",
+    "distilbert_p_phish": 0.9997,
+    "layer2_s_nlp": 100,
+    "inference_latency_ms": 97.45,
+    "predicted_phishing": 1,
+    "body_snippet": "Your BPI account requires immediate verification. Failure to verify within 48 hours will result in account termination. ",
+    "links": [
+      "http://shopee-ph-promo.tk/verify?id=37"
+    ],
+    "attachments": [],
+    "spf_pass": "False",
+    "dkim_pass": "False",
+    "test_verdict": "PASS (Correctly Classified)"
+  },
+  {
+    "test_case_id": "TC-03",
+    "sample_id": 24,
+    "description": "Phishing Credential / Order Hold Lure",
+    "provenance_file": "evidence/E-08_phishing-corpus-metrics/E-08_phishing-corpus-metrics_predictions_20261108_0c541f5.csv",
+    "model_state": "DistilBERT ONNX Loaded (Warm)",
+    "subject": "Lazada: Your order is on hold - confirm payment details",
+    "senderEmail": "helpdesk@microsoft-account-reset.click",
+    "true_label": 1,
+    "true_label_name": "Phishing",
+    "composite_score": 72,
+    "assigned_risk_tier": "Warning",
+    "distilbert_p_phish": 1.0,
+    "layer2_s_nlp": 96,
+    "inference_latency_ms": 76.94,
+    "predicted_phishing": 1,
+    "body_snippet": "Dear Finance Manager, please process an urgent wire transfer of $25,000 to our new vendor. This is time sensitive. Accou",
+    "links": [
+      "http://paypal-verify.top/verify?id=24"
+    ],
+    "attachments": [
+      "Statement.docx.exe"
+    ],
+    "spf_pass": "False",
+    "dkim_pass": "False",
+    "test_verdict": "PASS (Correctly Classified)"
+  }
+]

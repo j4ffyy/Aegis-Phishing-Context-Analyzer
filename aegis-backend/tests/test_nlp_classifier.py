@@ -3,6 +3,7 @@ Unit Tests for Aegis DistilBERT ONNX NLP Classifier Module
 Specification: Implementation Plan §5.2.1, §6.3 (Milestone 3.1)
 """
 
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -171,6 +172,40 @@ class TestNLPClassifier(unittest.TestCase):
             self.assertIn("nlp_score", res)
             self.assertIn("probabilities", res)
             self.assertIn("predicted_label", res)
+
+
+    def test_base_only_mode(self):
+        """When base_only is enabled, heuristic adjustments are ignored."""
+        mock_session = MagicMock()
+        mock_logits = np.array([[-5.0, 10.0, -5.0, 10.0]])  # P_phish ~ 1.0 -> S_base = 60
+        mock_session.get_inputs.return_value = [
+            MagicMock(name="input_ids"),
+            MagicMock(name="attention_mask"),
+        ]
+        mock_session.run.return_value = [mock_logits]
+
+        mock_tokenizer = MagicMock()
+        mock_tokenizer.return_value = {
+            "input_ids": np.ones((1, 10), dtype=np.int64),
+            "attention_mask": np.ones((1, 10), dtype=np.int64),
+        }
+
+        with patch("modules.nlp_classifier._session", mock_session), \
+             patch("modules.nlp_classifier._tokenizer", mock_tokenizer):
+            # Normal mode: 60 + 20 + 20 = 100
+            res_normal = classify_email_text("Suspicious", urgency_penalty=20, bec_penalty=20)
+            self.assertEqual(res_normal["nlp_score"], 100)
+
+            # Explicit base_only flag: returns 60
+            res_base = classify_email_text("Suspicious", urgency_penalty=20, bec_penalty=20, base_only=True)
+            self.assertEqual(res_base["nlp_score"], 60)
+            self.assertEqual(res_base["s_urgency"], 0)
+            self.assertEqual(res_base["s_bec"], 0)
+
+            # Via environment variable
+            with patch.dict(os.environ, {"AEGIS_NLP_BASE_ONLY": "1"}):
+                res_env = classify_email_text("Suspicious", urgency_penalty=20, bec_penalty=20)
+                self.assertEqual(res_env["nlp_score"], 60)
 
 
 if __name__ == "__main__":

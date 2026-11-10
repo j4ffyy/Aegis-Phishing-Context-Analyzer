@@ -1,0 +1,62 @@
+================================================================================
+AEGIS MANUSCRIPT FIGURE & CLAIM AUDIT (E-12)
+Commit: d801129 | Timestamp (UTC): 2026-11-07T15:40:45.723088+00:00
+================================================================================
+
+Audited Patterns:
+  - Metric: 97.5% Phishing Recall (pattern: 97\.5%?)
+  - Metric: 96.0% Baseline Accuracy (pattern: 96\.0%?)
+  - Metric: 93.8% Offline Accuracy (pattern: 93\.8%?)
+  - Metric: 0.955 ROC-AUC (pattern: 0\.955\b)
+  - Metric: 86.0% Unloaded Phishing Recall (pattern: 86\.0%?)
+  - Metric: 93.0% Unloaded Accuracy (pattern: 93\.0%?)
+  - Metric: 83.0% Neutral Auth Accuracy (pattern: 83(?:\.0)?%?)
+  - Tier Label: 'High' Risk Tier (pattern: \bHigh\s+Risk\b|\bHigh\s+Tier\b|\bTier:\s*High\b)
+  - Disavowed: Gmail API Claim (pattern: \bGmail\s+API\b)
+  - Disavowed: DMARC Enforcement (pattern: \bDMARC\b)
+
+================================================================================
+AUDIT FINDINGS BY FILE
+================================================================================
+
+[FILE] Aegis-Phishing-Context-Analyzer\docs\01-5_week_prototype_development_plan.md (2 hits)
+--------------------------------------------------------------------------------
+  L 293 | [Disavowed: DMARC Enforcement]
+         **2.4 Backend Heuristic Layer + SPF/DKIM/DMARC Stubs**
+  L 304 | [Disavowed: DMARC Enforcement]
+         # SPF/DKIM/DMARC (stub — reads from payload header data or simulated)
+
+[FILE] Aegis-Phishing-Context-Analyzer\docs\02-chapter_iv_and_appendices_package.md (2 hits)
+--------------------------------------------------------------------------------
+  L  69 | [Tier Label: 'High' Risk Tier]
+         - Scans incoming webmail in real-time and provides a visual indicator (Green: Safe, Yellow: Caution, Red: High Risk) wit
+  L  95 | [Tier Label: 'High' Risk Tier]
+         | `TC-01` | Heuristic | URL with homoglyph domain (`paypa1.com`) | Flagged as High Risk Domain Spoofing | Risk Score: 92
+
+[FILE] Aegis-Phishing-Context-Analyzer\docs\README.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\docs\RUN_GUIDE.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\demo_emails\01_SAFE_routine_workplace.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\demo_emails\02_WARNING_archive_attachment.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\demo_emails\03_CRITICAL_credential_harvesting_link.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\demo_emails\04_CRITICAL_malicious_html_attachment.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\demo_emails\05_CRITICAL_executive_impersonation_bec.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\demo_emails\README.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\README.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\implementation_plan.md -- CLEAN (0 hits)
+
+[FILE] Aegis-Phishing-Context-Analyzer\LIVE_DEMONSTRATION_GUIDE.md -- CLEAN (0 hits)
+
+[FILE] README.md -- CLEAN (0 hits)
+
+================================================================================
+AUDIT SUMMARY: Total flagged occurrences across audited files: 4
+================================================================================
