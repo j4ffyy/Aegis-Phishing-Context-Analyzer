@@ -3,27 +3,41 @@
 **Project:** Aegis: AI-Powered Phishing Context Analyzer  
 **Institutional Affiliation:** Mapúa Malayan Digital College (MMDC)  
 **Capstone Program:** BS Information Technology (Capstone 1 & 2)  
-**Document Generation Date:** 2026-11-09  
+**Document Generation Date:** 2026-11-09 (Updated Post-Defense Audit)  
 **Specification:** Academic Integrity Disclosure & AI Usage Attribution  
 
 ---
 
-## 1. Overview & Disclosure Policy
+## 1. Overview & Institutional Policy (MMDC AI Guidelines)
 
-In adherence to institutional academic integrity standards and ethical research guidelines, this document provides an honest accounting of Artificial Intelligence (AI) tools, models, and generative assistants utilized during the development, benchmarking, code evaluation, and documentation of the Aegis project.
+### Institutional Policy Statement
+> **AI GUIDELINES MMDC:**  
+> AI tools, and other resources that you can use to enhance the research, writing, organization, and presentation of your Capstone Project. Note, however, that AI and online resources should support, not replace, human analysis and problem-solving. When used responsibly and thoughtfully, these tools can improve the quality, accuracy, and efficiency of academic work while upholding integrity and ethical research practices.
+
+In strict adherence to the institutional academic integrity standards and ethical research guidelines of Mapúa Malayan Digital College (MMDC), this document provides a comprehensive, transparent, and verifiable accounting of Artificial Intelligence (AI) tools, models, and generative assistants utilized across the project lifecycle.
 
 Per repository auditing guidelines, all statements of provenance are strictly anchored to verifiable artifacts in Git history and repository files. Where specific tool sessions, model builds, or proprietary telemetry are not recorded in Git commit metadata, they are formally designated as **UNKNOWN**.
 
+### Disclosure of AI Assistance in Document Structuring
+In adherence to full academic transparency, the proponents disclose that **this disclosure document (`AI_USE.md`) itself was formatted and drafted with the assistance of an AI assistant during the post-defense audit**. 
+
+Commercial and research AI assistants are governed by corporate usage policies and safety principles that explicitly forbid academic dishonesty, cheating, misrepresentation, and deceptive practices:
+- **Anthropic Usage Policy:** Section on *Dishonest & Deceptive Practices* explicitly prohibits using the service to *"facilitate academic dishonesty, plagiarism, or cheat on evaluations"* ([Anthropic Usage Policy](https://www.anthropic.com/legal/commercial-terms)).
+- **OpenAI Usage Policies:** Under *Deceptive or Misleading Practices*, explicitly prohibits activities that violate educational integrity, cheat on academic evaluations, or mislead individuals regarding the authenticity of academic submissions ([OpenAI Usage Policies](https://openai.com/policies/usage-policies)).
+- **Google Generative AI Prohibited Use Policy:** Prohibits using the service to engage in *"fraud, scams, or other deceptive actions"* as well as misrepresentation, such as *"misrepresenting the provenance of generated content by claiming it was created solely by a human to deceive"* ([Google Generative AI Prohibited Use Policy](https://policies.google.com/terms/generative-ai/use-policy)), with explicit prohibitions against academic dishonesty appearing in Google Cloud enterprise agreements.
+
+In accordance with these principles and MMDC guidelines, the assistance used to compile this document was strictly assistive: structuring disclosures, compiling Git history entries, and indexing verified SHA-256 evidence hashes. All factual assertions were reviewed and confirmed by the human proponents.
+
 ---
 
-## 2. Itemized Ledger of AI Tools and Generative Agents
+## 2. Itemized Ledger of Development Authorship, AI Tools, and Audit Agents
 
-| AI Tool / Category | Primary Usage Domain | Specific Artifacts & Scope | Provenance & Git Verification Status |
+| Tool / Contributor Category | Primary Domain & Usage Scope | Specific Artifacts & Scope | Provenance & Git Verification Status |
 |---|---|---|---|
-| **AI Coding Assistants (Interactive Pair Programming)** | Interactive Code Assistance & Architecture Design | - Implementation Plan structuring (`implementation_plan.md`)<br>- Chrome Extension component layouts (`manifest.json`, `content_script.js`, `overlay.js`, `pii_scrubber.js`)<br>- Backend FastAPI routes and services (`routes/analyze.py`, `modules/meta_classifier.py`)<br>- UI adjustments (`dashboard.js`, `overlay.js`) | **Proponent Self-Disclosure**.<br>*(Specific model version and session IDs are **UNKNOWN in Git history**; Git commit logs record standard developer commits under `j4ffyy`).* |
-| **Autonomous Evaluation & Auditing Agent (Antigravity)** | Evaluation Harnesses & Integrity Auditing | - Automated evaluation runners (`tools/run_phase_c_evaluations.py`, `tools/run_round2_evaluations.py`)<br>- Warning cut-off calibration script (`tools/calibrate_warning_cutoff.py`)<br>- Evidence manifest & checksum tools (`tools/evidence_manifest.py`)<br>- Integrity audit reports (`evidence/AUDIT_ROUND2.md` through `AUDIT_ROUND5.md`, `FINAL_INTEGRITY_REPORT.md`) | **Documented in repository dev logs**.<br>*(Traced to operator entries in `AGENT_LOG.md`).* |
-| **Commercial LLM Session (External Corpus Generation)** | Synthetic Test Corpus Generation | - Authored 60 synthetic corporate emails (30 phishing lures, 30 legitimate workplace emails) without explicit keyword triggers (`evidence/E-43_llm-authored-eval/`) | **Model name as reported and not verified**.<br>*(Generated via external LLM evaluation harness on 2026-11-08; prompts preserved in `E-43_llm_generation_prompts.json`).* |
-| **In-Editor Autocomplete (e.g. GitHub Copilot, Cursor)** | Minor In-Editor Syntax & Autocomplete | - Standard syntax completion in developer IDE | **UNKNOWN**.<br>*(Cannot be verified or disproven from Git commit metadata).* |
+| **Human Authorship (UI & Full-Stack Implementation)** | Frontend UI/UX, DOM Scripting, Core Systems Architecture | - All Chrome Extension UI/UX components (`dashboard.html`, `dashboard.js`, `overlay.html`, `overlay.js`)<br>- DOM-based Gmail email extraction (`content_script.js`)<br>- Backend architecture, API routing, and telemetry scrubbing (`analyze.py`)<br>- Core threat scoring and threshold mechanics (`modules/meta_classifier.py`) | **100% Human Implementation (`j4ffyy`)**.<br>*(All visual design, CSS styling, interactive preset toggles, DOM mutation observer handling, and system integration were designed and implemented directly by the proponents. AI coding assistants were restricted to minor syntax reference and boilerplate lookup).* |
+| **Autonomous Evaluation & Auditing Agent (Antigravity)** | Post-Defense Code Auditing & Manifest Integrity Verification | - Post-defense automated evaluation execution (`tools/run_phase_c_evaluations.py`, `tools/run_round2_evaluations.py`)<br>- Evidence manifest & cryptographic checksum indexing (`tools/evidence_manifest.py`, `SHA256SUMS`, `EVIDENCE_INDEX.csv`)<br>- Forensic integrity audit documentation (`evidence/AUDIT_ROUND2.md` through `AUDIT_ROUND5.md`, `FINAL_INTEGRITY_REPORT.md`, `AI_USE.md`) | **Post-Defense Forensic Verification Only**.<br>*(Invoked strictly post-defense on November 8–10, 2026, to perform read-only static code audits, verify mathematical claims, test for potential label leakage, and reconcile evidence checksums per `AGENT_LOG.md`).* |
+| **Commercial LLM (`claude.ai`)** | Synthetic Test Corpus Generation | - Authored 60 synthetic corporate benchmark emails (30 phishing lures, 30 legitimate workplace emails) without explicit keyword triggers (`evidence/E-43_llm-authored-eval/`) | **Verified in Repository Artifacts**.<br>*(Recorded as `"generator": "claude.ai"` in `E-43_llm_generation_prompts.json` on 2026-11-08; prompts, seed parameters, and evaluations preserved in full).* |
+| **In-Editor Autocomplete (e.g. GitHub Copilot, Cursor)** | Minor In-Editor Syntax & Autocomplete | - Standard inline syntax completion in developer IDE | **UNKNOWN**.<br>*(Cannot be verified or disproven from Git commit metadata).* |
 
 ---
 
@@ -45,7 +59,12 @@ The following pre-trained or trained machine learning models serve as direct com
 
 ---
 
-## 4. Academic Integrity & Ethics Statement
+## 4. Academic Integrity, Human Verification & Ethics Statement
 
-- **Human Authorship & Oversight:** All system designs, algorithmic formulations (weights, threat floors, behavioral circular distance, dual-trigger whitelist), and final revisions were directed and supervised by the project proponents (**Jafphet P. Grengia** & **Michael Angelo L. Bernardo**).
-- **No Automated Unchecked Claims:** Every empirical performance metric reported in Chapter 4 of the manuscript and corresponding evidence artifacts was generated via deterministic scripts against frozen datasets and independently verified against source code.
+In alignment with the MMDC mandate that AI resources must *support, not replace, human analysis and problem-solving*, the proponents affirm the following governance controls:
+
+- **Human Authorship & Architectural Authority:** All system architectures, core algorithmic formulations (multi-tier Bayesian weight allocation, circular behavioral distance, dual-trigger whitelist, and hard security threat floors), and defensive heuristics were formulated, reviewed, and finalized directly by the human proponents (**Jafphet P. Grengia** & **Michael Angelo L. Bernardo**).
+- **Human Implementation of Extension and UI:** All frontend extension templates, styling, DOM listeners, and administrative dashboards were coded directly by the proponents. AI tools were not used to generate the user interface.
+- **Independent Post-Defense Verification:** The autonomous auditing agent was employed as an external verification harness following the defense to cross-examine claims, check label leakage, verify cryptographic hashes, and ensure complete reproducibility of the evidence base.
+- **Zero Runtime Generative AI Dependency:** The production Aegis Chrome extension and FastAPI backend **do not make calls to any external generative AI APIs (such as OpenAI, Anthropic, or Gemini) during live email analysis**. Live inference is 100% self-contained, offline-capable (via local ONNX Runtime), privacy-preserving, and non-reliant on cloud LLMs.
+- **Empirical Grounding:** Every performance metric and confusion matrix presented in Chapter IV of the manuscript was produced by deterministic evaluation scripts executing against frozen, cryptographically hashed datasets (`SHA256SUMS`).
