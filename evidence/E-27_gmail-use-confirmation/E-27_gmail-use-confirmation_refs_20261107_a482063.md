@@ -17,9 +17,9 @@ To verify and record that all three Philippine small and micro-enterprises parti
 
 | Enterprise ID | Business Name / Trade Category | Size Classification | Primary Email Client / Interface | User Roles Evaluated | Verification Status |
 |---|---|---|---|---|---|
-| **SME-01** | Mini Grocery / Retail Enterprise | Micro-enterprise (< 10 employees) | Google Gmail (Standard Webmail Interface on Google Chrome) | 1 Owner (Dezibel Mendoza)<br>1 Staff (Rejane Begosa) | Confirmed Active Daily Usage |
-| **SME-02** | Dental Clinic & Gym Facility | Small Business (< 50 employees) | Google Gmail / Google Workspace (Webmail Interface on Google Chrome) | 1 Owner (Nelson Licuanan)<br>1 Staff (Timothy Cruz) | Confirmed Active Daily Usage |
-| **SME-03** | Commercial Trading & Services | Small Business (< 50 employees) | Google Gmail (Standard Webmail Interface on Google Chrome) | 1 Owner (Paolo Reyes)<br>1 Staff (Arlene Bautista) | Confirmed Active Daily Usage |
+| **SME-01** | Mini Grocery / Retail Enterprise | Micro-enterprise (< 10 employees) | Google Gmail (Standard Webmail Interface on Google Chrome) | 1 Owner (Participant P1)<br>1 Staff (Participant P4) | Confirmed Active Daily Usage |
+| **SME-02** | Dental Clinic & Gym Facility | Small Business (< 50 employees) | Google Gmail / Google Workspace (Webmail Interface on Google Chrome) | 1 Owner (Participant P2)<br>1 Staff (Participant P5) | Confirmed Active Daily Usage |
+| **SME-03** | Commercial Trading & Services | Small Business (< 50 employees) | Google Gmail (Standard Webmail Interface on Google Chrome) | 1 Owner (Participant P3)<br>1 Staff (Participant P6) | Confirmed Active Daily Usage |
 
 ---
 
