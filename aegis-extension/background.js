@@ -19,7 +19,7 @@ const LOG_PREFIX = '[Aegis::Background]';
 const CONFIG = {
   DEFAULT_BACKEND_URL: 'http://localhost:8000',
   RENDER_BACKEND_URL:  'https://aegis-backend-oybm.onrender.com', // PR-07: live production Render.com URL
-  NETWORK_TIMEOUT_MS: 2000,          // 2.0-second network abort timeout per §5.1.4 & §3.1
+  NETWORK_TIMEOUT_MS: 3500,          // 2.0-second network abort timeout per §5.1.4 & §3.1
   MAX_CACHE_ENTRIES: 100,            // LRU capacity ceiling per §5.1.5
   CACHE_TTL_MS: 7 * 24 * 60 * 60 * 1000, // 7-day TTL in milliseconds per §5.1.5
   STORAGE_KEY_CACHE: 'aegis_analysis_cache',
@@ -303,13 +303,23 @@ async function getBackendUrl() {
   try {
     const config = (await storageAdapter.get(CONFIG.STORAGE_KEY_CONFIG)) || {};
     if (config.backendUrl) return config.backendUrl;
-    if (config.useRender)  return CONFIG.RENDER_BACKEND_URL; // PR-07: production Render flag
-    return CONFIG.DEFAULT_BACKEND_URL;
+    if (config.useRender)  return CONFIG.RENDER_BACKEND_URL;
+    
+    // Check if localhost:8000 is running; if not, default to live Render URL
+    const isLocalLive = await new Promise((resolve) => {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => { ctrl.abort(); resolve(false); }, 400);
+      fetch(CONFIG.DEFAULT_BACKEND_URL + '/api/v1/health', { signal: ctrl.signal })
+        .then(res => { clearTimeout(tid); resolve(res.ok); })
+        .catch(() => { clearTimeout(tid); resolve(false); });
+    });
+    if (isLocalLive) return CONFIG.DEFAULT_BACKEND_URL;
+
+    return CONFIG.RENDER_BACKEND_URL;
   } catch {
-    return CONFIG.DEFAULT_BACKEND_URL;
+    return CONFIG.RENDER_BACKEND_URL;
   }
 }
-
 // ---------------------------------------------------------------------------
 // 6. Analysis Dispatch & Offline Fallback Router
 // ---------------------------------------------------------------------------
