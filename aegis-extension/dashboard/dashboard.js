@@ -85,32 +85,94 @@ function storageClear(keys) {
 }
 
 // ─── Backend helpers ────────────────────────────────────────────────────────
+const DEFAULT_LOCAL_URL  = 'http://localhost:8000';
+const DEFAULT_RENDER_URL = 'https://aegis-backend-oybm.onrender.com';
+
 async function getBackendBase() {
-  const data = await storageGet(['aegis_backend_url']);
-  return (data.aegis_backend_url || 'http://localhost:8000').replace(/\/$/, '');
+  // 1. If background runtime bridge is available, query its active health probe
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+    try {
+      const resp = await new Promise(resolve => {
+        chrome.runtime.sendMessage({ action: 'AEGIS_CHECK_HEALTH' }, res => {
+          if (chrome.runtime.lastError || !res) resolve(null);
+          else resolve(res);
+        });
+      });
+      if (resp && resp.success && resp.data && (resp.data.status === 'ok' || resp.data.status === 'healthy')) {
+        const stored = await storageGet(['aegis_config', 'aegis_backend_url']);
+        const cfg = stored.aegis_config || {};
+        if (cfg.backendUrl) return cfg.backendUrl.replace(/\/+$/, '');
+        if (cfg.useRender)  return DEFAULT_RENDER_URL;
+        if (stored.aegis_backend_url) return stored.aegis_backend_url.replace(/\/+$/, '');
+        return DEFAULT_RENDER_URL;
+      }
+    } catch (_) {}
+  }
+
+  // 2. Read explicit user configuration
+  const stored = await storageGet(['aegis_backend_url', 'aegis_config']);
+  const config = stored.aegis_config || {};
+  if (config.backendUrl) return config.backendUrl.replace(/\/+$/, '');
+  if (config.useRender)  return DEFAULT_RENDER_URL;
+  if (stored.aegis_backend_url) return stored.aegis_backend_url.replace(/\/+$/, '');
+
+  // 3. Fallback priority: production Render endpoint
+  return DEFAULT_RENDER_URL;
 }
 
 async function pingBackend(base) {
-  try {
-    const ctrl = new AbortController();
-    const tid  = setTimeout(() => ctrl.abort(), 2000);
-    const res  = await fetch(`${base}/api/v1/health`, { signal: ctrl.signal });
-    clearTimeout(tid);
-    return res.ok;
-  } catch (_) { return false; }
-}
+  // 1. Query background bridge for synchronized health state across popup, overlay & dashboard
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+    try {
+      const bridgeOk = await new Promise(resolve => {
+        chrome.runtime.sendMessage({ action: 'AEGIS_CHECK_HEALTH' }, res => {
+          if (chrome.runtime.lastError || !res) resolve(null);
+          else resolve(res);
+        });
+      });
+      if (bridgeOk && bridgeOk.success && bridgeOk.data && (bridgeOk.data.status === 'ok' || bridgeOk.data.status === 'healthy')) {
+        return true;
+      }
+    } catch (_) {}
+  }
 
-async function fetchBackendStats(base) {
+  // 2. Direct fetch probe to configured base
   try {
     const ctrl = new AbortController();
     const tid  = setTimeout(() => ctrl.abort(), 2500);
-    const res  = await fetch(`${base}/api/v1/stats`, { signal: ctrl.signal });
+    const res  = await fetch(${base}/api/v1/health, { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (res.ok) return true;
+  } catch (_) {}
+
+  // 3. Fallback: if configured base fails or was localhost, attempt live Render endpoint
+  if (base !== DEFAULT_RENDER_URL) {
+    try {
+      const ctrl2 = new AbortController();
+      const tid2  = setTimeout(() => ctrl2.abort(), 3500);
+      const res2  = await fetch(${DEFAULT_RENDER_URL}/api/v1/health, { signal: ctrl2.signal });
+      clearTimeout(tid2);
+      if (res2.ok) {
+        _backendBase = DEFAULT_RENDER_URL;
+        return true;
+      }
+    } catch (_) {}
+  }
+
+  return false;
+}
+
+async function fetchBackendStats(base) {
+  const targetBase = _backendBase || base;
+  try {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), 3000);
+    const res  = await fetch(${targetBase}/api/v1/stats, { signal: ctrl.signal });
     clearTimeout(tid);
     if (res.ok) return res.json();
   } catch (_) {}
   return null;
 }
-
 // ─── DOM helpers ────────────────────────────────────────────────────────────
 function qs(id) { return document.getElementById(id); }
 
