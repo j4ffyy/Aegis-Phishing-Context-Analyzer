@@ -85,32 +85,58 @@ function storageClear(keys) {
 }
 
 // ─── Backend helpers ────────────────────────────────────────────────────────
+const DEFAULT_LOCAL_URL  = 'http://localhost:8000';
+const DEFAULT_RENDER_URL = 'https://aegis-backend-oybm.onrender.com';
+
 async function getBackendBase() {
-  const data = await storageGet(['aegis_backend_url']);
-  return (data.aegis_backend_url || 'http://localhost:8000').replace(/\/$/, '');
+  try {
+    const stored = await storageGet(['aegis_backend_url', 'aegis_config']);
+    const config = stored.aegis_config || {};
+    if (config.backendUrl) return config.backendUrl.replace(/\/+$/, '');
+    if (config.useRender)  return DEFAULT_RENDER_URL;
+    if (stored.aegis_backend_url) return stored.aegis_backend_url.replace(/\/+$/, '');
+  } catch (_) {}
+  return DEFAULT_RENDER_URL;
 }
 
 async function pingBackend(base) {
-  try {
-    const ctrl = new AbortController();
-    const tid  = setTimeout(() => ctrl.abort(), 2000);
-    const res  = await fetch(`${base}/api/v1/health`, { signal: ctrl.signal });
-    clearTimeout(tid);
-    return res.ok;
-  } catch (_) { return false; }
-}
-
-async function fetchBackendStats(base) {
+  // 1. Direct fetch probe with strict 2.5s abort
   try {
     const ctrl = new AbortController();
     const tid  = setTimeout(() => ctrl.abort(), 2500);
-    const res  = await fetch(`${base}/api/v1/stats`, { signal: ctrl.signal });
+    const res  = await fetch(base + "/api/v1/health", { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (res.ok) return true;
+  } catch (_) {}
+
+  // 2. If configured base failed and was not Render URL, try Render URL directly
+  if (base !== DEFAULT_RENDER_URL) {
+    try {
+      const ctrl2 = new AbortController();
+      const tid2  = setTimeout(() => ctrl2.abort(), 3000);
+      const res2  = await fetch(DEFAULT_RENDER_URL + "/api/v1/health", { signal: ctrl2.signal });
+      clearTimeout(tid2);
+      if (res2.ok) {
+        _backendBase = DEFAULT_RENDER_URL;
+        return true;
+      }
+    } catch (_) {}
+  }
+
+  return false;
+}
+
+async function fetchBackendStats(base) {
+  const targetBase = _backendBase || base;
+  try {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), 2500);
+    const res  = await fetch(targetBase + "/api/v1/stats", { signal: ctrl.signal });
     clearTimeout(tid);
     if (res.ok) return res.json();
   } catch (_) {}
   return null;
 }
-
 // ─── DOM helpers ────────────────────────────────────────────────────────────
 function qs(id) { return document.getElementById(id); }
 
