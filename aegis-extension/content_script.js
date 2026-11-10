@@ -816,7 +816,7 @@
     if (!hash) return true;
     // If the hash contains a slash, the part after must be a thread ID (10+ alphanum chars).
     // Anything shorter (e.g. "category/promotions") is still a list view.
-    var slashIdx = hash.indexOf('/');
+    var slashIdx = hash.lastIndexOf('/');
     if (slashIdx === -1) return true;  // No slash — definitely a list view (#inbox, #starred)
     var afterSlash = hash.slice(slashIdx + 1);
     // Thread IDs are 16+ hex/base64 characters; category names are short English words
