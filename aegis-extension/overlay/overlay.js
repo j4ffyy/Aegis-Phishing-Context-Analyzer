@@ -1661,7 +1661,7 @@
   function isGmailListView() {
     const hash = (window.location.hash || '').replace(/^#/, '');
     if (!hash) return true;
-    const slashIdx = hash.indexOf('/');
+    const slashIdx = hash.lastIndexOf('/');
     if (slashIdx === -1) return true;  // e.g. "inbox", "starred"
     const afterSlash = hash.slice(slashIdx + 1);
     return !/^[A-Za-z0-9_\-]{10,}$/.test(afterSlash);
