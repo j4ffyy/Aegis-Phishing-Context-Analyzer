@@ -1,276 +1,221 @@
-# Aegis: AI-Powered Phishing Context Analyzer for Small and Medium Enterprises
+# AEGIS: An Exploratory Phishing Context Analysis Decision-Support Framework for Small and Medium Enterprises
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python: 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Python: 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Uvicorn-009688.svg)](https://fastapi.tiangolo.com/)
-[![ONNX Runtime](https://img.shields.io/badge/Inference-ONNX%20Runtime%20(%3C150MB%20RSS)-005CED.svg)](https://onnxruntime.ai/)
+[![ONNX Runtime](https://img.shields.io/badge/Inference-ONNX%20Runtime%20(%7E140MB%20RSS)-005CED.svg)](https://onnxruntime.ai/)
 [![Chrome Extension](https://img.shields.io/badge/Chrome%20Extension-Manifest%20V3-4285F4.svg)](https://developer.chrome.com/docs/extensions/mv3/)
-[![Tests](https://img.shields.io/badge/Automated%20Tests-108%20Passed%20(100%25)-success.svg)]()
-[![Compliance](https://img.shields.io/badge/Data%20Privacy-RA%2010173%20(PH%20DPA)-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/Status-Academic%20Proof--of--Concept-orange.svg)]()
 
-> **MMDC IT200D1 — Capstone Project 1**  
-> **Institution:** Mapúa Malayan Digital College (MMDC)  
-> **Proponents:** **Jafphet P. Grengia** (Lead Developer / UX Lead) & **Michael Angelo L. Bernardo** (Co-Developer / Systems Lead)  
+> **Mapúa Malayan Digital College (MMDC)**  
+> **Course:** MO-IT200D2 — Capstone 2 (Academic Year 2026–2027)  
+> **Degree Program:** Bachelor of Science in Information Technology, Major in Network & Cyber Security  
+> **Proponents:** **Jafphet P. Grengia** & **Michael Angelo L. Bernardo**  
+> **Mentor / Adviser:** **Mr. Rhimshie Jay Aquino**  
+> **Program Head / Supervisory Review:** **Mr. Mario Pison Jr.**  
+> **Panel Evaluators:** **Mr. John Ray Hernani** (Panel Chair) & **Mr. Renz Canlas** (Panel Member)  
+> **Revised Manuscript (Post-Defense):** November 2026
 
 ---
 
-## 🛡️ Executive Summary
+## 🛡️ Project Overview & Positioning
 
-Small and Medium Enterprises (SMEs) in the Philippines face disproportionate exposure to targeted phishing, Business Email Compromise (BEC), and credential harvesting attacks. Unlike large enterprises with Security Operations Centers (SOCs), SMEs operate under severe budgetary and technical personnel constraints. Furthermore, legacy email gateways act as black-box filters, offering binary allow/block decisions without actionable, contextual explanations.
+Phishing attacks remain a persistent cyber threat to Small and Medium Enterprises (SMEs) in the Philippines, which often depend on consumer-grade email services and lack dedicated security personnel or Security Operations Centers (SOCs).
 
-**Aegis** is an intelligent, privacy-preserving browser security layer delivered as a **Google Chrome Extension (Manifest V3)** paired with a **self-hosted private machine learning backend (FastAPI)**. Aegis intercepts emails directly within the user's webmail interface (Gmail), evaluates threat signals across a **4-layer contextual pipeline**, and provides plain-language **Explainable AI (XAI)** threat rationales through a non-disruptive overlay interface.
+**AEGIS** is an **exploratory academic proof-of-concept framework** designed for explainable, context-aware phishing decision support on **desktop Gmail** (`https://mail.google.com/*`) in Chromium-based browsers (Google Chrome, Microsoft Edge, Brave). 
 
-To satisfy national privacy mandates under the **Philippine Data Privacy Act of 2012 (Republic Act No. 10173)**, Aegis enforces strict client-side personally identifiable information (PII) redaction prior to any inter-process communication or remote processing.
+### Architectural Boundary & Scope
+- **Advisory DOM-Based Overlay:** AEGIS observes email rendered in the active browser DOM using a client-side `MutationObserver` (with a 300 ms debounce).
+- **No Mailbox State Alteration:** AEGIS does **not** interact with Gmail's internal APIs, IMAP/POP3 protocols, or server-side mail storage. It **cannot quarantine, delete, move, or block emails**. Visual risk badges are advisory decision-support aids for the active user.
+- **Data Sovereignty & Privacy Posture:** On-device behavioral baselines (Layer 3) and custom whitelists are stored exclusively in `chrome.storage.local` and never leave the browser. Sanitized email text (with best-effort client-side PII scrubbing on email body text) is transmitted over HTTPS to the FastAPI backend service for inference. *A formal compliance audit under Republic Act No. 10173 (Data Privacy Act of 2012) was not conducted and is disclaimed.*
 
 ---
 
 ## 🏛️ System Architecture
 
-```
+```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        GOOGLE CHROME BROWSER                           │
+│             CHROMIUM BROWSER (Chrome, Edge, Brave)                     │
 │                                                                        │
 │  ┌───────────────────────┐             ┌─────────────────────────────┐ │
-│  │    mail.google.com    │             │       Aegis Extension       │ │
+│  │    mail.google.com    │             │       AEGIS Extension       │ │
 │  │   (Active Email DOM)  │◀────────────│  (Content Script & Overlay) │ │
 │  └───────────┬───────────┘             └──────────────┬──────────────┘ │
 │              │                                        │                │
-│              ▼                                        ▼                │
-│     [1. DOM Extractor]                      [Client Storage Local]     │
+│              ▼ (DOM Mutation, 300ms debounce)         ▼                │
+│     [1. Gmail DOM Extractor]               [chrome.storage.local]      │
 │              │                                        │                │
 │              ▼                                        ├── Whitelist    │
-│     [2. PII Scrubber (RA 10173)]                      └── Behavioral   │
+│     [2. PII Scrubber (Best-effort)]                   └── L3 Baseline  │
 │              │                                                         │
 │              ▼                                                         │
-│     [3. Local Heuristics & Offline Baseline Engine]                    │
+│     [3. Local Heuristic & Offline Fallback Engine]                     │
 └──────────────┼─────────────────────────────────────────────────────────┘
-               │ POST /api/v1/analyze (Anonymized Payload)
+               │ POST /api/v1/analyze (Sanitized Payload + L3 Score)
                ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│                    AEGIS BACKEND (FastAPI :8000)                       │
+│                   AEGIS BACKEND (FastAPI / Render)                     │
 │                                                                        │
 │  ┌───────────────────────────────┐   ┌───────────────────────────────┐ │
-│  │ Layer 1: Heuristic Engine     │   │ Layer 2: DistilBERT ONNX      │ │
-│  │ (Spoofing, Typosquatting,     │   │ (Semantic Intent Inference,   │ │
-│  │  Attachment Intelligence)     │   │  <150 MB RSS Memory Ceiling)  │ │
+│  │ Layer 1: Heuristics & ML      │   │ Layer 2: DistilBERT ONNX      │ │
+│  │ (RF + XGBoost Ensemble,       │   │ (4-Class Semantic Inference,  │ │
+│  │  Typosquatting, 21 Brands)    │   │  Frozen Static Checkpoint)    │ │
 │  └───────────────┬───────────────┘   └───────────────┬───────────────┘ │
 │                  │                                   │                 │
 │                  └─────────────────┬─────────────────┘                 │
 │                                    ▼                                   │
 │                      [Meta-Classifier & Synthesis]                     │
-│                      (Synthesized Risk Score 0-100%)                   │
+│               Composite = 0.25·L1 + 0.45·L2 + 0.15·L3 + 0.15·L4         │
 │                                    │                                   │
 │                  ┌─────────────────┴─────────────────┐                 │
 │                  ▼                                   ▼                 │
 │  ┌───────────────────────────────┐   ┌───────────────────────────────┐ │
-│  │ Layer 3: Behavioral Baseline  │   │ Layer 4: VirusTotal Gateway   │ │
-│  │ (Circadian Hour Delta Anomaly)│   │ (Async Rate-Paced Link Scan)  │ │
+│  │ Layer 3: Behavioral Ingestion │   │ Layer 4: VirusTotal Gateway   │ │
+│  │ (Client-computed Circular L3) │   │ (Async Rate-Paced Link & Hash)│ │
 │  └───────────────────────────────┘   └───────────────────────────────┘ │
 │                                    │                                   │
 │                                    ▼                                   │
-│                   [Plain-Language XAI Generator]                       │
-│                   (Actionable Security Guidance)                       │
+│                [Two-Tier Explainable AI (XAI) Engine]                  │
+│                - Tier 1: Plain-Language Summary (Default)              │
+│                - Tier 2: Technical View Panel & Modal                  │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      │ JSON Analysis Response
                                      ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│  Aegis Risk Overlay (In-Gmail HUD: Gauge, Layer Status, XAI Rationale) │
+│  AEGIS Risk Overlay (In-Gmail HUD: Gauge, Tier Badge, Two-Tier XAI)    │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔬 Multi-Layer Contextual Scoring Engine
+## 🔬 Detection Pipeline & Composite Scoring
 
-Aegis synthesizes heterogeneous signals into a single unified threat score:
+Aegis synthesizes heterogeneous signals using a weighted linear combination of four analytical layers:
 
-$$R_{\text{final}} = \min\left(100, \text{round}\left(w_1 S_{\text{heuristic}} + w_2 S_{\text{nlp}} + w_3 S_{\text{behavioral}} + w_4 S_{\text{vt}}\right)\right)$$
+$$S_{\text{composite}} = \min\left(100, \text{round}\left(0.25 \cdot S_{\text{heuristic}} + 0.45 \cdot S_{\text{nlp}} + 0.15 \cdot S_{\text{behavioral}} + 0.15 \cdot S_{\text{vt}}\right)\right)$$
 
-| Layer | Component | Weight ($w_i$) | Analytical Focus |
+| Layer | Component | Weight | Analytical Scope & Implementation |
 | :---: | :--- | :---: | :--- |
-| **L1** | **Heuristic & Spoofing** | **25%** | Domain typosquatting (Levenshtein), deceptive hyperlinks, IP hosts, suspicious TLDs, and executable/archive attachments. |
-| **L2** | **DistilBERT NLP Intent** | **45%** | Pre-trained transformer (`lemonade-sdk/phishing-email-detection-distilbert-ONNX`, Apache-2.0) executed via ONNX Runtime (<150 MB RSS) evaluating semantic urgency, financial coercion, and intent. |
-| **L3** | **Behavioral Baseline** | **15%** | Sender familiarity frequency and circadian timing anomalies using circular clock distance: $d_H(h_1, h_2) = \min(\|h_1 - h_2\|, 24 - \|h_1 - h_2\|)$. |
-| **L4** | **VirusTotal Intelligence** | **15%** | Rate-paced URL reputation scanner with an asynchronous 15.0s pacing lock, dual cache keyspaces, and offline seed lookup. |
+| **L1** | **Heuristics & Ensemble ML** | **25%** | Rule-based heuristics combined with a Random Forest and XGBoost ensemble ($S_{\text{layer1}} = 0.60 \cdot S_{\text{heuristic}} + 0.40 \cdot S_{\text{ensemble}}$). Evaluates URL structure, 21 protected brands (10 PH banks/wallets, 3 government, 2 e-commerce, 6 global), Levenshtein edit distance, and Tagalog/Taglish urgency lexicons (33 patterns). |
+| **L2** | **DistilBERT NLP Classifier** | **45%** | Pre-trained frozen ONNX sequence classifier (`lemonade-sdk/phishing-email-detection-distilbert-ONNX`, Apache-2.0) served via ONNX Runtime (~140 MB RSS). Evaluates semantic context and urgency tone. |
+| **L3** | **On-Device Behavioral Baseline** | **15%** | Evaluated on-device in `chrome.storage.local`. Measures sender novelty (first-time sender = 25) and circadian hour distance ($d_H > 6\text{h} = +20$). Does not upload interaction history to the cloud. |
+| **L4** | **Threat Intelligence** | **15%** | VirusTotal v3 API for URL reputation and attachment SHA-256 hash lookup (15-second rate pacing lock; free-tier quota-aware). |
 
-### Threat Tiers & Warning Floor
-- **Safe (0–44%)**: Routine benign communications; verified sender and expected timing.
-- **Warning (45–69%)**: Anomalous indicators detected; precautionary inspection recommended.
-- **Critical (70–100%)**: Active phishing, credential harvesting, dangerous attachment, or executive impersonation.
-- **Multi-Indicator Threat Floor (§6.5)**: When compound indicators are flagged (e.g., suspicious attachment combined with urgency signals), Aegis bounds the minimum score to **52% (Warning)**, preventing threat dilution when external links or sender history are absent.
-
----
-
-## 🔒 Privacy & Compliance (RA 10173)
-
-In compliance with the **Philippine Data Privacy Act of 2012 (RA 10173)**, Aegis executes client-side token redaction directly within the content script context before any data exits the browser:
-- Personal Names $\rightarrow$ `[NAME]`
-- Email Addresses $\rightarrow$ `[EMAIL]`
-- Telephone Numbers $\rightarrow$ `[PHONE]`
-- Payment Card Numbers $\rightarrow$ `[CARD_NUMBER]` *(Luhn algorithm validated)*
-- Government IDs (SSS, TIN, PhilHealth, US SSN) $\rightarrow$ `[SSN]`
-
-Zero raw email body content is logged to disk or stored remotely.
-
----
-
-## 📂 Repository Structure
+### Risk Tiers & Preset Thresholds
 
 ```text
-Aegis-Phishing-Context-Analyzer/
-├── aegis-backend/                   # Private inference server (FastAPI)
-│   ├── main.py                      # Application entrypoint & lifespan warmup
-│   ├── routes/                      # API endpoints (/analyze, /health, /vt-status)
-│   ├── modules/                     # Core detection engines
-│   │   ├── heuristic_engine.py      # Rule-based heuristics & typosquatting
-│   │   ├── nlp_classifier.py        # DistilBERT ONNX runtime inference
-│   │   ├── behavioral_analyzer.py   # Anomaly scoring & circular time delta
-│   │   ├── link_scanner.py          # Rate-paced VirusTotal v3 gateway
-│   │   └── meta_classifier.py       # 4-layer risk synthesis & XAI generator
-│   ├── models/phishing_distilbert/  # Pre-baked ONNX model weights & tokenizer
-│   ├── data/                        # VirusTotal seed cache & evaluation datasets
-│   └── tests/                       # Pytest/unittest backend test suite (34 tests)
-│
-├── aegis-extension/                 # Chrome Extension (Manifest V3)
-│   ├── manifest.json                # Least-privilege MV3 declaration
-│   ├── content_script.js            # Gmail DOM extraction & MutationObserver
-│   ├── background.js                # Service Worker: API bridge, LRU cache & TTL
-│   ├── pii_scrubber.js              # Client-side PII redaction engine (RA 10173)
-│   ├── local_heuristics.js          # Autonomous offline fallback engine
-│   ├── overlay/                     # In-page risk HUD & Full Analysis modal
-│   │   ├── overlay.html             # Modal structure
-│   │   ├── overlay.js               # Dynamic gauge, icon embedding & XAI logic
-│   │   └── overlay.css              # Glassmorphic dark/light UI design system
-│   ├── whitelist/                   # SME administrative whitelist dashboard
-│   ├── icons/                       # Shield logo assets (16px, 48px, 128px)
-│   └── tests/                       # Extension test suites (74 tests)
-│
-├── demo_emails/                     # Standardized evaluation test corpus
-│   ├── 01_SAFE_routine_workplace.md
-│   ├── 02_WARNING_archive_attachment.md
-│   ├── 03_CRITICAL_credential_harvesting_link.md
-│   ├── 04_CRITICAL_malicious_html_attachment.md
-│   ├── 05_CRITICAL_executive_impersonation_bec.md
-│   └── attachments/                 # Safe & simulated malicious test files
-│
-├── Aegis_Prototype/                 # Standalone offline web demo (no Gmail needed)
-├── docs/                            # Research papers, presentation guides & plans
-├── start_backend.bat                # Windows one-click backend launcher
-├── SETUP_GUIDE.md                   # Comprehensive step-by-step installation guide
-└── README.md                        # Project documentation (this file)
+  0 ──────────── 44 ────────────────────── 74 ─────────────────── 100
+ [     SAFE        ] [       WARNING         ] [     CRITICAL        ]
+   (Green Overlay)        (Amber Overlay)           (Red Overlay)
 ```
+
+- **Safe (0–44)**: Routine benign communication; verified sender and clean content.
+- **Warning (45–74)**: Anomalous signals detected (e.g., first-time sender, urgency markers).
+- **Critical (75–100)**: Corroborated malicious indicators (e.g., confirmed VirusTotal threat hit, spoofed executive identity).
+- **Heuristic Floors**: A minimum score of **52 (Warning)** is enforced when compound attachment/urgency cues or high heuristic scores ($S_h \ge 40$) occur.
+- **Guided Sensitivity Presets**:
+  - **Conservative (High Protection):** Warning $\ge 35$, Critical $\ge 65$ (recommended for financial/executive inboxes).
+  - **Standard (Default):** Warning $\ge 45$, Critical $\ge 75$ (balanced SME workflow).
+  - **Aggressive (Low Alert Volume):** Warning $\ge 55$, Critical $\ge 85$ (requires strong multi-layer corroboration).
 
 ---
 
-## 🚀 Quick Start Guide
+## 📊 Summary of Empirical Results
 
-> 📖 **For complete step-by-step instructions, see the [SETUP_GUIDE.md](SETUP_GUIDE.md).**
+| Evaluation Corpus | Size | Full Pipeline Recall | False Positive Rate | Key Empirical Finding |
+| :--- | :---: | :---: | :---: | :--- |
+| **Controlled Template Set (Phase C)** | $N=100$ | **100.0%** (CI 92.9–100%) | **0.0%** (CI 0.0–7.1%) | End-to-end pipeline feasibility confirmed with model confirmed loaded. |
+| **Independent Public Corpus (Test Split)** | $N=50$ | **32.0%** (CI 17.2–51.6%) | **0.0%** (CI 0.0–13.3%) | Fixed 45 cut-off failed on older/cleaner public mail ($\text{ROC-AUC} = 1.000$; 12% on Nazario phishing). |
+| **Philippine / Taglish Test Set** | $N=60$ | **86.7%** (CI 70.3–94.7%) | **10.0%** (CI 3.5–25.6%) | High regional sensitivity; lift driven primarily by heuristic keyword adjustments. |
+| **LLM-Authored Phishing Set** | $N=60$ | **13.3%** (CI 5.3–29.7%) | **0.0%** (CI 0.0–11.3%) | Polished AI text evades fixed thresholds; **detection of AI phishing not demonstrated**. |
+| **User Acceptance Testing (UAT)** | $N=6$ | — | — | Mean rating **4.67 / 5.00**; owners (4.33) vs. staff (5.00) highlighted an IT-literacy gap. |
+
+---
+
+## 🚀 Evaluation & Setup Guide for Advisers and Panelists
+
+This guide details how to install, inspect, and test the AEGIS proof-of-concept extension on desktop Google Chrome.
 
 ### Prerequisites
-- **Google Chrome** v109+ (Manifest V3 support)
-- **Python** 3.10, 3.11, or 3.12 (Python 3.11 recommended)
-- **Git**
+- **Google Chrome**, **Microsoft Edge**, or **Brave Browser** (Chromium-based with Manifest V3 support)
+- Active internet connection (for cloud backend analysis and VirusTotal lookups)
 
 ---
 
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/j4ffyy/Aegis-Phishing-Context-Analyzer.git
-cd Aegis-Phishing-Context-Analyzer
-```
+### Step 1: Load the Chrome Extension
+
+1. Open Google Chrome and enter `chrome://extensions/` in the address bar.
+2. In the top-right corner, toggle **Developer mode** to **ON**.
+3. In the top-left corner, click **Load unpacked**.
+4. In the file picker, select the `aegis-extension` folder from this repository:
+   ```text
+   .../Aegis-Phishing-Context-Analyzer/aegis-extension
+   ```
+5. You will see **Aegis: AI-Powered Phishing Context Analyzer** appear in your extension list.
 
 ---
 
-### Step 2: Launch the Backend Server
+### Step 2: Backend Connectivity & Cold-Start Notice
 
-#### Option A: One-Click Launcher (Windows)
-Double-click `start_backend.bat` in the root folder, or run:
-```cmd
-start_backend.bat
-```
+The extension is pre-configured to communicate with the live cloud backend:
+- **Production Backend Endpoint:** `https://aegis-backend-oybm.onrender.com`
+- **Fallback / Local Endpoint:** `http://localhost:8000`
 
-#### Option B: Manual Setup
-```bash
+> [!IMPORTANT]
+> **Render.com Free-Tier Cold-Start Delay (~50 seconds):**  
+> If the backend has been idle, the initial cloud request may take **50–55 seconds** to spin up the container. If this timeout window elapses during the very first scan, AEGIS gracefully transitions into **Offline Heuristic Mode** (amber banner). Once the backend container wakes up, subsequent scans execute in **< 1.0 second**.  
+> *Tip:* You can wake the container in advance by opening [`https://aegis-backend-oybm.onrender.com/api/v1/health`](https://aegis-backend-oybm.onrender.com/api/v1/health) in a browser tab before testing.
+
+---
+
+### Step 3: Testing in Desktop Gmail
+
+1. Open **[mail.google.com](https://mail.google.com)** on desktop Chrome.
+2. Select any email in your inbox.
+3. Upon opening the message, AEGIS's `MutationObserver` triggers after a 300 ms debounce:
+   - An advisory **Risk Score Badge** (Safe / Warning / Critical) and gauge appear in the overlay.
+   - **Tier 1 (Default):** Displays a plain-language summary designed for non-technical SME employees (e.g., Sender Legitimacy, Message Tone).
+   - **Tier 2 (Technical View Toggle):** Click the **"Technical View"** switch to inspect low-level indicators, including SPF/DKIM validation status (*Fail, Pass, or Not verified*), PII redaction tallies, behavioral circular hour metrics, and per-layer scores.
+4. Open the **Settings Panel / Dashboard** from the extension popup or overlay to inspect the **Guided Sensitivity Presets** (*Conservative*, *Standard*, *Aggressive*).
+
+---
+
+### Step 4: Optional Local Backend Execution
+
+If you wish to run the backend locally instead of relying on the cloud service:
+
+```powershell
+# Navigate to backend directory
 cd aegis-backend
+
+# Create and activate virtual environment
 python -m venv .venv
-
-# Activate Virtual Environment:
-# Windows (PowerShell):
 .\.venv\Scripts\Activate.ps1
-# macOS / Linux:
-source .venv/bin/activate
 
-# Install Dependencies:
+# Install requirements
 pip install -r requirements.txt
 
-# Download Model Assets (if not already baked into models/):
-python scripts/download_model.py
-
-# Start Server:
-uvicorn main:app --reload --port 8000
-```
-Verify the server is running by opening: [`http://localhost:8000/api/v1/health`](http://localhost:8000/api/v1/health)
-
----
-
-### Step 3: Load the Extension into Google Chrome
-
-1. Open Google Chrome and navigate to `chrome://extensions/`.
-2. Enable **Developer mode** (toggle in the top-right corner).
-3. Click **Load unpacked** (top-left).
-4. Select the `aegis-extension` folder from the repository.
-5. The **Aegis Phishing Context Analyzer** extension is now active!
-
----
-
-### Step 4: Test in Gmail
-
-1. Open [mail.google.com](https://mail.google.com).
-2. Open any email thread.
-3. The Aegis **Shield Icon** will analyze the email and display the risk assessment badge and overlay HUD.
-4. Click **"View Full Analysis"** for detailed XAI rationales and layer breakdown.
-5. You can also test with the provided scenarios in the [`demo_emails/`](demo_emails/) folder.
-
----
-
-## 🧪 Automated Testing & Empirical Verification
-
-Aegis includes comprehensive test suites across both subsystems with **108 total automated tests** passing at 100%:
-
-```bash
-# 1. Run Backend Unit & Integration Tests (34 tests)
-cd aegis-backend
-.\.venv\Scripts\python.exe -m unittest discover -s tests
-
-# 2. Run Extension Unit Tests (74 tests)
-cd ../aegis-extension
-node tests/test_local_heuristics.js    # 12 tests: typosquatting, IPs, attachments
-node tests/test_pii_scrubber.js        # 14 tests: RA 10173 PII redaction, Luhn check
-node tests/test_behavioral_baseline.js # 30 tests: circular hour delta, novelty scoring
-node tests/test_whitelist.js           # 18 tests: dual-trigger auto-revocation
+# Start local server on port 8000
+python -m uvicorn main:app --reload --port 8000
 ```
 
-| Component | Test Suite | Tests Run | Result |
-| :--- | :--- | :---: | :---: |
-| **Backend Subsystem** | `aegis-backend/tests/` | 34 | ✅ **PASSED** |
-| **Local Heuristics** | `tests/test_local_heuristics.js` | 12 | ✅ **PASSED** |
-| **PII Redaction (RA 10173)** | `tests/test_pii_scrubber.js` | 14 | ✅ **PASSED** |
-| **Behavioral Baseline** | `tests/test_behavioral_baseline.js` | 30 | ✅ **PASSED** |
-| **Whitelist Auto-Revocation** | `tests/test_whitelist.js` | 18 | ✅ **PASSED** |
-| **Total Automated Tests** | **Full System** | **108** | ✅ **100% PASS** |
+Verify local health: [`http://localhost:8000/api/v1/health`](http://localhost:8000/api/v1/health)
 
 ---
 
-## 👥 Project Team & Credits
+## 👥 Academic Credits & Acknowledgment
 
-| Role | Proponent | Institution |
+| Role | Name | Affiliation |
 | :--- | :--- | :--- |
-| **Lead Developer / UX Lead** | **Jafphet P. Grengia** | Mapúa Malayan Digital College |
-| **Co-Developer / Systems Lead** | **Michael Angelo L. Bernardo** | Mapúa Malayan Digital College |
-| **Capstone Project Adviser** | **Mr. Ryan Dalmacio** | Mapúa Malayan Digital College |
+| **Researcher / Proponent** | **Jafphet P. Grengia** | Mapúa Malayan Digital College |
+| **Researcher / Proponent** | **Michael Angelo L. Bernardo** | Mapúa Malayan Digital College |
+| **Capstone Mentor / Adviser** | **Mr. Rhimshie Jay Aquino** | Mapúa Malayan Digital College |
+| **Program Head / Revision Review** | **Mr. Mario Pison Jr.** | Mapúa Malayan Digital College |
+| **Panel Chair** | **Mr. John Ray Hernani** | Panel Evaluator |
+| **Panel Member** | **Mr. Renz Canlas** | Panel Evaluator |
 
 ---
 
 ## 📄 Academic Citation & License
 
-Developed as part of **IT200D1 — Capstone Project 1** at Mapúa Malayan Digital College (MMDC). Released under the [MIT License](LICENSE).
+Developed in partial fulfillment of the requirements for the degree of **Bachelor of Science in Information Technology (Major in Network and Cyber Security)** at **Mapúa Malayan Digital College (MMDC)**. Released under the [MIT License](LICENSE).
