@@ -207,21 +207,31 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
 ### 2.7 Verify Backend Health & Test Analysis Endpoint
-You can test the endpoints directly from your terminal or browser:
+You can test the endpoints directly from your terminal or browser across both testing tiers:
 
-- **Browser Health Check:** [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health) (returns `{"status": "ok", "nlp_model_loaded": true, ...}`)
+- **Browser Health Check (Local):** [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health) (returns `{"status": "ok", "nlp_model_loaded": true, ...}`)
+- **Browser Health Check (Cloud Fallback):** [https://aegis-backend-oybm.onrender.com/api/v1/health](https://aegis-backend-oybm.onrender.com/api/v1/health)
 - **Interactive Swagger Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-#### Windows PowerShell API Test:
+> [!NOTE]
+> **Cloud Fallback Wakeup:** If evaluating the cloud backend without running Python locally, wake up the Render container via PowerShell:
+> ```powershell
+> Invoke-RestMethod -Uri "https://aegis-backend-oybm.onrender.com/api/v1/health" -Method Get -TimeoutSec 60 | ConvertTo-Json
+> ```
+> *In the extension, `background.js` automatically failovers to Render whenever `localhost:8000` is offline.*
+
+#### Windows PowerShell API Test (Critical Phishing Showcase):
+Test the **Critical Phishing Sample** to witness the 80%+ DistilBERT NLP score, VirusTotal cache hit, and the full Explainable AI (XAI) rationale:
 ```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}' | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Unauthorized Security Access Detected - Immediate Action Required","sender":"security@paypal-verification-account-sec.com","body_text":"Dear Customer, We have detected unauthorized login attempts. For your protection, access is temporarily restricted within 24 hours. Confirm your credentials immediately: http://paypal-verification-account-sec.com/login to prevent permanent termination.","links":["http://paypal-verification-account-sec.com/login"]}' | ConvertTo-Json -Depth 5
 ```
+*(To test Cloud Fallback, replace `http://127.0.0.1:8000` with `https://aegis-backend-oybm.onrender.com`).*
 
 #### Linux / macOS (Bash) API Test:
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/v1/analyze" \
   -H "Content-Type: application/json" \
-  -d '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}'
+  -d '{"subject":"URGENT: Unauthorized Security Access Detected - Immediate Action Required","sender":"security@paypal-verification-account-sec.com","body_text":"Dear Customer, We have detected unauthorized login attempts. For your protection, access is temporarily restricted within 24 hours. Confirm your credentials immediately: http://paypal-verification-account-sec.com/login to prevent permanent termination.","links":["http://paypal-verification-account-sec.com/login"]}'
 ```
 
 > **Keep this terminal window open** while using the extension so the local AI server remains active.
@@ -306,7 +316,10 @@ You will now see the Aegis extension card:
 
 ### Method C: Offline Testing via Prototype (No Gmail Account Required)
 
-If you wish to test or demonstrate the detection interface without opening your private Gmail inbox:
+If you wish to inspect or demonstrate the UI overlay without opening a live Gmail inbox:
+
+> [!NOTE]
+> **Role of the Prototype:** `Aegis_Prototype/index.html` is an isolated visual/UX mockup created for offline interface demonstrations and defense walkthroughs. Live dynamic multi-layer inference is demonstrated via the PowerShell API tests above and the unpacked Chrome extension in Method A.
 
 1. In Chrome, press `Ctrl + O` (or `Cmd + O` on macOS).
 2. Browse to and open:

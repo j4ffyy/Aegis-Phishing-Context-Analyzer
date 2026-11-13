@@ -1,4 +1,4 @@
-﻿# Aegis Phishing Analyzer — Reproduction Guide (REPRODUCE.md)
+# Aegis Phishing Analyzer — Reproduction Guide (REPRODUCE.md)
 
 **Target Milestone:** Capstone 1 & 2 Final Submission Benchmark Replication  
 **Repository:** `Aegis-Phishing-Context-Analyzer`  

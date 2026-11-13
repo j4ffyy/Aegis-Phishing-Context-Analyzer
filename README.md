@@ -22,7 +22,11 @@
 
 If you are an adviser, panelist, or evaluator testing Aegis on your local machine, follow these three steps:
 
-### 1. Start the Local Backend (FastAPI + ONNX Runtime)
+### 1. Backend Evaluation: Choose Option A (Local) or Option B (Cloud)
+
+AEGIS features a resilient dual-tier architecture: **Primary Local ML** with **Automatic Cloud Fallback** via `background.js`. Choose the testing method that best fits your environment:
+
+#### Option A: Primary Local ML Inference (Sub-second, On-Device ONNX)
 > **Requirement:** Python **3.10, 3.11, or 3.12 (64-bit)**. *(Do not use Python 3.13 or 3.14 due to C-extension constraints in onnxruntime and pydantic-core).*
 
 ```powershell
@@ -38,15 +42,33 @@ pip install -r requirements.txt
 uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 *Health check:* [`http://127.0.0.1:8000/api/v1/health`](http://127.0.0.1:8000/api/v1/health)  
-*PowerShell API Test:*
-```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}' | ConvertTo-Json -Depth 5
-```
 
-### 2. Standalone Demo UI (Instant Evaluation — No Gmail Login Needed)
+#### Option B: Cloud Fallback Evaluation (Render.com)
+If you do not wish to install Python locally or want to evaluate cloud resilience, you can wake and use the live cloud backend directly:
+```powershell
+# Wake up sleeping Render container (60s timeout for free-tier spin-up)
+Invoke-RestMethod -Uri "https://aegis-backend-oybm.onrender.com/api/v1/health" -Method Get -TimeoutSec 60 | ConvertTo-Json
+```
+> [!NOTE]
+> **Fault Tolerance:** In the Chrome extension, `background.js` automatically failovers to Render (`https://aegis-backend-oybm.onrender.com`) whenever `localhost:8000` is offline or unavailable.
+
+#### Run the Multi-Layer Showcase API Test (PowerShell):
+Test the **Critical Phishing Sample** to witness the 80%+ DistilBERT NLP score, VirusTotal cache hit, and the full Explainable AI (XAI) rationale in action:
+```powershell
+# Test Critical Phishing (DistilBERT NLP + VirusTotal Cache Hit)
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Unauthorized Security Access Detected - Immediate Action Required","sender":"security@paypal-verification-account-sec.com","body_text":"Dear Customer, We have detected unauthorized login attempts. For your protection, access is temporarily restricted within 24 hours. Confirm your credentials immediately: http://paypal-verification-account-sec.com/login to prevent permanent termination.","links":["http://paypal-verification-account-sec.com/login"]}' | ConvertTo-Json -Depth 5
+```
+*(For Cloud mode, simply replace `http://127.0.0.1:8000` with `https://aegis-backend-oybm.onrender.com`).*
+
+---
+
+### 2. Standalone Demo UI (Instant Visual Evaluation — No Gmail Login Needed)
 Open the bundled mock client directly in Google Chrome:
 - Simply double-click or open [`Aegis_Prototype/index.html`](file:///c:/Users/jafph/Desktop/Capstone%201%20-%20Phishing%20Analyzer/Aegis-Phishing-Context-Analyzer/Aegis_Prototype/index.html) in Chrome.
+- **Role:** *`Aegis_Prototype/index.html` is an isolated visual/UX mockup designed for offline UI demonstration and defense presentations, whereas live dynamic multi-layer inference is demonstrated via the PowerShell API test above and the live Chrome Extension below.*
 - Test 4 attack scenarios (Internal Memo, Certificate Scam, BEC Wire Scam, Suspicious Invoice) and observe the real-time XAI rationale and gauge overlay.
+
+---
 
 ### 3. Load the Chrome Extension (For Live Gmail Evaluation)
 1. Open Chrome and browse to `chrome://extensions/`.
@@ -239,9 +261,9 @@ uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 
 Verify local health: [`http://127.0.0.1:8000/api/v1/health`](http://127.0.0.1:8000/api/v1/health)
 
-Test the analysis endpoint via PowerShell:
+Test the analysis endpoint via PowerShell (Critical Phishing Showcase):
 ```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}' | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Unauthorized Security Access Detected - Immediate Action Required","sender":"security@paypal-verification-account-sec.com","body_text":"Dear Customer, We have detected unauthorized login attempts. For your protection, access is temporarily restricted within 24 hours. Confirm your credentials immediately: http://paypal-verification-account-sec.com/login to prevent permanent termination.","links":["http://paypal-verification-account-sec.com/login"]}' | ConvertTo-Json -Depth 5
 ```
 
 ---
