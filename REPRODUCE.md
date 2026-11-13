@@ -16,7 +16,7 @@
 - **Disk:** 1 GB free space (including 255 MB DistilBERT ONNX model artifact)
 
 ### 1.2 Runtimes & Interpreters
-- **Python Version:** Python `3.14.7` (verified development environment) or Python `3.11-slim` (official Docker container)
+- **Python Version:** Supported versions: **Python 3.10, 3.11, or 3.12 (64-bit)** (Python 3.11 recommended; Python 3.13 and 3.14 are **not supported** due to compiled C-extension constraints in `onnxruntime` and `pydantic-core`)
 - **Node.js Version:** Node.js `v18.0.0` or higher (required for executing extension test suites)
 
 ### 1.3 Pinned Python Dependencies
@@ -48,8 +48,10 @@ scipy==1.18.1
 # Navigate to backend root
 cd aegis-backend
 
-# Create virtual environment with Python 3.14 (or Python 3.11)
-python -m venv .venv
+# Create virtual environment with Python 3.10–3.12 (e.g., using Windows Python Launcher)
+py -3.12 -m venv .venv
+# Or if python points to 3.10-3.12:
+# python -m venv .venv
 
 # Activate virtual environment
 # Windows PowerShell:

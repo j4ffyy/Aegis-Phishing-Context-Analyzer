@@ -106,9 +106,14 @@ cd aegis-backend
 
 ### 2.2 Create a Python Virtual Environment
 
-- **On Windows (PowerShell):**
+> [!IMPORTANT]
+> **Python Version Requirement:** Strictly use **Python 3.10, 3.11, or 3.12 (64-bit)** (Python 3.11 recommended).  
+> *Do not use Python 3.13 or 3.14*, as compiled C-dependencies (`onnxruntime`, `pydantic-core`) are not yet compatible and will crash with an `ImportError`.
+
+- **On Windows (PowerShell with multiple Python versions installed):**
   ```powershell
-  python -m venv .venv
+  # Explicitly select Python 3.12 (or 3.11 / 3.10)
+  py -3.12 -m venv .venv
   ```
   *If you encounter a script execution restriction in PowerShell, enable it for this process:*
   ```powershell
@@ -118,13 +123,13 @@ cd aegis-backend
 
 - **On Windows (Command Prompt `cmd`):**
   ```cmd
-  python -m venv .venv
+  py -3.12 -m venv .venv
   .\.venv\Scripts\activate.bat
   ```
 
 - **On macOS / Linux:**
   ```bash
-  python3 -m venv .venv
+  python3.11 -m venv .venv
   source .venv/bin/activate
   ```
 
@@ -184,10 +189,11 @@ You should see output similar to:
 This stores the model assets inside `aegis-backend/models/phishing_distilbert/`.
 
 ### 2.6 Start the FastAPI Server
-Launch the development server with live reload enabled:
+Launch the development server with live reload enabled. Note that `main.py` is located in the root of `aegis-backend/` (not an `app/` subpackage):
 
 ```bash
-uvicorn main:app --reload --port 8000
+cd aegis-backend
+uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 Verify the server started:
@@ -200,10 +206,23 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-### 2.7 Verify Backend Health
-Open your browser or run curl to test the endpoints:
-- **Health check:** [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) (returns `{"status": "ok", "nlp_model_loaded": true, ...}`)
-- **Interactive API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI)
+### 2.7 Verify Backend Health & Test Analysis Endpoint
+You can test the endpoints directly from your terminal or browser:
+
+- **Browser Health Check:** [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health) (returns `{"status": "ok", "nlp_model_loaded": true, ...}`)
+- **Interactive Swagger Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+#### Windows PowerShell API Test:
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}' | ConvertTo-Json -Depth 5
+```
+
+#### Linux / macOS (Bash) API Test:
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/analyze" \
+  -H "Content-Type: application/json" \
+  -d '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}'
+```
 
 > **Keep this terminal window open** while using the extension so the local AI server remains active.
 

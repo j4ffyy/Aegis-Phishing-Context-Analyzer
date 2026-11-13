@@ -18,6 +18,44 @@
 
 ---
 
+## ⚡ 5-Minute Panelist & Evaluator Quick Start
+
+If you are an adviser, panelist, or evaluator testing Aegis on your local machine, follow these three steps:
+
+### 1. Start the Local Backend (FastAPI + ONNX Runtime)
+> **Requirement:** Python **3.10, 3.11, or 3.12 (64-bit)**. *(Do not use Python 3.13 or 3.14 due to C-extension constraints in onnxruntime and pydantic-core).*
+
+```powershell
+# Navigate to backend directory
+cd aegis-backend
+
+# Create virtual environment (py -3.12 or py -3.11 for Windows with multiple Pythons)
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Install dependencies and start Uvicorn (main:app in root of aegis-backend/)
+pip install -r requirements.txt
+uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+```
+*Health check:* [`http://127.0.0.1:8000/api/v1/health`](http://127.0.0.1:8000/api/v1/health)  
+*PowerShell API Test:*
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}' | ConvertTo-Json -Depth 5
+```
+
+### 2. Standalone Demo UI (Instant Evaluation — No Gmail Login Needed)
+Open the bundled mock client directly in Google Chrome:
+- Simply double-click or open [`Aegis_Prototype/index.html`](file:///c:/Users/jafph/Desktop/Capstone%201%20-%20Phishing%20Analyzer/Aegis-Phishing-Context-Analyzer/Aegis_Prototype/index.html) in Chrome.
+- Test 4 attack scenarios (Internal Memo, Certificate Scam, BEC Wire Scam, Suspicious Invoice) and observe the real-time XAI rationale and gauge overlay.
+
+### 3. Load the Chrome Extension (For Live Gmail Evaluation)
+1. Open Chrome and browse to `chrome://extensions/`.
+2. Toggle **Developer mode** to **ON** (top right).
+3. Click **Load unpacked** (top left) and select the `aegis-extension` folder from this repository.
+4. Open [mail.google.com](https://mail.google.com) to test live on any email.
+
+---
+
 ## 🛡️ Project Overview & Positioning
 
 Phishing attacks remain a persistent cyber threat to Small and Medium Enterprises (SMEs) in the Philippines, which often depend on consumer-grade email services and lack dedicated security personnel or Security Operations Centers (SOCs).
@@ -188,18 +226,23 @@ If you wish to run the backend locally instead of relying on the cloud service:
 # Navigate to backend directory
 cd aegis-backend
 
-# Create and activate virtual environment
-python -m venv .venv
+# Strictly use Python 3.10–3.12 (e.g. py -3.12 or py -3.11)
+py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
 # Install requirements
 pip install -r requirements.txt
 
-# Start local server on port 8000
-python -m uvicorn main:app --reload --port 8000
+# Start local server on port 8000 (main.py is located at aegis-backend/main.py)
+uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Verify local health: [`http://localhost:8000/api/v1/health`](http://localhost:8000/api/v1/health)
+Verify local health: [`http://127.0.0.1:8000/api/v1/health`](http://127.0.0.1:8000/api/v1/health)
+
+Test the analysis endpoint via PowerShell:
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/analyze" -Method Post -ContentType "application/json" -Body '{"subject":"URGENT: Verify Account","sender":"security@paypa1.com","body_text":"Verify password now.","links":["http://paypa1.com"]}' | ConvertTo-Json -Depth 5
+```
 
 ---
 
